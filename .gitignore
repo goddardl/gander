@@ -2,6 +2,7 @@
 *.slo
 *.lo
 *.o
+*.os
 
 # Compiled Dynamic libraries
 *.so
@@ -11,3 +12,8 @@
 *.lai
 *.la
 *.a
+
+# Temporary Files
+*.swp
+*.sconsign.dblite
+
