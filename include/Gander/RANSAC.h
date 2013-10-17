@@ -35,9 +35,8 @@
 #define __GANDER_RANSAC_H__
 
 #include <vector>
-#include "Eigen/Eigen"
-#include "Eigen/Dense"
-#include "Eigen/Core"
+
+#include "Gander/Math.h"
 
 namespace Gander
 {
