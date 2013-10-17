@@ -36,9 +36,7 @@
 
 #include <vector>
 
-#include "Eigen/Eigen"
-#include "Eigen/Dense"
-#include "Eigen/Core"
+#include "Gander/Math"
 
 namespace Gander
 {
@@ -71,7 +69,7 @@ private :
 	const size_t m_inputs; // The number of unknowns to solve.
 };
 
-/// A Wrapper class for the LG::Stereo::ErrorFn which converts a Least Squares function
+/// A Wrapper class for the Gander::ErrorFn which converts a Least Squares function
 /// to a Least Squares Jacobian function using forward differences.
 template< class LeastSquaresFn >
 class ForwardDifferenceJacobian
