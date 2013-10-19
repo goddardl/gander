@@ -31,8 +31,8 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDER_LEVENBERGMARQUARDTTEST_H__
-#define __GANDER_LEVENBERGMARQUARDTTEST_H__
+#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
 
 #include <vector>
 
@@ -47,8 +47,4 @@ void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
 
 }; // namespace GanderTest
 
-
-
-
-#endif
-
+#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
