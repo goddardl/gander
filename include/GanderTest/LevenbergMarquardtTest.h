@@ -31,5 +31,24 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#include "boost/test/auto_unit_test.hpp"
+#ifndef __GANDER_LEVENBERGMARQUARDTTEST_H__
+#define __GANDER_LEVENBERGMARQUARDTTEST_H__
+
+#include <vector>
+
+#include "unsupported/Eigen/NonLinearOptimization"
+#include "Gander/ErrorFunctions.h"
 #include "boost/test/unit_test.hpp"
+
+namespace GanderTest
+{
+
+void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
+
+}; // namespace GanderTest
+
+
+
+
+#endif
+

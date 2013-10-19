@@ -31,5 +31,38 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#define BOOST_TEST_MODULE GANDER_TEST_MODULE
-#include "GanderTestModule/Test.h"
+
+#include <iostream>
+
+#include "boost/test/test_tools.hpp"
+#include "boost/test/results_reporter.hpp"
+#include "boost/test/unit_test_suite.hpp"
+#include "boost/test/output_test_stream.hpp"
+#include "boost/test/unit_test_log.hpp"
+#include "boost/test/framework.hpp"
+#include "boost/test/detail/unit_test_parameters.hpp"
+
+#include "GanderTest/LevenbergMarquardtTest.h"
+
+using namespace boost::unit_test;
+using boost::test_tools::output_test_stream;
+
+using namespace GanderTest;
+using namespace Gander;
+
+test_suite* init_unit_test_suite( int argc, char* argv[] )
+{
+	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
+
+	try
+	{
+		addLevenbergMarquardtTest(test);
+	}
+	catch (std::exception &ex)
+	{
+		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
+		throw;
+	}
+
+	return test;
+}

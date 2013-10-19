@@ -36,7 +36,7 @@
 
 #include <vector>
 
-#include "Gander/Math"
+#include "Gander/Math.h"
 
 namespace Gander
 {
@@ -96,7 +96,7 @@ public:
 		m_fn( v, fErr );
 
 		const double reciprocal = 1. / m_step;
-		for( int parameter = 0; parameter < inputs(); ++parameter )
+		for( unsigned int parameter = 0; parameter < inputs(); ++parameter )
 		{
 			// Increment a parameter by a step.
 			v( parameter ) += m_step;
@@ -105,7 +105,7 @@ public:
 			Eigen::VectorXd stepErr( values() );
 			m_fn( v, stepErr );
 
-			for( int i = 0; i < values(); ++i )
+			for( unsigned int i = 0; i < values(); ++i )
 			{
 				fJac( i, parameter ) = ( stepErr(i) - fErr(i) ) * reciprocal;
 			}

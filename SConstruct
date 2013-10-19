@@ -106,6 +106,27 @@ options.Add(
 	"${INSTALL_DIR}.tar.gz",
 )
 
+options.Add(
+	"TEST_LIBPATH",
+	"Additional colon separated paths to be prepended to the library path"
+	"used when running tests.",
+	""
+)
+
+if Environment()["PLATFORM"]=="darwin" :	
+	libraryPathEnvVar = "DYLD_LIBRARY_PATH"
+else :
+	libraryPathEnvVar = "LD_LIBRARY_PATH"
+	
+options.Add(
+	"TEST_LIBRARY_PATH_ENV_VAR",
+	"This is a curious one, probably only ever necessary at image engine. It "
+	"specifies the name of an environment variable used to specify the library "
+	"search paths correctly when running the tests. Defaults to LD_LIBRARY_PATH on "
+	"Linux and DYLD_LIBRARY_PATH on OSX.",
+	libraryPathEnvVar
+)
+
 options.Add( 
 	BoolVariable( "BUILD_DEPENDENCIES", "Set this to build all the library dependencies Gander has.", False )
 )
@@ -158,7 +179,7 @@ options.Add(
 	"LOCATE_DEPENDENCY_SYSTEMPATH",
 	"Locations on which to search for include files "
 	"for the dependencies. These are included with -isystem.",
-	"",
+	[],
 )
 
 options.Add(
@@ -282,6 +303,7 @@ baseLibEnv.Append(
 
 	CPPPATH = [
 		"include",
+		"include/external",
 	] + env["LOCATE_DEPENDENCY_CPPPATH"],
 	
 	CPPFLAGS = [
@@ -316,7 +338,6 @@ baseLibEnv.Append(
 # and past the defences.
 for path in [
 		"$BUILD_DIR/include",
-		"$BUILD_DIR/include/Eigen",
 	] + env["LOCATE_DEPENDENCY_SYSTEMPATH"] :
 	
 	baseLibEnv.Append(
@@ -329,22 +350,12 @@ for path in [
 
 libraries = {
 	"Gander" : {
+		"install" : True,
 		"envAppends" : {
 			"LIBS" : [
 			],
 		}
 	},
-	"GanderTestModule" : {
-		"install" : False,
-		"envAppends" : {
-			"CPPFLAGS" : [
-				"-DBOOST_TEST_DYN_LINK=1",
-			],
-			"LIBS" : [
-				"boost_test_exec_monitor" + boostLibSuffix,
-			],
-		}
-	}
 }
 
 ###############################################################################################
@@ -359,7 +370,6 @@ tests = {
 			],
 			"LIBS" : [
 				"Gander",
-				"GanderTestModule",
 				"boost_test_exec_monitor" + boostLibSuffix
 			],
 		},
@@ -408,54 +418,16 @@ for libraryName, libraryDef in libraries.items() :
 # Testing
 ###############################################################################################
 
-def preprocessor( target, source, env ) :
-	import shutil
-
-	try :
-		tokens = env["SEARCH_REPLACE"]
-	except :
-		return 0
-
-	targetPath = target[0].abspath
-	sourcePath = source[0].abspath
-	testName = os.path.splitext( os.path.basename( sourcePath ) )[0]
-	targetDir = os.path.dirname( targetPath )
-
-	if not os.path.exists( targetDir ) :
-		op.path.mkdirs( targetDir )
-	
-	shutil.copyfile( sourcePath, targetPath )
-	
-	for search, replace in tokens.iteritems() :
-		sedArgs = [ "sed", "-i", "s\\"+search+"\\"+replace+"\\g", targetPath ]
-		if os.spawnvpe( os.P_WAIT, 'sed', sedArgs, os.environ ) != 0 :
-			return 1
-
-# The stuff that actually builds the tests
-
-def unittest( target, source, env ) :
-	testPath = str( source[0].abspath )
-	testModule = os.path.basename( testPath )
-	testDef = tests[testModule]
-	
-	env = baseLibEnv.Clone()
-	env.PrependENVPath( 'LD_LIBRARY_PATH', ":".join( [ (env.Dir(i).abspath).replace(" ", ":" ) for i in env["LIBPATH"] ] ) )
-
-	testCase = env["TestCase"]
-	if testCase != "" :	
-		testCase = "--run_test="+testCase
-	
-	if os.spawnve( os.P_WAIT, testPath, [ testModule, testCase ], env["ENV"] ) == 0 :
-		open(str(target[0]),'w').write("PASSED\n")
-	else:
-		return 0
-
-# Create a builder for tests
 baseTestEnv = baseLibEnv.Clone()
-bld = Builder( action = unittest )
-baseTestEnv.Append( BUILDERS = {'Test' :  bld} )
-bld = Builder( action = preprocessor )
-baseTestEnv.Append( BUILDERS = {'TestPreprocessor' :  bld} )
+
+testEnvLibPath = ":".join( baseTestEnv["LIBPATH"] )
+if baseTestEnv["TEST_LIBPATH"] != "" :
+	testEnvLibPath += ":" + baseTestEnv["TEST_LIBPATH"]
+testEnvLibPath = baseTestEnv.subst( testEnvLibPath )
+testEnvLibPath = testEnvLibPath.replace( " ", ":" )
+
+baseTestEnv["ENV"][baseTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
+baseTestEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
 
 for testModule, testDef in tests.items() :
 
@@ -469,35 +441,31 @@ for testModule, testDef in tests.items() :
 		continue
 
 	# environment
-	libEnv = baseTestEnv.Clone()
-	libEnv.Append( **(testDef.get( "envAppends", {} )) )
+	testEnv = baseTestEnv.Clone()
+	testEnv.Append( **(testDef.get( "envAppends", {} )) )
 
-	objs = []
-	
-	# Compile each source file in the module by copying the source, doing a basic search/replace on various tokens and
-	# build an Object file. Finally we build an executable from the objs.
-	moduleSource = sorted( glob.glob( "src/" + testModule + "/*.cpp" ) )
-	if moduleSource :
-		for source in moduleSource :
-			testName = os.path.splitext( os.path.basename( source ) )[0]
-			testEnv = libEnv.Clone()
-			testSource = source.replace( "src/", "test/src/" )
-			testEnv["SEARCH_REPLACE"] = {}
-			testEnv["SEARCH_REPLACE"]["LG_CORE_TEST_SUITE"] = testName
-			testEnv["SEARCH_REPLACE"]["LG_CORE_TEST_MODULE"] = testModule
+	# test
+	testDir = os.path.join( "test", testModule )
+	testSource = sorted( glob.glob( "src/" + testModule + "/*.cpp" ) )
 
-			testEnv.TestPreprocessor( testSource, source, preprocessor )
-			objs.append( testEnv.Object( "test/" + testModule + "/" + testName, testSource ) )
-	
-	test = libEnv.Program( "test/" + testModule + "/" + testModule, objs )
-	libEnv.Test( testModule + ".passed", test, libEnv )
-	
-	# add alias to run all unit tests.
-	libEnv.Alias('test', testModule + ".passed")
-	
-	# To clean the tests we just remove the test directory.
-	Clean( test, "test/src" )
+	if testSource :
 
+		testProgram = testEnv.Program( os.path.join( testDir, testModule ), testSource )
+		testEnv.Default( testProgram )
+		
+		# The testResultsFile is the output of our test.
+		testResultsFile = os.path.join( testDir, "results.txt" )
+		testCommand = testEnv.Command( testResultsFile, testProgram, os.path.join( testDir, testModule ) + " >& " + testResultsFile )
+		
+		# Turn off cacheing of the tests.
+		NoCache( testCommand )
+
+		# Add an easy alias to run this test.
+		testEnv.Alias( testModule, testCommand )
+	
+		# add alias to run all unit tests.
+		testEnv.Alias('test', testResultsFile )
+	
 #########################################################################################################
 # Licenses
 #########################################################################################################
@@ -518,6 +486,7 @@ manifest = [
 	"bin/Gander",
 	"LICENSE",
 	"lib/libboost_thread" + boostLibSuffix + "$SHLIBSUFFIX*",
+	"lib/libboost_chrono" + boostLibSuffix + "$SHLIBSUFFIX*",
 	"lib/libboost_wave" + boostLibSuffix + "$SHLIBSUFFIX*",
 	"lib/libboost_regex" + boostLibSuffix + "$SHLIBSUFFIX*",
 	"lib/libboost_python" + boostLibSuffix + "$SHLIBSUFFIX*",
@@ -526,7 +495,7 @@ manifest = [
 	"lib/libboost_iostreams" + boostLibSuffix + "$SHLIBSUFFIX*",
 	"lib/libboost_system" + boostLibSuffix + "$SHLIBSUFFIX*",
 	"lib/libGander*$SHLIBSUFFIX",
-	"lib/libLG*",
+	"lib/libGander*",
 	"include/Gander*",
 	"include/boost",
 ]

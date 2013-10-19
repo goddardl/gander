@@ -48,8 +48,8 @@
 /// libraries that we may be using too. For example, it will add casting
 /// operators to and from the common Imath types if USE_IMATH_EXTENSIONS is
 /// defines.
-#define EIGEN_MATRIXBASE_PLUGIN "EigenMatrixBaseExtension.h"
-#define EIGEN_MATRIX_PLUGIN "EigenMatrixExtension.h"
+#define EIGEN_MATRIXBASE_PLUGIN "Gander/EigenMatrixBaseExtension.h"
+#define EIGEN_MATRIX_PLUGIN "Gander/EigenMatrixExtension.h"
 
 /// Now that the base classes have been extended, add the eigen includes.
 #include "Eigen/Eigen"

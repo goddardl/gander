@@ -1,0 +1,178 @@
+##########################################################################
+#
+#  Copyright (c) 2013, Luke Goddard. All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are
+#  met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#
+#     * Neither the name of Image Engine Design nor the names of any
+#       other contributors to this software may be used to endorse or
+#       promote products derived from this software without specific prior
+#       written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+#  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+#  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+#  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+#  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+#  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+##########################################################################
+import os
+import sys
+import os.path
+import IEEnv
+import re
+import copy
+
+def getOption( name, default ) :
+
+	import sys
+	result = default
+	for a in sys.argv:
+		if a[:len(name)+1]==name+"=" :	
+			result = a[len(name)+1:]
+
+	return result
+
+cortexMajorVersion = getOption( "CORTEX_MAJOR_VERSION", os.environ["CORTEX_MAJOR_VERSION"] )
+cortexReg = IEEnv.registry["libraries"]["cortex"][cortexMajorVersion].get( IEEnv.platform(), IEEnv.registry["libraries"]["cortex"][cortexMajorVersion] )
+compiler = getOption( "COMPILER", None )
+compilerVersion = getOption( "COMPILER_VERSION", None )
+targetApp = getOption( "APP", None )
+targetAppVersion = None
+
+targetApp = "gander"
+targetAppReg = cortexReg
+platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
+if not compiler :
+	compiler = platformReg.get( "toolsCompiler", platformReg["compiler"] )
+if not compilerVersion :
+	compilerVersion = platformReg.get( "toolsCompilerVersion", platformReg["compilerVersion"] )
+
+##########################################################################
+# set where we'll put things
+##########################################################################
+
+versionString = "${GANDER_MAJOR_VERSION}.${GANDER_MINOR_VERSION}.${GANDER_PATCH_VERSION}"
+if getOption( "RELEASE", "0" )=="1" :
+	buildRoot = "/tmp/ganderBuilds"
+	installRoot = "/software"
+else :
+	buildRoot = os.path.expanduser( "~" )
+	installRoot = os.path.expanduser( "~/ganderTestInstalls" )
+	versionString += "dev"
+
+BUILD_DIR = buildRoot + "/apps/gander/" + versionString + "/" + IEEnv.platform() + "/cortex/" + cortexMajorVersion + "/" + targetApp
+INSTALL_DIR = installRoot + "/apps/gander/" + versionString + "/" + IEEnv.platform() + "/cortex/" + cortexMajorVersion + "/" + targetApp
+
+if targetAppVersion :
+	BUILD_DIR = BUILD_DIR + "/" + targetAppMajorVersion
+	INSTALL_DIR = INSTALL_DIR + "/" + targetAppMajorVersion
+
+##########################################################################
+# get include locations right
+##########################################################################
+
+LOCATE_DEPENDENCY_SYSTEMPATH = [
+	os.path.join( IEEnv.Environment.rootPath(), "tools", "include", IEEnv.platform(), "boost", targetAppReg.get( "boostVersion", cortexReg["boostVersion"] ) ),
+]
+
+if targetAppVersion :
+	LOCATE_DEPENDENCY_SYSTEMPATH = [ os.path.join( targetAppReg['location'], x ) for x in targetAppReg.get( 'includes', [] ) ] + LOCATE_DEPENDENCY_SYSTEMPATH
+
+LOCATE_DEPENDENCY_CPPPATH = [
+	os.path.join( IEEnv.Environment.rootPath(), "apps", "cortex", cortexMajorVersion, IEEnv.platform(), "base", "include" ),
+]
+
+if getOption( "RELEASE", "0" )=="0" :
+	
+	LOCATE_DEPENDENCY_CPPPATH.insert(
+		0,
+		os.path.join( os.path.expanduser( "~" ), "apps", "cortex", cortexMajorVersion, IEEnv.platform(), "base", "include" )
+	)
+	
+	if targetAppVersion :
+		LOCATE_DEPENDENCY_CPPPATH.insert(
+			0,
+			os.path.join( os.path.expanduser( "~" ), "apps", "cortex", cortexMajorVersion, IEEnv.platform(), targetApp, targetAppMajorVersion, "include" )
+		)
+
+##########################################################################
+# get lib locations right
+##########################################################################
+
+LOCATE_DEPENDENCY_LIBPATH = [
+
+	os.path.join( IEEnv.Environment.rootPath(), "tools", "lib", IEEnv.platform(), compiler, compilerVersion ),
+	os.path.join( IEEnv.Environment.rootPath(), "apps", "cortex", cortexMajorVersion, IEEnv.platform(), "base", "lib", compiler, compilerVersion ),
+
+]
+
+if targetAppVersion :
+	
+	targetAppLocation = targetAppReg["location"]
+	for directory in targetAppReg.get( "libPaths", [] ) :
+		LOCATE_DEPENDENCY_LIBPATH.insert(
+			0,
+			os.path.join( IEEnv.Environment.rootPath(), targetAppLocation, directory ),
+		)
+	
+	LOCATE_DEPENDENCY_LIBPATH.insert(
+		0,
+		os.path.join( IEEnv.Environment.rootPath(), "tools", targetApp, targetAppVersion, "lib", IEEnv.platform() ),
+	)
+
+if getOption( "RELEASE", "0" )=="0" :
+
+	LOCATE_DEPENDENCY_LIBPATH.insert(
+		0,
+		os.path.join( os.path.expanduser( "~" ), "apps", "cortex", cortexMajorVersion, IEEnv.platform(), "base", "lib", compiler, compilerVersion ),
+	)
+	
+##########################################################################
+# get compiler set up
+##########################################################################
+
+compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][IEEnv.platform()]
+CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
+
+##########################################################################
+# figure out the lib suffixes
+##########################################################################
+
+compilerVersionSplit = compilerVersion.split( "." )
+# figure out the suffix for boost libraries
+boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
+boostVersionSuffix = "-mt-" + boostVersion.replace( ".", "_" )
+while boostVersionSuffix.endswith( "_0" ) :
+	boostVersionSuffix = boostVersionSuffix[:-2]
+
+BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
+
+# we need these imported so scons runs ok when we invoke the cortex build
+ENV_VARS_TO_IMPORT="PATH PYTHONPATH IEENV_ROOT IEENV_DISABLE_WRAPPER_ENV_CHECK IEENV_WORKING_PATH  DOXYGEN_VERSION"
+
+# the output is pretty tedious without this disabled
+os.environ["IEENV_DISABLE_WRAPPER_ENV_CHECK"] = "1"
+
+# speed up the build a bit hopefully.
+BUILD_CACHEDIR = os.environ["IEBUILD_CACHEDIR"]
+
+# make sure the tests can run
+TEST_LIBPATH = ":".join( [ compilerReg["location"] + "/lib" ] )
+TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
+
