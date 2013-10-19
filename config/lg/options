@@ -62,6 +62,4 @@ else :
 		"/home/luke/build/Eigen",
 	]
 
-	BOOST_SUFFIX=".so"
-
 

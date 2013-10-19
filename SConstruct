@@ -366,7 +366,7 @@ tests = {
 	"GanderTest" : {
 		"envAppends" : {
 			"CPPFLAGS" : [
-				"-DBOOST_TEST_DYN_LINK=1",
+				#"-DBOOST_TEST_DYN_LINK=1",
 			],
 			"LIBS" : [
 				"Gander",
@@ -455,7 +455,7 @@ for testModule, testDef in tests.items() :
 		
 		# The testResultsFile is the output of our test.
 		testResultsFile = os.path.join( testDir, "results.txt" )
-		testCommand = testEnv.Command( testResultsFile, testProgram, os.path.join( testDir, testModule ) + " >& " + testResultsFile )
+		testCommand = testEnv.Command( testResultsFile, testProgram, os.path.join( testDir, testModule ) + " > " + testResultsFile )
 		
 		# Turn off cacheing of the tests.
 		NoCache( testCommand )
