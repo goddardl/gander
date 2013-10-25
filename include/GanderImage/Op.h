@@ -31,25 +31,31 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+#ifndef __GANDERIMAGE_OP__
+#define __GANDERIMAGE_OP__
 
-#include <vector>
+#include <iostream>
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
+#include "Gander/Common.h"
+
+#include "GanderImage/Channel.h"
+#include "GanderImage/RunTimeChannelFormat.h"
+#include "GanderImage/ChannelBrothers.h"
 
 namespace Gander
 {
 
-namespace Test
+namespace Image
 {
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
+class Op
+{
+	public :
+	
+};
 
-}; // namespace Test
+}; // namespace Image
 
 }; // namespace Gander
 
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+#endif

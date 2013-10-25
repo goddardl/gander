@@ -31,25 +31,43 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+#ifndef __GANDERIMAGETEST_PPM_H__
+#define __GANDERIMAGETEST_PPM_H__
 
-#include <vector>
+#include "boost/noncopyable.hpp"
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
+#include "Gander/Common.h"
 
 namespace Gander
 {
 
-namespace Test
+namespace ImageTest
 {
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
+/// A simple class for reading and writing PPM files.
+/// This class is implemented as simply as possible. It can only represent images that have
+/// interleaved RGB channels where each channel is an int8u in the range of 0-255.
+/// Its only purpose is for the testing of low-level image operations and shouldn't be used
+/// in any production code.
+struct PPM : private boost::noncopyable
+{
+	PPM() : width(0), height(0), buf(NULL) {}
+	PPM( int32u w, int32u h ) : width(w), height(h), buf( new int8u[ 3 * w * h ] ) {}
+	~PPM();
 
-}; // namespace Test
+	bool operator == ( const PPM &rhs ) const;
+	void read( std::string file );
+	bool write( std::string file ) const;
+	
+	int32u width;
+	int32u height;
+
+	/// A buffer of size: width * height * 3.
+	int8u *buf;
+};
+
+}; // namespace ImageTest
 
 }; // namespace Gander
 
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+#endif

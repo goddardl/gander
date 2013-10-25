@@ -1,0 +1,45 @@
+2)
+Change the RunTimeChannelFormat class to hold a value for ChanIndexToStep, ChanIndexToOffset and ChanIndexToPtrIndex. These types should be of size EnumType.
+These values can then be used in the pointerIndex( index ), step( index ) and pointerOffset( index ) methods in the same way that the ChannelFormat currently does.
+Use the bit twiddler class to access them as if they are arrays.
+Change the pointerIndex( channel ), step( channel ) and pointerOffset( channel ) methods to work out the index of the channel and look it up from the ChanIndexToStep, ChanIndexToOffset
+and ChanIndexToPtrIndex bit arrays.
+
+3)
+The purpose of the CompileTimeChannelFormat class is that it should be possible to write a method that constucts one from a RunTimeChannelFormat. This method can then be used within the operate()
+method of the ops. Write this method so that it constructs a CompileTimeChannelFormat from a RunTimeChannelFormat before calling compute().
+
+4) Write an Iterator wrapper class to give an interface which can use the accessor
+class as a base to implement iteration over a row.
+
+5) Write the Image wrapper which also uses the pixel accessor as it's base. It should
+be able to add channels to the list of pointers. This should be implemented as a 
+addChannelPointer method on the pixel accessor base classes. In the case of the runtime
+base, the pointer should be inserted and the runtime Channel format class updated.
+In the case of the compile time pixel accessor, the addChannelPointer method should
+assert that the pointer it is adding to is null and if not, raise an exception.
+
+Use the requiredChannelPointers() method on the format and accessor classes to get a ChannelSet
+or the channels that require pointers before looping over them and setting the pointer values.
+
+>  Rebase against OIIO master.
+>  The OIIO lib and src dependencies to GanderImage. E.G:
+>
+>  388     "GanderImage" : {
+	>  389         "install" : True,
+	>  390         "envAppends" : {
+		>  391             "LIBS" : [
+		>  392                 "OpenImageIO$OIIO_LIB_SUFFIX",
+		>  393                 "dl"
+		>  394             ],
+		>  395             "requiredOptions" : [ "OIIO_SRC_DIR", "OCIO_SRC_DIR" ],
+		>  396         }
+		>  397     },
+		>
+
+6) Implement some basic pixel operations to see how well it works.
+
+7) As we can now launch ops with a CompileTimeChannelFormat, it may not be neccessary to have the ChannelFormat and ChannelFormatBase classes at all. They are still useful if we want to explicitly
+define the format of an image outside of an Op but otherwise, it is probably easier to just use a RunTimeChannelFormat class. To this end, work out a better naming scheme for all of the ChannelFormat
+classes so that we don't need to use the RunTimeXXX and CompileTimeXXX names. 
+

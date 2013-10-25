@@ -45,11 +45,14 @@
 #include "boost/test/test_tools.hpp"
 
 using namespace Gander;
-using namespace GanderTest;
+using namespace Gander::Test;
 using namespace boost;
 using namespace boost::unit_test;
 
-namespace GanderTest
+namespace Gander
+{
+
+namespace Test
 {
 
 void testMatrices( Eigen::MatrixXd &matrix1, Eigen::MatrixXd &matrix2, int inliers, int outliers, bool noise, Eigen::Transform<double, 2, Eigen::Affine> &transform )
@@ -156,7 +159,7 @@ struct HomographyTest
 			// to the original transform.
 			refineHomography( points1, points2, H, 15 ); // Use a maximum of 15 iterations.
 			double refinedError = computePlaneToPlaneHomographyError( points1, points2, H, error );
-			BOOST_CHECK( refinedError < originalError );
+			BOOST_CHECK( refinedError <= originalError );
 		}
 		catch ( std::exception &e ) 
 		{
@@ -230,5 +233,7 @@ void addHomographyTest( boost::unit_test::test_suite *test )
 	test->add( new HomographyTestSuite( ) );
 }
 
-} // namespace GanderTest
+} // namespace Gander
+
+} // namespace Test
 

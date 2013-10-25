@@ -31,25 +31,43 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
 
-#include <vector>
+#include <string.h>
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
-
-namespace Gander
+template< class T, class FlagType, unsigned nDefaultFlagSet, class FlagMaskType >
+const char *Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::name( Flag v )
 {
+	if( static_cast<T>(v) < static_cast<T>( g_flagMappings.size() ) )
+	{
+		return g_flagMappings[v];
+	}
+	return "unused";
+}
 
-namespace Test
+template<class T, class FlagType, unsigned nDefaultFlagSet, class FlagMaskType>
+typename Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::Flag Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::flag( const char *name )
 {
+	for( T i = 0; i < g_flagMappings.size(); ++i )
+	{
+		if( strcmp( g_flagMappings[i], name ) == 0 )
+		{
+			return Flag( i );
+		}
+	}
+	g_flagMappings.push_back( name );
+	return Flag( g_flagMappings.size() - 1 );
+}
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
+template<class T, class FlagType, unsigned nDefaultFlagSet, class FlagMaskType>
+typename Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::Flag Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::findFlag( const char *name )
+{
+	for( T i = 0; i < g_flagMappings.size(); ++i )
+	{
+		if( strcmp( g_flagMappings[i], name ) == 0 )
+		{
+			return Flag( i );
+		}
+	}
+	return Flag( 0 );
+}
 
-}; // namespace Test
-
-}; // namespace Gander
-
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__

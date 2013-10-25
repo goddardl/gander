@@ -31,25 +31,19 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-
 #include <vector>
+#include <stdexcept>
+#include <string.h>
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
+#include "Gander/Common.h"
+#include "GanderImage/ChannelBrothers.h"
 
-namespace Gander
-{
+using namespace Gander::Image;
 
-namespace Test
-{
+DECLARE_BROTHER_TRAITS( Brothers_RGB );
+DECLARE_BROTHER_TRAITS( Brothers_RGBA );
+DECLARE_BROTHER_TRAITS( Brothers_BGR );
+DECLARE_BROTHER_TRAITS( Brothers_BGRA );
+DECLARE_BROTHER_TRAITS( Brothers_UV );
+DECLARE_BROTHER_TRAITS( Brothers_VU );
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
-
-}; // namespace Test
-
-}; // namespace Gander
-
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__

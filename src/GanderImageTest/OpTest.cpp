@@ -31,25 +31,50 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+#include <iostream>
+#include <cstdlib>
 
-#include <vector>
+#include "GanderImage/Op.h"
+#include "GanderImageTest/OpTest.h"
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
+
+using namespace Gander;
+using namespace Gander::Image;
+using namespace Gander::ImageTest;
+using namespace boost;
+using namespace boost::unit_test;
 
 namespace Gander
 {
 
-namespace Test
+namespace ImageTest
 {
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
+struct OpTest
+{
+	void testOpPreprocess()
+	{
+//		BOOST_CHECK(0);
+	}
+};
 
-}; // namespace Test
+struct OpTestSuite : public boost::unit_test::test_suite
+{
+	OpTestSuite() : boost::unit_test::test_suite( "OpTestSuite" )
+	{
+		boost::shared_ptr<OpTest> instance( new OpTest() );
+		add( BOOST_CLASS_TEST_CASE( &OpTest::testOpPreprocess, instance ) );
+		}
+	};
 
-}; // namespace Gander
+	void addOpTest( boost::unit_test::test_suite *test )
+	{
+		test->add( new OpTestSuite() );
+	}
 
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+} // namespace ImageTest
+
+} // namespace Gander
+

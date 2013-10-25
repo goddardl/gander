@@ -31,14 +31,20 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+#include <iostream>
+#include <cstdlib>
 
-#include <vector>
+#include "Gander/Common.h"
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
+#include "GanderTest/CommonTest.h"
+
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
+
+using namespace Gander;
+using namespace Gander::Test;
+using namespace boost;
+using namespace boost::unit_test;
 
 namespace Gander
 {
@@ -46,10 +52,36 @@ namespace Gander
 namespace Test
 {
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
+struct CommonTest
+{
+	void testDataTypeSizes()
+	{
+		BOOST_CHECK_EQUAL( int( 1 ), int( sizeof( int8 ) ) );
+		BOOST_CHECK_EQUAL( int( 1 ), int( sizeof( int8u ) ) );
+		BOOST_CHECK_EQUAL( int( 2 ), int( sizeof( int16 ) ) );
+		BOOST_CHECK_EQUAL( int( 2 ), int( sizeof( int16u ) ) );
+		BOOST_CHECK_EQUAL( int( 4 ), int( sizeof( int32 ) ) );
+		BOOST_CHECK_EQUAL( int( 4 ), int( sizeof( int32u ) ) );
+		BOOST_CHECK_EQUAL( int( 8 ), int( sizeof( int64 ) ) );
+		BOOST_CHECK_EQUAL( int( 8 ), int( sizeof( int64u ) ) );
+	}
+};
 
-}; // namespace Test
+struct CommonTestSuite : public boost::unit_test::test_suite
+{
+	CommonTestSuite() : boost::unit_test::test_suite( "CommonTestSuite" )
+	{
+		boost::shared_ptr<CommonTest> instance( new CommonTest() );
+		add( BOOST_CLASS_TEST_CASE( &CommonTest::testDataTypeSizes, instance ) );
+	}
+};
 
-}; // namespace Gander
+void addCommonTest( boost::unit_test::test_suite *test )
+{
+	test->add( new CommonTestSuite( ) );
+}
 
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+} // namespace ImageTest
+
+} // namespace Gander
+

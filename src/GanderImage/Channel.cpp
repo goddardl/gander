@@ -31,25 +31,27 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-
 #include <vector>
+#include <stdexcept>
+#include <string.h>
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
+#include "Gander/Common.h"
+#include "GanderImage/Channel.h"
 
-namespace Gander
-{
+template <>
+const char* Gander::Image::ChannelSet::g_defaultFlags[ Gander::Image::ChannelTraits::NumberOfDefaultChannels ] = {
+	"unused",
+	"red",
+	"green",
+	"blue",
+	"alpha",
+	"z",
+	"u",
+	"v",
+	"mask",
+};
 
-namespace Test
-{
+template <>
+std::vector<const char*> Gander::Image::ChannelSet::g_flagMappings
+	= std::vector<const char*>( Gander::Image::ChannelSet::g_defaultFlags, Gander::Image::ChannelSet::g_defaultFlags + Gander::Image::ChannelTraits::NumberOfDefaultChannels );
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
-
-}; // namespace Test
-
-}; // namespace Gander
-
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
