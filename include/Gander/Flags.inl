@@ -31,25 +31,49 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
 
-#include <vector>
+#include <string.h>
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
-
-namespace Gander
+template< class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum >
+const Gander::int8u* Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::name( Flag z )
 {
+	if( z.value < static_cast<int>( g_flagMappings.size() ) )
+	{
+		return g_flagMappings[z.value];
+	}
+	return "unused";
+}
 
-namespace Test
+template<class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum>
+Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum> Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::flag( const Gander::int8u *name )
 {
+	for( T i = 0; i < g_flagMappings.size(); ++i )
+	{
+		if( strcmp( g_flagMappings[i], name ) == 0 )
+		{
+			return Flag( i );
+		}
+	}
+	g_flagMappings.push_back( name );
+	return Flag( g_flagMappings.size() - 1 );
+}
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
+template<class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum>
+Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum> Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum>::findFlag( const Gander::int8u *name )
+{
+	for( T i = 0; i < g_flagMappings.size(); ++i )
+	{
+		if( strcmp( g_flagMappings[i], name ) == 0 )
+		{
+			return Flag( i );
+		}
+	}
+	return Flag( 0 );
+}
 
-}; // namespace Test
+template<class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum>
+inline T Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::flagIndex( Flag z )
+{
+	return z.value;
+}
 
-}; // namespace Gander
-
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__

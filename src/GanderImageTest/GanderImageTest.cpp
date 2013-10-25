@@ -31,25 +31,39 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
 
-#include <vector>
+#include <iostream>
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
+#include "boost/test/test_tools.hpp"
+#include "boost/test/results_reporter.hpp"
+#include "boost/test/unit_test_suite.hpp"
+#include "boost/test/output_test_stream.hpp"
+#include "boost/test/unit_test_log.hpp"
+#include "boost/test/framework.hpp"
+#include "boost/test/detail/unit_test_parameters.hpp"
 
-namespace Gander
+#include "GanderImageTest/PixelTest.h"
+
+using namespace boost::unit_test;
+using boost::test_tools::output_test_stream;
+
+using namespace Gander;
+using namespace Gander::ImageTest;
+
+test_suite* init_unit_test_suite( int argc, char* argv[] )
 {
+	test_suite* test = BOOST_TEST_SUITE( "Gander Image unit test" );
 
-namespace Test
-{
+	try
+	{
+		addPixelTest(test);
+	}
+	catch (std::exception &ex)
+	{
+		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
+		throw;
+	}
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
+	return test;
+}
 
-}; // namespace Test
-
-}; // namespace Gander
-
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__

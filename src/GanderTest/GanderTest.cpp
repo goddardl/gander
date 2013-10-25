@@ -31,7 +31,6 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
 #include <iostream>
 
 #include "boost/test/test_tools.hpp"
@@ -44,12 +43,13 @@
 
 #include "GanderTest/LevenbergMarquardtTest.h"
 #include "GanderTest/HomographyTest.h"
+#include "GanderTest/FlagSetTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
 
-using namespace GanderTest;
 using namespace Gander;
+using namespace Gander::Test;
 
 test_suite* init_unit_test_suite( int argc, char* argv[] )
 {
@@ -59,6 +59,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 	{
 		addLevenbergMarquardtTest(test);
 		addHomographyTest(test);
+		addFlagSetTest(test);
 	}
 	catch (std::exception &ex)
 	{

@@ -31,14 +31,19 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+#include <iostream>
+#include <cstdlib>
 
-#include <vector>
+#include "GanderTest/FlagSetTest.h"
+#include "Gander/FlagSet.h"
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
+
+using namespace Gander;
+using namespace Gander::Test;
+using namespace boost;
+using namespace boost::unit_test;
 
 namespace Gander
 {
@@ -46,10 +51,34 @@ namespace Gander
 namespace Test
 {
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
+struct FlagSetTest
+{
+	void testFlagSet()
+	{
+		try
+		{
+		}
+		catch ( std::exception &e ) 
+		{
+		}
+	}
+};
 
-}; // namespace Test
+struct FlagSetTestSuite : public boost::unit_test::test_suite
+{
+	FlagSetTestSuite() : boost::unit_test::test_suite( "FlagSetTestSuite" )
+	{
+		boost::shared_ptr<FlagSetTest> instance( new FlagSetTest() );
+		add( BOOST_CLASS_TEST_CASE( &FlagSetTest::testFlagSet, instance ) );
+	}
+};
 
-}; // namespace Gander
+void addFlagSetTest( boost::unit_test::test_suite *test )
+{
+	test->add( new FlagSetTestSuite( ) );
+}
 
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+} // namespace Test
+
+} // namespace Gander
+

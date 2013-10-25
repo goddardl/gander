@@ -31,25 +31,56 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
-#define __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
 
-#include <vector>
+#include <iostream>
+#include <cstdlib>
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "Gander/ErrorFunctions.h"
-#include "boost/test/unit_test.hpp"
+#include "GanderImageTest/PixelTest.h"
+#include "GanderImage/Pixel.h"
+
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
+
+using namespace Gander;
+using namespace Gander::Image;
+using namespace Gander::ImageTest;
+using namespace boost;
+using namespace boost::unit_test;
 
 namespace Gander
 {
 
-namespace Test
+namespace ImageTest
 {
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test );
+struct PixelTest
+{
+	void testPixel()
+	{
+		try
+		{
+		}
+		catch ( std::exception &e ) 
+		{
+		}
+	}
+};
 
-}; // namespace Test
+struct PixelTestSuite : public boost::unit_test::test_suite
+{
+	PixelTestSuite() : boost::unit_test::test_suite( "PixelTestSuite" )
+	{
+		boost::shared_ptr<PixelTest> instance( new PixelTest() );
+		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixel, instance ) );
+	}
+};
 
-}; // namespace Gander
+void addPixelTest( boost::unit_test::test_suite *test )
+{
+	test->add( new PixelTestSuite( ) );
+}
 
-#endif // __GANDERTEST_LEVENBERGMARQUARDTTEST_H__
+} // namespace ImageTest
+
+} // namespace Gander
+

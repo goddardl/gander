@@ -57,7 +57,7 @@
 #endif
 
 #ifndef GANDER_INT32U
-#define GANDER_INT32U unsigned
+#define GANDER_INT32U unsigned int
 #endif
 
 #ifndef GANDER_INT64
@@ -70,15 +70,15 @@
 
 namespace Gander
 {
-	typedef GANDER_INT8   int8;
-	typedef GANDER_INT8U  int8u
-	typedef GANDER_INT16  int16;
-	typedef GANDER_INT16U int16u
-	typedef GANDER_INT32  int32;
-	typedef GANDER_INT32U int32u
-	typedef GANDER_INT64  int64;
+	typedef GANDER_INT8 int8;
+	typedef GANDER_INT8U int8u;
+	typedef GANDER_INT16 int16;
+	typedef GANDER_INT16U int16u;
+	typedef GANDER_INT32 nt32;
+	typedef GANDER_INT32U int32u;
+	typedef GANDER_INT64 int64;
 	typedef GANDER_INT64U int64u;
-}
+}; // Gander
 
 
 #endif
