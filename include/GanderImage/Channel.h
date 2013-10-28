@@ -31,54 +31,61 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDER_TYPES_H__
-#define __GANDER_TYPES_H__
+#ifndef __GANDERIMAGE_CHANNEL__
+#define __GANDERIMAGE_CHANNEL__
 
-/// We create several defines for the basic types. This allows use to configure the types using 
-/// the compiler's command line.
-#ifndef GANDER_INT8
-#define GANDER_INT8 signed char
-#endif
+#include <iostream>
 
-#ifndef GANDER_INT8U
-#define GANDER_INT8U unsigned char
-#endif
-
-#ifndef GANDER_INT16
-#define GANDER_INT16 short
-#endif
-
-#ifndef GANDER_INT16U
-#define GANDER_INT16U unsigned short
-#endif
-
-#ifndef GANDER_INT32
-#define GANDER_INT32 int
-#endif
-
-#ifndef GANDER_INT32U
-#define GANDER_INT32U unsigned int
-#endif
-
-#ifndef GANDER_INT64
-#define GANDER_INT64 signed long long
-#endif
-
-#ifndef GANDER_INT64U
-#define GANDER_INT64U unsigned long long
-#endif
+#include "Gander/Common.h"
+#include "Gander/Flags.h"
+#include "Gander/FlagSet.h"
 
 namespace Gander
 {
-	typedef GANDER_INT8 int8;
-	typedef GANDER_INT8U int8u;
-	typedef GANDER_INT16 int16;
-	typedef GANDER_INT16U int16u;
-	typedef GANDER_INT32 int32;
-	typedef GANDER_INT32U int32u;
-	typedef GANDER_INT64 int64;
-	typedef GANDER_INT64U int64u;
-}; // Gander
 
+namespace Image
+{
+	
+/// Defines the available preset channel types.
+enum ChannelDefaults 
+{
+	Chan_Unused = 0,
+	Chan_Red = 1,
+	Chan_Green = 2,
+	Chan_Blue = 3,
+	Chan_Alpha = 4,
+	Chan_Z     = 5,
+	Chan_Mask  = 6,
+	Chan_U     = 7,
+	Chan_V     = 8
+};
+
+/// Values used to mask bits within a channel set.
+enum ChannelSetInit
+{
+	Mask_None  = 0,
+	Mask_Red   = 1 << ( Chan_Red - 1 ),
+	Mask_Green   = 1 << ( Chan_Green - 1 ),
+	Mask_Blue   = 1 << ( Chan_Blue - 1 ),
+	Mask_Alpha = 1 << ( Chan_Alpha - 1 ),
+	Mask_Z     = 1 << ( Chan_Z - 1 ),
+	Mask_Mask  = 1 << ( Chan_Mask - 1 ),
+	Mask_U     = 1 << ( Chan_U - 1 ),
+	Mask_V     = 1 << ( Chan_V - 1 ),
+	Mask_UV  = Mask_U | Mask_V,
+	Mask_RGB  = Mask_Red | Mask_Green | Mask_Blue,
+	Mask_RGBA  = Mask_RGB | Mask_Alpha,
+	Mask_All   = 0xFFFFFFFF
+};
+
+typedef Gander::Flag<int32u, ChannelDefaults, 9, ChannelSetInit> Channel;
+
+typedef Gander::FlagSet<int32u, ChannelSetInit, Channel> ChannelSet;
+
+Gander::int8u channelIndex( Channel z, ChannelSet set );
+
+}; // namespace Image
+
+}; // namespace Gander
 
 #endif

@@ -32,38 +32,90 @@
 //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream>
+#include <cstdlib>
 
+#include "GanderImage/Channel.h"
+#include "GanderImageTest/ChannelTest.h"
+
+#include "boost/test/floating_point_comparison.hpp"
 #include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
-
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
 
 using namespace Gander;
-using namespace Gander::Test;
+using namespace Gander::Image;
+using namespace Gander::ImageTest;
+using namespace boost;
+using namespace boost::unit_test;
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+namespace ImageTest
+{
 
-	return test;
+struct ChannelTest
+{
+	void testChannelMasks()
+	{
+		try
+		{
+			{
+				// Test the assignment constructor.
+				Channel red( Chan_Red );
+				BOOST_CHECK( red == Chan_Red );
+
+				// Test the copy constructor.
+				Channel blue( Chan_Blue );
+				blue = red;
+				BOOST_CHECK( blue == Chan_Red );
+
+				// Test the assignement operator.
+				red = Chan_Green;
+				BOOST_CHECK( red == Chan_Green );
+
+				red = Mask_RGB; // This shouldn't be allowed! This is allowed because the flags class can accept uint32 as a construcotr..
+				std::cerr << red.value() << std::endl;
+			}
+
+			{
+				/// Test the basic Mask bitwise operations.
+				ChannelSet rb( Mask_Red | Mask_Blue );
+				//BOOST_CHECK( rb.contains( Chan_Red ) );
+			//	BOOST_CHECK( !rb.contains( Chan_Green ) );
+		//		BOOST_CHECK( rb.contains( Chan_Blue ) );
+			}
+			
+			/// Working tests:
+			/*
+			{
+				ChannelSet rgb( Mask_RGB );
+				BOOST_CHECK( rgb.contains( Chan_Red ) );
+				BOOST_CHECK( rgb.contains( Chan_Green ) );
+				BOOST_CHECK( rgb.contains( Chan_Blue ) );
+			}
+			*/
+
+		}
+		catch ( std::exception &e ) 
+		{
+		}
+	}
+};
+
+struct ChannelTestSuite : public boost::unit_test::test_suite
+{
+	ChannelTestSuite() : boost::unit_test::test_suite( "ChannelTestSuite" )
+	{
+		boost::shared_ptr<ChannelTest> instance( new ChannelTest() );
+		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testChannelMasks, instance ) );
+	}
+};
+
+void addChannelTest( boost::unit_test::test_suite *test )
+{
+	test->add( new ChannelTestSuite( ) );
 }
+
+} // namespace ImageTest
+
+} // namespace Gander
+

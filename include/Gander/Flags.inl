@@ -35,17 +35,17 @@
 #include <string.h>
 
 template< class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum >
-const Gander::int8u* Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::name( Flag z )
+const char *Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::name( Flag z )
 {
-	if( z.value < static_cast<int>( g_flagMappings.size() ) )
+	if( z.m_value < static_cast<int>( g_flagMappings.size() ) )
 	{
-		return g_flagMappings[z.value];
+		return g_flagMappings[z.m_value];
 	}
 	return "unused";
 }
 
 template<class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum>
-Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum> Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::flag( const Gander::int8u *name )
+Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum> Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::flag( const char *name )
 {
 	for( T i = 0; i < g_flagMappings.size(); ++i )
 	{
@@ -59,7 +59,7 @@ Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum> Gander::Flag<
 }
 
 template<class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum>
-Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum> Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum>::findFlag( const Gander::int8u *name )
+Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum> Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum>::findFlag( const char *name )
 {
 	for( T i = 0; i < g_flagMappings.size(); ++i )
 	{
@@ -72,8 +72,9 @@ Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum> Gander::Flag<T
 }
 
 template<class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum>
-inline T Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::flagIndex( Flag z )
+inline T Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::index( Flag z )
 {
-	return z.value;
+	return z.m_value;
 }
+
 

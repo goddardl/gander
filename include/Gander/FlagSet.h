@@ -31,8 +31,8 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDER_FLAGSET_SET__
-#define __GANDER_FLAGSET_SET__
+#ifndef __GANDER_FLAGSET__
+#define __GANDER_FLAGSET__
 
 #include "Gander/Common.h"
 #include "Gander/Flags.h"
@@ -50,27 +50,31 @@ namespace Gander
 template< class T, class FlagSetInitEnum, typename Flag >
 class FlagSet
 {
-	public :
+
+public :
 
 	FlagSet() : m_mask(0) {}
-	FlagSet( const FlagSet &source ) { m_mask = source.m_mask; }
-	FlagSet( FlagSetInitEnum v ) : m_mask(v) {}
-	FlagSet( Flag v ) { *this = v; }
-	const FlagSet& operator=(const FlagSet& source)
+	FlagSet( const FlagSet &source ) { m_mask = source.m_mask;std::cerr << "c)" << source << std::endl; }
+	FlagSet( FlagSetInitEnum v ) : m_mask(v) { std::cerr << "a)" << v << std::endl; }
+	FlagSet( Flag v ) { *this = v; std::cerr << "b) " << v << std::endl;}
+
+	const FlagSet &operator = ( const FlagSet& source )
 	{
 		m_mask = source.m_mask; return *this;
 	}
-	const FlagSet& operator=(FlagSetInitEnum source) 
+
+	const FlagSet &operator = ( FlagSetInitEnum source ) 
 	{
 		m_mask = source;
 		return *this;
 	}
 
-	const FlagSet& operator=(Flag z)
+	const FlagSet &operator = ( Flag z )
 	{
 		m_mask = T(1) << (T(z)-1);
 		return *this;
 	}
+
 	void clear() { m_mask = 0; }
 	operator bool() const { return m_mask; }
 	bool empty() const { return !m_mask; }
@@ -85,16 +89,23 @@ class FlagSet
 	void operator += ( const FlagSet &source ) { m_mask |= source.m_mask; }
 	void operator += ( FlagSetInitEnum source ) { m_mask |= source; }
 	void operator += ( Flag z ) { m_mask |= T(1) << ( T(z) - 1 ); }
-	void insert(Flag z) { *this += z; }
+	void insert( Flag z ) { *this += z; }
 	void insert( const Flag* array, int n ) { for( int i = 0; i < n; ++i ) *this += array[i]; }
 	void operator -= ( const FlagSet &source ) { m_mask &= ~source.m_mask; }
 	void operator -= ( FlagSetInitEnum source ) { m_mask &= ~source; }
 	void operator -= ( Flag z );
 	void erase( Flag z ) { *this -= z; }
 	void erase( const Flag* array, int n ) { for( int i = 0; i < n; ++i ) *this -= array[i]; }
-	void operator &= ( const FlagSet& source ) { m_mask &= source.m_mask; }
+	void operator &= ( const FlagSet &source ) { m_mask &= source.m_mask; }
 	void operator &= ( FlagSetInitEnum source ) { m_mask &= source; }
 	void operator &= ( Flag z ) { m_mask &= T(1) << ( T(z) - 1 ); }
+	bool operator & ( const FlagSet &k ) const { return ( m_mask & ( T(1) << ( T( k ) - 1 ) ) ) != 0; }
+	bool operator & ( FlagSetInitEnum k ) const { return ( m_mask & k ) != 0; }
+	bool operator & ( Flag k ) const { return ( m_mask & ( T(1) << ( T( k ) - 1 ) ) ) != 0; }
+	unsigned size( Flag k ) const { return *this & k ? 1 : 0; }
+	bool contains( const FlagSet &source ) const { return ( ( source.m_mask & m_mask ) == source.m_mask ); }
+	bool contains( FlagSetInitEnum source ) const { return !( ~m_mask & source ); }
+	bool contains( Flag k ) const { return ( ( T(1) << ( T( k ) - 1 ) ) & m_mask ) == ( T(1) << ( T( k )-1 ) ); }
 
 	template< class Type >
 	FlagSet operator + ( Type z ) const
@@ -112,22 +123,15 @@ class FlagSet
 		return tmp;
 	}
 
-	//! return the intersection of this FlagSet with another as a FlagSet
+	/// return the intersection of this FlagSet with another as a FlagSet
 	template< class Type >
-	FlagSet intersection(Type z) const
+	FlagSet intersection( Type z ) const
 	{
 		FlagSet tmp = *this;
 		tmp &= z;
 		return tmp;
 	}
 
-	bool operator & ( const FlagSet& k ) const { return ( m_mask & ( T(1) << ( T( k ) - 1 ) ) ) != 0; }
-	bool operator & ( FlagSetInitEnum k ) const { return ( m_mask & k ) != 0; }
-	bool operator & ( Flag k ) const { return ( m_mask & ( T(1) << ( T( k ) - 1 ) ) ) != 0; }
-	unsigned count(Flag k) const { return *this & k ? 1 : 0; }
-	bool contains(const FlagSet& source) const { return ( ( source.m_mask & m_mask ) == source.m_mask ); }
-	bool contains(FlagSetInitEnum source) const { return !( ~m_mask & source ); }
-	bool contains(Flag k) const { return ( ( T(1) << ( T( k ) - 1 ) ) & m_mask ) == ( T(1) << ( T( k )-1 ) ); }
 	unsigned short size() const
 	{
 		unsigned short total = 0;
@@ -138,23 +142,32 @@ class FlagSet
 		return total;
 	}
 
-	Flag first() const { return _first(); }
-	Flag next(Flag k) const
+	Flag first() const
+	{
+		int8u i = 0;
+		for( ; i < ( T( sizeof(T) ) << 3 ) && ( ( m_mask >> i ) & T(1) ) == 0; ++i );
+		return Flag( i+1 );
+	}
+
+	Flag next( Flag k ) const
 	{
 		if ( m_mask >> T( k ) == 0 )
 		{
 			return Flag( T( 0 ) );
 		}
-		k = _next( k );
-		return k;
+		int8u i = k;
+		for( ; i < ( sizeof(T) << 3 ) && ( ( m_mask >> i ) & T(1) ) == 0; ++i );
+		return Flag( i+1 );
 	}
+
 	Flag last() const
 	{
 		char i = ( sizeof( T ) << 3 ) - 1;
 		for( ; i >= 0 && ( ( m_mask >> i ) & T(1) ) == 0; --i );
 		return Flag( i + 1 );
 	}
-	Flag previous(Flag k) const
+
+	Flag previous( Flag k ) const
 	{
 		int8u i = k;
 		if ((m_mask & ~((~T(0)) << T(k-1))) == 0)
@@ -174,26 +187,13 @@ class FlagSet
 		return out;
 	}
 
-	private :
+private :
 
-		T m_mask;
+	T m_mask;
 
-		Flag _first() const
-		{
-			int8u i = 0;
-			for( ; i < ( T( sizeof(T) ) << 3 ) && ( ( m_mask >> i ) & T(1) ) == 0; ++i );
-			return Flag( i+1 );
-		}
-
-		Flag _next( Flag c ) const
-		{
-			int8u i = c;
-			for ( ; i < ( sizeof(T) << 3 ) && ( ( m_mask >> i ) & T(1) ) == 0; ++i );
-			return Flag( i+1 );
-		}
 };
 
 }; // Gander
 
-#endif // __GANDER_FLAGSET_SET__
+#endif // __GANDER_FLAGSET__
 

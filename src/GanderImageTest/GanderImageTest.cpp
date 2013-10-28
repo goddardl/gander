@@ -42,6 +42,7 @@
 #include "boost/test/framework.hpp"
 #include "boost/test/detail/unit_test_parameters.hpp"
 
+#include "GanderImageTest/ChannelTest.h"
 #include "GanderImageTest/PixelTest.h"
 
 using namespace boost::unit_test;
@@ -57,6 +58,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 	try
 	{
 		addPixelTest(test);
+		addChannelTest(test);
 	}
 	catch (std::exception &ex)
 	{

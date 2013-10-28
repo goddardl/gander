@@ -356,6 +356,13 @@ libraries = {
 			],
 		}
 	},
+	"GanderImage" : {
+		"install" : True,
+		"envAppends" : {
+			"LIBS" : [
+			],
+		}
+	},
 }
 
 ###############################################################################################
@@ -381,6 +388,7 @@ tests = {
 			],
 			"LIBS" : [
 				"Gander",
+				"GanderImage",
 				"boost_test_exec_monitor" + boostLibSuffix
 			],
 		},

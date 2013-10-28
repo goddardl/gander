@@ -42,76 +42,38 @@
 namespace Gander
 {
 
+/// The flag class can be specialized to create a set of predefined flags
+/// which can be stored in sets. These sets can be iterated over and queried.
+/// A set of default enum values are used to specialise the class along with the number of
+/// values in the enum. Finally another enum which contains the sets init values is also used
+/// to specialise the class and provide useful bitwise operator overides.
+/// See also the class Gander::FlagSet.
 template<class T, class FlagDefaultsEnum,  unsigned nDefaultFlags, class FlagSetInitEnum>
-struct Flag
+class Flag
 {
-	/*!
-	Flag ID numbers. This base clase can be specialized to create a set of predefined flags
-	which can be stored in sets. These sets can be iterated over and queried.
 
-	A set of default enum values are used to specialise the class along eith the number of
-	values in the enum. Finally another enum which contains the Sets init values is also used
-	to specialise the class and provide useful bitwise operator overides.
+public :
 
-	See also the class Core::FlagSet.
-	For a specialisation exmple see class Image::Channel.
-	*/
+	inline Flag() : m_value(0) {}
+	inline Flag( const T& rhs ) { m_value = rhs; std::cerr << "c" << std::endl;}
+	inline Flag( const Flag& rhs ) : m_value( rhs.m_value ) {std::cerr << "b" << std::endl; }
+	//inline Flag( const FlagDefaultsEnum &rhs ) : m_value( rhs ) { std::cerr << "a" << std::endl;}
 
-	T value;
-			
-	static const int8u *g_defaultFlags[ nDefaultFlags ];
-	static std::vector<const int8u*> g_flagMappings;
+	inline const T &value() const { return m_value; }
 
-	Flag( const T& rhs )
+	inline const Flag& operator = (const FlagDefaultsEnum& source)
 	{
-		value = rhs;
-	}
-
-	public:
-	Flag(): value(0) {}
-	Flag( const Flag& rhs ): value( rhs.value) {}
-
-	/*! \relates Core::FlagSetInitEnum */
-	Flag( const FlagDefaultsEnum& rhs ): value( rhs ) {}
-
-	/*! \relates Image::FlagSetInitEnum */
-	inline const Flag& operator=(const FlagDefaultsEnum& source)
-	{
-		value = source;
+		m_value = source;
 		return *this;
 	}
 
-	inline const Flag& operator=(const Flag& source)
+	inline const Flag& operator = (const Flag& source)
 	{
-		value = source.value;
+		m_value = source.m_value;
 		return *this;
 	}
-
-	inline operator T () {	return value; }
-
-	static inline void incr( FlagDefaultsEnum &c ) { c = FlagDefaultsEnum(c + 1); }
-
-	/// Get the flag's name.
-	/// Returns the name of the flag z by looking it up from the static g_flagMappings member.
-	/// @param z The flag.
-	/// @return Returns a int8uacter string with the name of the flag z.
-	static const int8u *name( Flag z );
-	/// Returns an existing or new flag by looking up a name.
-	/// Returns a flag by looking up a name in the static g_flagMappings member. If the flag doesn't
-	/// exist then a new mapping for the name will be created and the new Flag returned
-	/// @param z The flag name.
-	/// @return Returns the flag which matches the name.
-	static inline Flag flag( const int8u *name );
-	/// Returns an existing flag by looking up a name.
-	/// Returns a flag by looking up \a name in the static g_flagMappings member. If the flag doesn't exist
-	/// then a NULL flag will be returned (with a value of 0).
-	/// @param z The name of the flag.
-	/// @return Returns the flag which matches the name.
-	static inline Flag findFlag( const int8u *name );
-	/// Returns the enum value of the flag.
-	/// @param z The flag.
-	/// @return The value of the flag.
-	static inline T flagIndex( Flag );
+	
+	inline operator T () { return m_value; }
 
 	inline friend std::ostream &operator << ( std::ostream &o, const Flag &z )
 	{
@@ -119,8 +81,9 @@ struct Flag
 		return o;
 	}
 
-	inline friend FlagSetInitEnum operator | ( const FlagSetInitEnum &a, const FlagSetInitEnum &b )
+	inline friend FlagSetInitEnum operator | ( const FlagDefaultsEnum &a, const FlagDefaultsEnum &b )
 	{
+		std::cerr << "|" << std::endl;
 		return FlagSetInitEnum( T( a ) | T( b ) );
 	}
 
@@ -131,8 +94,40 @@ struct Flag
 
 	inline friend FlagSetInitEnum operator & ( const FlagSetInitEnum &a, const Flag &b )
 	{
-		return b ? FlagSetInitEnum( T( a ) & ( T( 1 ) << ( b.value - 1 ) ) ) : 0;
+		return b ? FlagSetInitEnum( T( a ) & ( T( 1 ) << ( b.m_value - 1 ) ) ) : 0;
 	}
+	
+	/// Get the flag's name.
+	/// Returns the name of the flag z by looking it up from the static g_flagMappings member.
+	/// @param z The flag.
+	/// @return Returns a character string with the name of the flag z.
+	static const char *name( Flag z );
+	/// Returns an existing or new flag by looking up a name.
+	/// Returns a flag by looking up a name in the static g_flagMappings member. If the flag doesn't
+	/// exist then a new mapping for the name will be created and the new Flag returned
+	/// @param z The flag name.
+	/// @return Returns the flag which matches the name.
+	static inline Flag flag( const char *name );
+	/// Returns an existing flag by looking up a name.
+	/// Returns a flag by looking up the name in the static g_flagMappings member. If the flag doesn't exist
+	/// then a NULL flag will be returned (with a m_value of 0).
+	/// @param z The name of the flag.
+	/// @return Returns the flag which matches the name.
+	static inline Flag findFlag( const char *name );
+	/// Returns the enum m_value of the flag.
+	/// @param z The flag.
+	/// @return The m_value of the flag.
+	static inline T index( Flag );
+
+private :
+	
+	static inline void incr( FlagDefaultsEnum &c ) { c = FlagDefaultsEnum( c + 1 ); }
+
+	T m_value;
+	
+	static const char *g_defaultFlags[ nDefaultFlags ];
+	static std::vector<const char*> g_flagMappings;
+		
 };
 
 }; // namespace Gander
