@@ -47,7 +47,7 @@ namespace Image
 {
 	
 /// Defines the available preset channel types.
-enum ChannelDefaults 
+typedef enum ChannelDefaults
 {
 	Chan_Unused = 0,
 	Chan_Red = 1,
@@ -58,10 +58,10 @@ enum ChannelDefaults
 	Chan_Mask  = 6,
 	Chan_U     = 7,
 	Chan_V     = 8
-};
+} ChannelDefaults;
 
 /// Values used to mask bits within a channel set.
-enum ChannelSetInit
+typedef enum ChannelSetInit
 {
 	Mask_None  = 0,
 	Mask_Red   = 1 << ( Chan_Red - 1 ),
@@ -76,7 +76,7 @@ enum ChannelSetInit
 	Mask_RGB  = Mask_Red | Mask_Green | Mask_Blue,
 	Mask_RGBA  = Mask_RGB | Mask_Alpha,
 	Mask_All   = 0xFFFFFFFF
-};
+} ChannelSetInit;
 
 typedef Gander::Flag<int32u, ChannelDefaults, 9, ChannelSetInit> Channel;
 

@@ -54,9 +54,16 @@ class FlagSet
 public :
 
 	FlagSet() : m_mask(0) {}
-	FlagSet( const FlagSet &source ) { m_mask = source.m_mask;std::cerr << "c)" << source << std::endl; }
-	FlagSet( FlagSetInitEnum v ) : m_mask(v) { std::cerr << "a)" << v << std::endl; }
-	FlagSet( Flag v ) { *this = v; std::cerr << "b) " << v << std::endl;}
+	FlagSet( const FlagSet &source ) { m_mask = source.m_mask; }
+	FlagSet( FlagSetInitEnum v ) : m_mask( v ) { }
+	FlagSet( Flag v ) { *this = v; }
+
+	// Why doesn't this friend operator work? 	
+	inline friend FlagSet operator | ( const FlagSetInitEnum &a, const FlagSetInitEnum &b )
+	{
+		std::cerr << "|" << std::endl;
+		return FlagSet(a  );
+	}
 
 	const FlagSet &operator = ( const FlagSet& source )
 	{
@@ -71,12 +78,13 @@ public :
 
 	const FlagSet &operator = ( Flag z )
 	{
-		m_mask = T(1) << (T(z)-1);
+		m_mask = T(1) << ( z.value() - 1 );
 		return *this;
 	}
 
 	void clear() { m_mask = 0; }
 	operator bool() const { return m_mask; }
+	T value() const { return m_mask; }
 	bool empty() const { return !m_mask; }
 	bool all() const { return ( m_mask & 0x80000000u ) != 0; }
 	bool operator == ( const FlagSet &source ) const { return m_mask == source.m_mask; }
@@ -88,12 +96,12 @@ public :
 	bool operator != ( Flag z) const { return !(*this == z); }
 	void operator += ( const FlagSet &source ) { m_mask |= source.m_mask; }
 	void operator += ( FlagSetInitEnum source ) { m_mask |= source; }
-	void operator += ( Flag z ) { m_mask |= T(1) << ( T(z) - 1 ); }
+	void operator += ( Flag z ) { m_mask |= T(1) << ( z.value() - 1 ); }
 	void insert( Flag z ) { *this += z; }
 	void insert( const Flag* array, int n ) { for( int i = 0; i < n; ++i ) *this += array[i]; }
 	void operator -= ( const FlagSet &source ) { m_mask &= ~source.m_mask; }
 	void operator -= ( FlagSetInitEnum source ) { m_mask &= ~source; }
-	void operator -= ( Flag z );
+	void operator -= ( Flag z ) { m_mask &= ~z.value(); };
 	void erase( Flag z ) { *this -= z; }
 	void erase( const Flag* array, int n ) { for( int i = 0; i < n; ++i ) *this -= array[i]; }
 	void operator &= ( const FlagSet &source ) { m_mask &= source.m_mask; }
@@ -105,7 +113,7 @@ public :
 	unsigned size( Flag k ) const { return *this & k ? 1 : 0; }
 	bool contains( const FlagSet &source ) const { return ( ( source.m_mask & m_mask ) == source.m_mask ); }
 	bool contains( FlagSetInitEnum source ) const { return !( ~m_mask & source ); }
-	bool contains( Flag k ) const { return ( ( T(1) << ( T( k ) - 1 ) ) & m_mask ) == ( T(1) << ( T( k )-1 ) ); }
+	bool contains( Flag k ) const { return ( ( T(1) << ( k.value() - 1 ) ) & m_mask ) == ( T(1) << ( k.value() - 1 ) ); }
 
 	template< class Type >
 	FlagSet operator + ( Type z ) const

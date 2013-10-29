@@ -56,6 +56,7 @@ std::vector<const char*> Gander::Image::Channel::g_flagMappings = std::vector<co
 
 Gander::int8u Gander::Image::channelIndex( Gander::Image::Channel z, Gander::Image::ChannelSet set )
 {
+	/*
 	Channel i;
 	Gander::int8u idx = 0;
 	
@@ -68,5 +69,6 @@ Gander::int8u Gander::Image::channelIndex( Gander::Image::Channel z, Gander::Ima
 		idx++;
 	}
 	throw std::runtime_error( "Channel does not exist in the specified channelSet.");
+	*/
 }
 

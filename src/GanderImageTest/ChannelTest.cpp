@@ -54,6 +54,29 @@ namespace ImageTest
 
 struct ChannelTest
 {
+	void testChannelSetConstructors()
+	{
+		ChannelSet alphaSet( Chan_Alpha );
+		BOOST_CHECK( alphaSet.contains( Chan_Alpha ) );
+
+		ChannelSet blueSet( Mask_Blue );
+		BOOST_CHECK( blueSet.contains( Chan_Blue ) );
+
+		ChannelSet copySet( alphaSet );
+		BOOST_CHECK( copySet.contains( Chan_Alpha ) );
+
+		ChannelSet rgb( Mask_RGB );
+		BOOST_CHECK( rgb.contains( Chan_Red ) );
+		BOOST_CHECK( rgb.contains( Chan_Green ) );
+		BOOST_CHECK( rgb.contains( Chan_Blue ) );
+		
+		ChannelSet rgba( Mask_RGB | Mask_Alpha );
+		BOOST_CHECK( rgba.contains( Chan_Red ) );
+		BOOST_CHECK( rgba.contains( Chan_Green ) );
+		BOOST_CHECK( rgba.contains( Chan_Blue ) );
+		BOOST_CHECK( rgba.contains( Chan_Alpha ) );
+	}
+
 	void testChannelMasks()
 	{
 		try
@@ -72,27 +95,10 @@ struct ChannelTest
 				red = Chan_Green;
 				BOOST_CHECK( red == Chan_Green );
 
-				red = Mask_RGB; // This shouldn't be allowed! This is allowed because the flags class can accept uint32 as a construcotr..
-				std::cerr << red.value() << std::endl;
+				//red = Mask_RGB; // This shouldn't be allowed! This is allowed because the flags class can accept uint32 as a construcotr..
+//				std::cerr << red.value() << std::endl;
 			}
 
-			{
-				/// Test the basic Mask bitwise operations.
-				ChannelSet rb( Mask_Red | Mask_Blue );
-				//BOOST_CHECK( rb.contains( Chan_Red ) );
-			//	BOOST_CHECK( !rb.contains( Chan_Green ) );
-		//		BOOST_CHECK( rb.contains( Chan_Blue ) );
-			}
-			
-			/// Working tests:
-			/*
-			{
-				ChannelSet rgb( Mask_RGB );
-				BOOST_CHECK( rgb.contains( Chan_Red ) );
-				BOOST_CHECK( rgb.contains( Chan_Green ) );
-				BOOST_CHECK( rgb.contains( Chan_Blue ) );
-			}
-			*/
 
 		}
 		catch ( std::exception &e ) 
@@ -107,6 +113,7 @@ struct ChannelTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<ChannelTest> instance( new ChannelTest() );
 		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testChannelMasks, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testChannelSetConstructors, instance ) );
 	}
 };
 

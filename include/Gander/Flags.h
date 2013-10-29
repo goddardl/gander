@@ -55,9 +55,8 @@ class Flag
 public :
 
 	inline Flag() : m_value(0) {}
-	inline Flag( const T& rhs ) { m_value = rhs; std::cerr << "c" << std::endl;}
-	inline Flag( const Flag& rhs ) : m_value( rhs.m_value ) {std::cerr << "b" << std::endl; }
-	//inline Flag( const FlagDefaultsEnum &rhs ) : m_value( rhs ) { std::cerr << "a" << std::endl;}
+	inline Flag( const Flag& rhs ) : m_value( rhs.m_value ) {}
+	inline Flag( const FlagDefaultsEnum &rhs ) : m_value( rhs ) {}
 
 	inline const T &value() const { return m_value; }
 
@@ -73,8 +72,8 @@ public :
 		return *this;
 	}
 	
-	inline operator T () { return m_value; }
-
+	//inline operator T () { return m_value; }
+/*
 	inline friend std::ostream &operator << ( std::ostream &o, const Flag &z )
 	{
 		o << name( z );
@@ -95,6 +94,17 @@ public :
 	inline friend FlagSetInitEnum operator & ( const FlagSetInitEnum &a, const Flag &b )
 	{
 		return b ? FlagSetInitEnum( T( a ) & ( T( 1 ) << ( b.m_value - 1 ) ) ) : 0;
+	}
+*/
+	
+	inline bool operator == ( const FlagDefaultsEnum& source )
+	{
+		return ( source == m_value );
+	}
+	
+	inline bool operator != ( const FlagDefaultsEnum& source )
+	{
+		return ( source != m_value );
 	}
 	
 	/// Get the flag's name.
