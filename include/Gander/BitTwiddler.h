@@ -31,59 +31,94 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERIMAGE_CHANNEL__
-#define __GANDERIMAGE_CHANNEL__
+#ifndef __GANDER_BITTWIDDLER__
+#define __GANDER_BITTWIDDLER__
 
 #include <iostream>
+#include <math.h>
 
 #include "Gander/Common.h"
-#include "Gander/Flags.h"
 
-namespace Gander
+namespace Gander 
 {
 
-namespace Image
+template < class T, unsigned WIDTH  >
+class Bits
 {
+	T& m_data;
+	const unsigned char m_idx;
 	
-/// Defines the available preset channel types.
-typedef enum ChannelDefaults
+	private:
+		inline T mask_() const
+		{
+			return static_cast<T>(~((~static_cast<T>(0x0)) << WIDTH));
+		}
+		
+		inline const int shift_() const
+		{
+			return WIDTH*(int)m_idx;
+		}
+	
+	public:
+		inline Bits(T& data, const unsigned char idx):
+			m_data( data ),
+			m_idx( idx )
+		{}
+		
+		inline Bits operator = ( const T& i )
+		{
+			const int shift = shift_();
+			const T mask = mask_();
+			m_data = ((m_data & ~(mask << shift))|((i & mask) << shift));
+			return *this;
+		}
+		
+		inline friend std::ostream &operator<< ( std::ostream &out, const Bits<T, WIDTH> &t )
+		{
+			int shift = t.shift_();
+			for (char i = WIDTH-1; i >= 0; i--)
+			{
+				out << static_cast<bool>((t.m_data >> (shift + i)) & 0x1);
+			}
+			
+			return out << " (" << (static_cast<T>((t.m_data >> shift) & t.mask_()))<< ")" ;
+		}
+		
+		inline operator T() const { return (static_cast<T>((m_data >> shift_()) & mask_())); }
+};
+
+/// A utility class for manipulating individual bits of data.	
+template < class T, unsigned WIDTH >
+class BitTwiddler
 {
-	Chan_Unused = 0,
-	Chan_Red = 1,
-	Chan_Green = 2,
-	Chan_Blue = 3,
-	Chan_Alpha = 4,
-	Chan_Z     = 5,
-	Chan_Mask  = 6,
-	Chan_U     = 7,
-	Chan_V     = 8
-} ChannelDefaults;
+	public:
+		
+		/// Constructs a BitTwiddler with the data that it will be manipulating.
+		inline BitTwiddler( T& data ):
+			m_data( data )
+		{}
+		
+		/// Returns a class that can manipulate a set of consecutive bits WIDTH wide.
+		inline Bits<T, WIDTH> operator [] ( const int8u idx )
+		{
+			return Bits<T, WIDTH>( m_data, idx );
+		}
+	
+		inline friend std::ostream &operator<< ( std::ostream &out, const BitTwiddler<T, WIDTH> &t )
+		{
+			for( int8u i = WIDTH-1; i >= 0; --i )
+			{
+				out << static_cast<bool>( ( t.m_data >> i ) & 0x1 );
+			}
+			
+			return out << " (" << static_cast<int32u>(t.m_data) << ") ";
+		}
+	
+	private:
+		
+		T& m_data;
+};
 
-/// Values used to mask bits within a channel set.
-typedef enum ChannelMask
-{
-	Mask_None  = 0,
-	Mask_Red   = 1 << ( Chan_Red - 1 ),
-	Mask_Green   = 1 << ( Chan_Green - 1 ),
-	Mask_Blue   = 1 << ( Chan_Blue - 1 ),
-	Mask_Alpha = 1 << ( Chan_Alpha - 1 ),
-	Mask_Z     = 1 << ( Chan_Z - 1 ),
-	Mask_Mask  = 1 << ( Chan_Mask - 1 ),
-	Mask_U     = 1 << ( Chan_U - 1 ),
-	Mask_V     = 1 << ( Chan_V - 1 ),
-	Mask_UV  = Mask_U | Mask_V,
-	Mask_RGB  = Mask_Red | Mask_Green | Mask_Blue,
-	Mask_RGBA  = Mask_RGB | Mask_Alpha,
-	Mask_All   = 0xFFFFFFFF
-} ChannelMask;
-
-typedef Gander::Flags<int32u, ChannelDefaults, 9, ChannelMask>::Flag Channel;
-typedef Gander::Flags<int32u, ChannelDefaults, 9, ChannelMask>::FlagSet ChannelSet;
-
-Gander::int8u channelIndex( Channel z, ChannelSet set );
-
-}; // namespace Image
-
-}; // namespace Gander
+};
 
 #endif

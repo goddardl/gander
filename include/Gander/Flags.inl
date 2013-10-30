@@ -35,7 +35,7 @@
 #include <string.h>
 
 template< class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum >
-const char *Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::name( Flag z )
+const char *Gander::Flags<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum>::Flag::name( Flag z )
 {
 	if( z.m_value < static_cast<int>( g_flagMappings.size() ) )
 	{
@@ -45,7 +45,7 @@ const char *Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::
 }
 
 template<class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum>
-Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum> Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::flag( const char *name )
+typename Gander::Flags<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum>::Flag Gander::Flags<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum>::Flag::flag( const char *name )
 {
 	for( T i = 0; i < g_flagMappings.size(); ++i )
 	{
@@ -59,7 +59,7 @@ Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum> Gander::Flag<
 }
 
 template<class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum>
-Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum> Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum>::findFlag( const char *name )
+typename Gander::Flags<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum>::Flag Gander::Flags<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum>::Flag::findFlag( const char *name )
 {
 	for( T i = 0; i < g_flagMappings.size(); ++i )
 	{
@@ -72,7 +72,7 @@ Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags, FlagSetInitEnum> Gander::Flag<T
 }
 
 template<class T, class FlagDefaultsEnum, unsigned nDefaultFlags, class FlagSetInitEnum>
-inline T Gander::Flag<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::index( Flag z )
+inline T Gander::Flags<T, FlagDefaultsEnum, nDefaultFlags,  FlagSetInitEnum>::Flag::index( Flag z )
 {
 	return z.m_value;
 }

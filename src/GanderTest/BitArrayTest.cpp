@@ -34,8 +34,8 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "GanderTest/FlagSetTest.h"
-#include "Gander/FlagSet.h"
+#include "Gander/BitArray.h"
+#include "GanderTest/BitArrayTest.h"
 
 #include "boost/test/floating_point_comparison.hpp"
 #include "boost/test/test_tools.hpp"
@@ -51,34 +51,30 @@ namespace Gander
 namespace Test
 {
 
-struct FlagSetTest
+struct BitArrayTest
 {
-	void testFlagSet()
+	void testBitArrayConstructors()
 	{
-		try
-		{
-		}
-		catch ( std::exception &e ) 
-		{
-		}
+		// Test the bit array here.
+		BOOST_CHECK( false );
 	}
 };
 
-struct FlagSetTestSuite : public boost::unit_test::test_suite
+struct BitArrayTestSuite : public boost::unit_test::test_suite
 {
-	FlagSetTestSuite() : boost::unit_test::test_suite( "FlagSetTestSuite" )
+	BitArrayTestSuite() : boost::unit_test::test_suite( "BitArrayTestSuite" )
 	{
-		boost::shared_ptr<FlagSetTest> instance( new FlagSetTest() );
-		add( BOOST_CLASS_TEST_CASE( &FlagSetTest::testFlagSet, instance ) );
+		boost::shared_ptr<BitArrayTest> instance( new BitArrayTest() );
+		add( BOOST_CLASS_TEST_CASE( &BitArrayTest::testBitArrayConstructors, instance ) );
 	}
 };
 
-void addFlagSetTest( boost::unit_test::test_suite *test )
+void addBitArrayTest( boost::unit_test::test_suite *test )
 {
-	test->add( new FlagSetTestSuite( ) );
+	test->add( new BitArrayTestSuite( ) );
 }
 
-} // namespace Test
+} // namespace ImageTest
 
 } // namespace Gander
 

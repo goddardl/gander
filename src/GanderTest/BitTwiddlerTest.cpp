@@ -31,13 +31,19 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_FLAGSETTEST_H__
-#define __GANDERTEST_FLAGSETTEST_H__
+#include <iostream>
+#include <cstdlib>
 
-#include <vector>
+#include "Gander/BitTwiddler.h"
+#include "GanderTest/BitTwiddlerTest.h"
 
-#include "unsupported/Eigen/NonLinearOptimization"
-#include "boost/test/unit_test.hpp"
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
+
+using namespace Gander;
+using namespace Gander::Test;
+using namespace boost;
+using namespace boost::unit_test;
 
 namespace Gander
 {
@@ -45,10 +51,33 @@ namespace Gander
 namespace Test
 {
 
-void addFlagSetTest( boost::unit_test::test_suite *test );
+struct BitTwiddlerTest
+{
+	void testBitTwiddlerConstructors()
+	{
+		int testData = 0;
+		BitTwiddler<int, 4> t( testData );
 
-}; // namespace Test
+		// Test the bit twiddler here.
+		BOOST_CHECK( false );
+	}
+};
 
-}; // Gander
+struct BitTwiddlerTestSuite : public boost::unit_test::test_suite
+{
+	BitTwiddlerTestSuite() : boost::unit_test::test_suite( "BitTwiddlerTestSuite" )
+	{
+		boost::shared_ptr<BitTwiddlerTest> instance( new BitTwiddlerTest() );
+		add( BOOST_CLASS_TEST_CASE( &BitTwiddlerTest::testBitTwiddlerConstructors, instance ) );
+	}
+};
 
-#endif // __GANDERTEST_FLAGSETTEST_H__
+void addBitTwiddlerTest( boost::unit_test::test_suite *test )
+{
+	test->add( new BitTwiddlerTestSuite( ) );
+}
+
+} // namespace ImageTest
+
+} // namespace Gander
+

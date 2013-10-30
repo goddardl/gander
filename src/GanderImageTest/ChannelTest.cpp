@@ -70,7 +70,7 @@ struct ChannelTest
 		BOOST_CHECK( rgb.contains( Chan_Green ) );
 		BOOST_CHECK( rgb.contains( Chan_Blue ) );
 		
-		ChannelSet rgba( Mask_RGB | Mask_Alpha );
+		ChannelSet rgba( ChannelMask( Mask_RGB | Mask_Alpha ) );
 		BOOST_CHECK( rgba.contains( Chan_Red ) );
 		BOOST_CHECK( rgba.contains( Chan_Green ) );
 		BOOST_CHECK( rgba.contains( Chan_Blue ) );
