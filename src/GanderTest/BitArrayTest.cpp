@@ -32,42 +32,49 @@
 //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream>
+#include <cstdlib>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
-
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/BitTwiddlerTest.h"
+#include "Gander/BitArray.h"
 #include "GanderTest/BitArrayTest.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
 
 using namespace Gander;
 using namespace Gander::Test;
+using namespace boost;
+using namespace boost::unit_test;
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-	//	addBitTwiddlerTest(test);
-	//	addBitArrayTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+namespace Test
+{
 
-	return test;
+struct BitArrayTest
+{
+	void testBitArrayConstructors()
+	{
+		// Test the bit array here.
+		BOOST_CHECK( false );
+	}
+};
+
+struct BitArrayTestSuite : public boost::unit_test::test_suite
+{
+	BitArrayTestSuite() : boost::unit_test::test_suite( "BitArrayTestSuite" )
+	{
+		boost::shared_ptr<BitArrayTest> instance( new BitArrayTest() );
+		add( BOOST_CLASS_TEST_CASE( &BitArrayTest::testBitArrayConstructors, instance ) );
+	}
+};
+
+void addBitArrayTest( boost::unit_test::test_suite *test )
+{
+	test->add( new BitArrayTestSuite( ) );
 }
+
+} // namespace ImageTest
+
+} // namespace Gander
+

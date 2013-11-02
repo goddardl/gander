@@ -31,43 +31,58 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+#ifndef __GANDERIMAGE_CHANNEL__
+#define __GANDERIMAGE_CHANNEL__
+
 #include <iostream>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include "Gander/Common.h"
+#include "Gander/Flags.h"
 
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/BitTwiddlerTest.h"
-#include "GanderTest/BitArrayTest.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace Gander;
-using namespace Gander::Test;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-	//	addBitTwiddlerTest(test);
-	//	addBitArrayTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+namespace Image
+{
+	
+/// Defines the available preset channel types.
+enum ChannelDefault
+{
+	Chan_Unused = 0,
+	Chan_Red = 1,
+	Chan_Green = 2,
+	Chan_Blue = 3,
+	Chan_Alpha = 4,
+	Chan_Z     = 5,
+	Chan_Mask  = 6,
+	Chan_U     = 7,
+	Chan_V     = 8
+};
 
-	return test;
-}
+/// Values used to mask bits within a channel set.
+enum ChannelMask
+{
+	Mask_None  = 0,
+	Mask_Red   = 1 << ( Chan_Red - 1 ),
+	Mask_Green   = 1 << ( Chan_Green - 1 ),
+	Mask_Blue   = 1 << ( Chan_Blue - 1 ),
+	Mask_Alpha = 1 << ( Chan_Alpha - 1 ),
+	Mask_Z     = 1 << ( Chan_Z - 1 ),
+	Mask_Mask  = 1 << ( Chan_Mask - 1 ),
+	Mask_U     = 1 << ( Chan_U - 1 ),
+	Mask_V     = 1 << ( Chan_V - 1 ),
+	Mask_UV  = Mask_U | Mask_V,
+	Mask_RGB  = Mask_Red | Mask_Green | Mask_Blue,
+	Mask_RGBA  = Mask_RGB | Mask_Alpha,
+	Mask_All   = 0xFFFFFFFF
+};
+
+GANDER_DECLARE_FLAGSET( ChannelDefault, ChannelMask, Channel, ChannelSet );
+
+Gander::int8u channelIndex( Channel z, ChannelSet set );
+
+}; // namespace Image
+
+}; // namespace Gander
+
+#endif

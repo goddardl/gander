@@ -31,43 +31,21 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream>
+#ifndef __GANDERTEST_BITTWIDDLERTEST_H__
+#define __GANDERTEST_BITTWIDDLERTEST_H__
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include "boost/test/unit_test.hpp"
 
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/BitTwiddlerTest.h"
-#include "GanderTest/BitArrayTest.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace Gander;
-using namespace Gander::Test;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-	//	addBitTwiddlerTest(test);
-	//	addBitArrayTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+namespace Test
+{
 
-	return test;
-}
+void addBitTwiddlerTest( boost::unit_test::test_suite *test );
+
+}; // namespace Test
+
+}; // namespace Gander
+
+#endif // __GANDERTEST_BITTWIDDLERTEST_H__

@@ -31,43 +31,45 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream>
+#include <vector>
+#include <stdexcept>
+#include <string.h>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include "Gander/Common.h"
+#include "GanderImage/Channel.h"
 
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/BitTwiddlerTest.h"
-#include "GanderTest/BitArrayTest.h"
+template <>
+const char* Gander::Image::ChannelSet::g_defaultFlags[9] = {
+	"unused",
+	"red",
+	"green",
+	"blue",
+	"alpha",
+	"z",
+	"mask",
+	"u",
+	"v"
+};
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+template <>
+std::vector<const char*> Gander::Image::ChannelSet::g_flagMappings = std::vector<const char*>(Gander::Image::ChannelSet::g_defaultFlags, Gander::Image::ChannelSet::g_defaultFlags+9);
 
-using namespace Gander;
-using namespace Gander::Test;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+Gander::int8u Gander::Image::channelIndex( Gander::Image::Channel z, Gander::Image::ChannelSet set )
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
-
-	try
+	/*
+	Channel i;
+	Gander::int8u idx = 0;
+	
+	foreach( i, set )
 	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-	//	addBitTwiddlerTest(test);
-	//	addBitArrayTest(test);
+		if ( z == i )
+		{
+			return idx;
+		}
+		idx++;
 	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
-
-	return test;
+	throw std::runtime_error( "Channel does not exist in the specified channelSet.");
+	*/
+	return 0;
 }
+

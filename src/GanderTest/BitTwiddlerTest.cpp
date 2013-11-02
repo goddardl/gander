@@ -32,42 +32,52 @@
 //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream>
+#include <cstdlib>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
-
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
+#include "Gander/BitTwiddler.h"
 #include "GanderTest/BitTwiddlerTest.h"
-#include "GanderTest/BitArrayTest.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
 
 using namespace Gander;
 using namespace Gander::Test;
+using namespace boost;
+using namespace boost::unit_test;
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-	//	addBitTwiddlerTest(test);
-	//	addBitArrayTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+namespace Test
+{
 
-	return test;
+struct BitTwiddlerTest
+{
+	void testBitTwiddlerConstructors()
+	{
+		int testData = 0;
+		BitTwiddler<int, 4> t( testData );
+
+		// Test the bit twiddler here.
+		BOOST_CHECK( false );
+	}
+};
+
+struct BitTwiddlerTestSuite : public boost::unit_test::test_suite
+{
+	BitTwiddlerTestSuite() : boost::unit_test::test_suite( "BitTwiddlerTestSuite" )
+	{
+		boost::shared_ptr<BitTwiddlerTest> instance( new BitTwiddlerTest() );
+		add( BOOST_CLASS_TEST_CASE( &BitTwiddlerTest::testBitTwiddlerConstructors, instance ) );
+	}
+};
+
+void addBitTwiddlerTest( boost::unit_test::test_suite *test )
+{
+	test->add( new BitTwiddlerTestSuite( ) );
 }
+
+} // namespace ImageTest
+
+} // namespace Gander
+

@@ -31,43 +31,52 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include <string.h>
 
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/BitTwiddlerTest.h"
-#include "GanderTest/BitArrayTest.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace Gander;
-using namespace Gander::Test;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+/*
+template< class T, class FlagType, unsigned nDefaultFlags, class FlagMaskType >
+const char *Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag::name( Flag z )
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
-
-	try
+	if( z.m_value < static_cast<int>( g_flagMappings.size() ) )
 	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-	//	addBitTwiddlerTest(test);
-	//	addBitArrayTest(test);
+		return g_flagMappings[z.m_value];
 	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
-
-	return test;
+	return "unused";
 }
+
+template<class T, class FlagType, unsigned nDefaultFlags, class FlagMaskType>
+typename Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag::flag( const char *name )
+{
+	for( T i = 0; i < g_flagMappings.size(); ++i )
+	{
+		if( strcmp( g_flagMappings[i], name ) == 0 )
+		{
+			return Flag( i );
+		}
+	}
+	g_flagMappings.push_back( name );
+	return Flag( g_flagMappings.size() - 1 );
+}
+
+template<class T, class FlagType, unsigned nDefaultFlags, class FlagMaskType>
+typename Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag::findFlag( const char *name )
+{
+	for( T i = 0; i < g_flagMappings.size(); ++i )
+	{
+		if( strcmp( g_flagMappings[i], name ) == 0 )
+		{
+			return Flag( i );
+		}
+	}
+	return Flag( 0 );
+}
+
+template<class T, class FlagType, unsigned nDefaultFlags, class FlagMaskType>
+inline T Gander::Flags<T, FlagType, nDefaultFlags,  FlagMaskType>::Flag::index( Flag z )
+{
+	return z.m_value;
+}
+
+*/
+

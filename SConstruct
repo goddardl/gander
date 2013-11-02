@@ -356,6 +356,13 @@ libraries = {
 			],
 		}
 	},
+	"GanderImage" : {
+		"install" : True,
+		"envAppends" : {
+			"LIBS" : [
+			],
+		}
+	},
 }
 
 ###############################################################################################
@@ -370,6 +377,18 @@ tests = {
 			],
 			"LIBS" : [
 				"Gander",
+				"boost_test_exec_monitor" + boostLibSuffix
+			],
+		},
+	},
+	"GanderImageTest" : {
+		"envAppends" : {
+			"CPPFLAGS" : [
+				#"-DBOOST_TEST_DYN_LINK=1",
+			],
+			"LIBS" : [
+				"Gander",
+				"GanderImage",
 				"boost_test_exec_monitor" + boostLibSuffix
 			],
 		},
