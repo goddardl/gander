@@ -52,24 +52,6 @@ const char* Gander::Image::ChannelSet::g_defaultFlags[9] = {
 };
 
 template <>
-std::vector<const char*> Gander::Image::ChannelSet::g_flagMappings = std::vector<const char*>(Gander::Image::ChannelSet::g_defaultFlags, Gander::Image::ChannelSet::g_defaultFlags+9);
-
-Gander::int8u Gander::Image::channelIndex( Gander::Image::Channel z, Gander::Image::ChannelSet set )
-{
-	/*
-	Channel i;
-	Gander::int8u idx = 0;
-	
-	foreach( i, set )
-	{
-		if ( z == i )
-		{
-			return idx;
-		}
-		idx++;
-	}
-	throw std::runtime_error( "Channel does not exist in the specified channelSet.");
-	*/
-	return 0;
-}
+std::vector<const char*> Gander::Image::ChannelSet::g_flagMappings
+	= std::vector<const char*>(Gander::Image::ChannelSet::g_defaultFlags, Gander::Image::ChannelSet::g_defaultFlags+9);
 

@@ -34,19 +34,18 @@
 
 #include <string.h>
 
-/*
-template< class T, class FlagType, unsigned nDefaultFlags, class FlagMaskType >
-const char *Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag::name( Flag z )
+template< class T, class FlagType, unsigned nDefaultFlagSet, class FlagMaskType >
+const char *Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::name( Flag v )
 {
-	if( z.m_value < static_cast<int>( g_flagMappings.size() ) )
+	if( v < static_cast<T>( g_flagMappings.size() ) )
 	{
-		return g_flagMappings[z.m_value];
+		return g_flagMappings[v];
 	}
 	return "unused";
 }
 
-template<class T, class FlagType, unsigned nDefaultFlags, class FlagMaskType>
-typename Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag::flag( const char *name )
+template<class T, class FlagType, unsigned nDefaultFlagSet, class FlagMaskType>
+typename Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::Flag Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::flag( const char *name )
 {
 	for( T i = 0; i < g_flagMappings.size(); ++i )
 	{
@@ -59,8 +58,8 @@ typename Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag Gander::F
 	return Flag( g_flagMappings.size() - 1 );
 }
 
-template<class T, class FlagType, unsigned nDefaultFlags, class FlagMaskType>
-typename Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag::findFlag( const char *name )
+template<class T, class FlagType, unsigned nDefaultFlagSet, class FlagMaskType>
+typename Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::Flag Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::findFlag( const char *name )
 {
 	for( T i = 0; i < g_flagMappings.size(); ++i )
 	{
@@ -71,12 +70,4 @@ typename Gander::Flags<T, FlagType, nDefaultFlags, FlagMaskType>::Flag Gander::F
 	}
 	return Flag( 0 );
 }
-
-template<class T, class FlagType, unsigned nDefaultFlags, class FlagMaskType>
-inline T Gander::Flags<T, FlagType, nDefaultFlags,  FlagMaskType>::Flag::index( Flag z )
-{
-	return z.m_value;
-}
-
-*/
 
