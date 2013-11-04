@@ -77,7 +77,7 @@ enum ChannelMask
 	Mask_All   = 0xFFFFFFFF
 };
 
-GANDER_DEFINE_FLAGSET( int32u, ChannelDefault, ChannelMask, Channel, ChannelSet );
+GANDER_DEFINE_FLAGSET( int16u, ChannelDefault, ChannelMask, Channel, ChannelSet );
 
 }; // namespace Image
 

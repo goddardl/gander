@@ -338,15 +338,15 @@ class FlagSet
 		{
 			return last();
 		}
+		i -= 2;
+		for( ; ( ( m_mask >> i ) & T(1) ) == T(0); i-- );
 
-		for( ; ( ( m_mask >> (i-1) ) & T(1) ) == T(0); i-- );
-
-		if( ( m_mask & ( T(1) << ( i - 2 ) ) ) == T(0) )
+		if( ( m_mask & ( T(1) << i ) ) == T(0) )
 		{
 			return static_cast<Flag>( 0 );
 		}
 	
-		return static_cast<Flag>( i-1 );
+		return static_cast<Flag>( i+1 );
 	}
 
 	friend std::ostream & operator << ( std::ostream &out, FlagSet &set )

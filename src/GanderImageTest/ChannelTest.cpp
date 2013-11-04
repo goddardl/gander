@@ -103,15 +103,15 @@ struct ChannelTest
 		rgba &= ChannelSet( Chan_Green );
 		BOOST_CHECK( rgba == Chan_Green );
 
-		ChannelSet gb( Mask_Green | Mask_Blue );
-		ChannelSet b( Mask_Blue );
+		ChannelSet ga( Mask_Green | Mask_Alpha );
+		ChannelSet a( Mask_Alpha );
 		ChannelSet g( Mask_Green );
-		BOOST_CHECK_EQUAL( b + Chan_Green, gb );
-		BOOST_CHECK_EQUAL( b + Mask_Green, gb );
-		BOOST_CHECK_EQUAL( b + g, gb );
-		BOOST_CHECK_EQUAL( gb - Chan_Green, b );
-		BOOST_CHECK_EQUAL( gb - Mask_Green, b );
-		BOOST_CHECK_EQUAL( gb - g, b );
+		BOOST_CHECK_EQUAL( a + Chan_Green, ga );
+		BOOST_CHECK_EQUAL( a + Mask_Green, ga );
+		BOOST_CHECK_EQUAL( a + g, ga );
+		BOOST_CHECK_EQUAL( ga - Chan_Green, a );
+		BOOST_CHECK_EQUAL( ga - Mask_Green, a );
+		BOOST_CHECK_EQUAL( ga - g, a );
 	}
 
 	void testEquality()
@@ -167,19 +167,19 @@ struct ChannelTest
 	
 	void testIterator()
 	{
-		ChannelSet gba( Mask_Alpha | Mask_Green | Mask_Blue );
-		ChannelSet::const_iterator it( gba.begin() );
-		ChannelSet::const_iterator end( gba.end() );
+		ChannelSet gbm( Mask_Mask | Mask_Green | Mask_Blue );
+		ChannelSet::const_iterator it( gbm.begin() );
+		ChannelSet::const_iterator end( gbm.end() );
 		BOOST_CHECK_EQUAL( *it, Chan_Green );		
 		BOOST_CHECK_EQUAL( *it++, Chan_Green );
 		BOOST_CHECK_EQUAL( *it, Chan_Blue );
-		BOOST_CHECK_EQUAL( *(++it), Chan_Alpha );		
+		BOOST_CHECK_EQUAL( *(++it), Chan_Mask );		
 		BOOST_CHECK_EQUAL( *(++it), *end );
 
-		it = gba.end();
-		end = gba.end();
+		it = gbm.end();
+		end = gbm.end();
 		BOOST_CHECK_EQUAL( *it--, Chan_Unused );		
-		BOOST_CHECK_EQUAL( *it, Chan_Alpha );		
+		BOOST_CHECK_EQUAL( *it, Chan_Mask );		
 		BOOST_CHECK_EQUAL( *(--it), Chan_Blue );		
 		BOOST_CHECK_EQUAL( *(it--), Chan_Blue );		
 		BOOST_CHECK_EQUAL( *(it--), Chan_Green );		
