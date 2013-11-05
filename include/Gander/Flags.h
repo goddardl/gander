@@ -38,6 +38,7 @@
 #include <iostream>
 
 #include "Gander/Common.h"
+#include "boost/assert.hpp"
 
 #define GANDER_DEFINE_FLAGSET( DATA_TYPE, FLAG_ENUM, FLAGMASK_ENUM, FLAG_NAME, FLAGSET_NAME )\
 	typedef Gander::FlagSet<DATA_TYPE, FLAG_ENUM, 9, FLAGMASK_ENUM>::Flag FLAG_NAME;\
@@ -70,7 +71,7 @@
 	{\
 		return ( b ? static_cast<FLAGMASK_ENUM>( static_cast<DATA_TYPE>( b ) & FLAGSET_NAME( a ).value() ) : static_cast<FLAGMASK_ENUM>( 0 ) );\
 	}\
-	std::ostream &operator << ( std::ostream &out, const FLAGMASK_ENUM &a )\
+	inline std::ostream &operator << ( std::ostream &out, const FLAGMASK_ENUM &a )\
 	{\
 		FLAGSET_NAME::Flag v;\
 		FLAGSET_NAME set( a );\
@@ -80,7 +81,7 @@
 		}\
 		return out;\
 	}\
-	std::ostream &operator << ( std::ostream &out, const FLAG_ENUM &a )\
+	inline std::ostream &operator << ( std::ostream &out, const FLAG_ENUM &a )\
 	{\
 		out << FLAGSET_NAME::name( a );\
 	}
@@ -229,6 +230,19 @@ class FlagSet
 		}
 		return total;
 	}
+
+	/// Returns the index of a Flag within the FlagSet. 
+	inline int8u index( const Flag &v ) const
+	{
+		BOOST_ASSERT( contains( v ) );
+		T i = static_cast<T>(v);
+		int8u idx = 0;
+		for( ; i > 1; --i )
+		{
+			idx += T(1) & ( m_mask >> (i - 2) );
+		}
+		return idx;
+	}
 	//@}
 
 	//! @name Equality Operators
@@ -334,19 +348,20 @@ class FlagSet
 	Flag previous( Flag v ) const
 	{
 		T i = static_cast<T>(v);
+		
 		if( i == T(0) )
 		{
 			return last();
 		}
-		i -= 2;
-		for( ; ( ( m_mask >> i ) & T(1) ) == T(0); i-- );
 
-		if( ( m_mask & ( T(1) << i ) ) == T(0) )
+		for( ; i >= 2 && ( ( m_mask >> (i-2) ) & T(1) ) == T(0); i-- );
+
+		if( ( m_mask & ( T(1) << ( i - 2 ) ) ) == T(0) )
 		{
 			return static_cast<Flag>( 0 );
 		}
-	
-		return static_cast<Flag>( i+1 );
+		
+		return static_cast<Flag>( i-1 );
 	}
 
 	friend std::ostream & operator << ( std::ostream &out, FlagSet &set )

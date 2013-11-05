@@ -55,14 +55,31 @@ namespace ImageTest
 
 struct PixelTest
 {
-	void testPixel()
+	void testChannelOrder()
 	{
-		try
-		{
-		}
-		catch ( std::exception &e ) 
-		{
-		}
+		// This test checks that the internal channel pointers are kept in the same order
+		// as the Channels in the ChannelSet.
+		int8u i[3] = { 1, 2, 3 };
+		Buffer desc;
+		desc.data = &i[0];
+		desc.width = 1;
+		desc.height = 1;
+
+		Gander::Image::Image image( 1, 1 );
+		image.addChannel( desc, Chan_Blue );
+		BOOST_CHECK_EQUAL( (*(image.channelPtr(0))), 1 );
+		
+		// Insert a red channel which, as it comes before the blue channel in the ChannelSet,
+		// should now be located at index 0.
+		desc.data = &i[1];
+		image.addChannel( desc, Chan_Red );
+		BOOST_CHECK_EQUAL( (*(image.channelPtr(0))), 2 );
+
+		// Insert a green channel which, as it comes before the blue channel but after the red in the ChannelSet,
+		// should now be located at index 1.
+		desc.data = &i[2];
+		image.addChannel( desc, Chan_Green );
+		BOOST_CHECK_EQUAL( (*(image.channelPtr(1))), 3 );
 	}
 };
 
@@ -71,7 +88,7 @@ struct PixelTestSuite : public boost::unit_test::test_suite
 	PixelTestSuite() : boost::unit_test::test_suite( "PixelTestSuite" )
 	{
 		boost::shared_ptr<PixelTest> instance( new PixelTest() );
-		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixel, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelTest::testChannelOrder, instance ) );
 	}
 };
 

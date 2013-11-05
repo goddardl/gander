@@ -208,6 +208,27 @@ struct ChannelTest
 		BOOST_CHECK_EQUAL( *it, Chan_Red );
 	}
 
+	void testIndex()
+	{
+		ChannelSet gbm( Mask_Mask | Mask_Green | Mask_Blue );
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Green ), 0 );
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Blue ), 1 );
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Mask ), 2 );
+		
+		gbm += Chan_Red;	
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Red ), 0 );
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Green ), 1 );
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Blue ), 2 );
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Mask ), 3 );
+		
+		gbm += Chan_Alpha;	
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Red ), 0 );
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Green ), 1 );
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Blue ), 2 );
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Alpha ), 3 );
+		BOOST_CHECK_EQUAL( gbm.index( Chan_Mask ), 4 );
+	}
+
 	void testNewFlags()
 	{
 		Channel red( ChannelSet::flag("red") );
@@ -280,6 +301,7 @@ struct ChannelTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testIterator, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testIoStream, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testNewFlags, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testIndex, instance ) );
 	}
 };
 

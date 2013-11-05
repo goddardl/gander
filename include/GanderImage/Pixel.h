@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "Gander/Common.h"
+#include "GanderImage/Channel.h"
 
 namespace Gander
 {
@@ -50,45 +51,67 @@ and would basically be a tile with a height of 1. By using steps and strides, we
 data layout needs to be kept along with a pointer to the first element. Internally we hold an array of bytes rather than an array of the channel types as it means that if we really wanted, we could
 mix the types of the channels.
 */
-/*
-template< class T >
-class Tile
+
+/// A simple struct for holding the raw data of a channel.
+struct ChannelDescriptor
+{
+	/// Pointer to the channels data cast to an int8u*.
+	int8u *data;
+	/// The size of the step between two consecutive pixels in bytes.
+	size_t step;
+	/// The stride required to step from the end of a row to the
+	/// beginning of the next in bytes.
+	size_t stride;
+};
+
+/// A simple struct for describing an image buffer of a single channel.
+struct Buffer : public ChannelDescriptor
+{
+	/// The width and height of the image. This should correspond with the
+	/// step and stride of the ChannelDescriptor.
+	int32u width, height;
+};
+
+class Image
 {
 	public :
-		typedef T ImageType;
-		typedef typename T::PixelType PixelType;
 
-		Tile( ImageType &image, The tile area ) :
-			m_image( image )
-		{
-		}
+	/// Constructs a new image of a specified width and height.
+	inline Image( int32u width, int32 height ) : m_width( width ), m_height( height ) {}
 
-		template< class S = PixelType >
-		const PixelIterator<S>& operator [] ( int Channel ) const
-		{
-			Return a PixelIterator of the particular Channel type. Set the step of the PixelIterator to match the size in bytes of the channel + the step to the next pixel in the row.
-		}
-		
-		template< class S = PixelType >
-		const PixelIterator<S>& begin() const
-		{
-			Return an iterator to the beginning of the row.
-		}
+	/// Adds a new channel to the image by inserting the data pointer in the same location
+	/// as the Channel is found in the ChannelSet.
+	void addChannel( const Buffer &buffer, Channel channel )
+	{
+		BOOST_ASSERT( !m_channels.contains( channel ) );
+		BOOST_ASSERT( buffer.width == m_width );
+		BOOST_ASSERT( buffer.height == m_height );
 
-		template< class S = PixelType >
-		const PixelIterator<S>& end() const
-		{
-			Return an iterator to the end of the row (that is not a valid address)..
-		}
+		m_channels += channel;
+		int index = m_channels.index( channel );
+		m_channelPtrs.insert( m_channelPtrs.begin()+index, buffer );
+	}
 
+	//! @name Accessors
+	/// Various accessors for setting and querying the contents of the Image.
+	//////////////////////////////////////////////////////////////
+	//@{
+	/// Returns a pointer to the channel at a specified index within the list of data pointers.
+	inline int8u* channelPtr( int index ) const { BOOST_ASSERT( index < m_channelPtrs.size() ); return m_channelPtrs[index].data; };
+	/// Returns a pointer to the specified channel within the list of data pointers.
+	inline int8u* channelPtr( Channel channel ) const { return m_channelPtrs[ m_channels.index( channel ) ].data; };
+	//@}
+	
 	private :
-		
-		ImageType &m_image;
-
+	
+	int32u m_width;
+	int32u m_height;
+	ChannelSet m_channels;
+	std::vector<ChannelDescriptor> m_channelPtrs;
 };
 
 template< class T >
-class PixelIterator
+class iterator : public ChannelDescriptor
 {
 	public :
 		
@@ -109,13 +132,46 @@ class PixelIterator
 			m_ptr( buffer ), m_step( step )
 		{
 		}
-
-		int8u *m_ptr;
-		int m_step;
 };
 
+template< class T >
+class Tile
+{
+	public :
+
+		typedef T ImageType;
+		typedef typename T::PixelType PixelType;
+
+		Tile( ImageType &image, int32 x, int32 y, int32 r, int32 t ) :
+			m_image( image )
+		{
+		}
+
+		template< class S = PixelType >
+		const PixelIterator<S>& operator [] ( ChannelSet channel ) const
+		{
+			// Return a PixelIterator of the particular Channel type.
+			// Set the step of the PixelIterator to match the size in bytes of the channel + the step to the next pixel in the row.
+		}
+		
+		template< class S = PixelType >
+		const PixelIterator<S>& begin() const
+		{
+			// Return an iterator to the beginning of the row.
+		}
+
+		template< class S = PixelType >
+		const PixelIterator<S>& end() const
+		{
+			// Return an iterator to the end of the row (that is not a valid address)..
+		}
+
+	private :
+		
+		ImageType &m_image;
+
 };
-*/
+
 }; // namespace Image
 
 }; // namespace Gander
