@@ -33,39 +33,72 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <cstdlib>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include "Gander/Math.h"
 
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
 #include "GanderTest/RectifyTest.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+#include "Eigen/Geometry"
+
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
 
 using namespace GanderTest;
-using namespace Gander;
+using namespace boost;
+using namespace boost::unit_test;
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+Eigen::Vector3d opticalCenter( const Eigen::MatrixXd &pose )
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
-
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addRectifyTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
-
-	return test;
+	Eigen::MatrixXd d = pose.block( 0, 0, 3, 3 );
+	return - d.inverse() * pose.col(3);
 }
+
+namespace GanderTest
+{
+
+struct RectifyTest
+{
+	void testRectify()
+	{
+		Eigen::MatrixXd pose1( 3, 4 );
+		pose1 << 9.765e2, 5.382e1, -2.398e2, 3.875e5,
+		9.849e1, 9.333e2, 1.574e2, 2.428e5,
+		5.790e-1, 1.108e-1, 8.077e-1, 1.118e3;
+
+		Eigen::MatrixXd pose2( 3, 4 );
+		pose2 << 9.767e2, 5.376e1, -2.400e2, 4.003e4,
+		9.868e1, 9.310e2, 1.567e2, 2.517e5,
+		5.766e-1, 1.141e-1, 8.089e-1, 1.174e3;
+
+		// Compute the optical centers.
+		Eigen::Vector3d c1, c2;
+		c1 = opticalCenter( pose1 );
+		c2 = opticalCenter( pose2 );
+
+		// Create a new X axis which is the same as the direction
+		// of the baseline.
+		Eigen::Vector3d v1 = c1 - c2;
+		// New Y axis which is orthogonal to the new x and old z.
+		Eigen::Vector3d v2 = R1.
+		// New Z axis which is orthogonal to the baseline and Y.
+		Eigen::Vector3d v3 = v1.cross( v2 );
+	}
+};
+
+struct RectifyTestSuite : public boost::unit_test::test_suite
+{
+	RectifyTestSuite() : boost::unit_test::test_suite( "RectifyTestSuite" )
+	{
+		boost::shared_ptr<RectifyTest> instance( new RectifyTest() );
+		add( BOOST_CLASS_TEST_CASE( &RectifyTest::testRectify, instance ) );
+	}
+};
+
+void addRectifyTest( boost::unit_test::test_suite *test )
+{
+	test->add( new RectifyTestSuite( ) );
+}
+
+} // namespace GanderTest
+
