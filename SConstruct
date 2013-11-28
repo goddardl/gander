@@ -366,10 +366,18 @@ tests = {
 	"GanderTest" : {
 		"envAppends" : {
 			"CPPFLAGS" : [
-				#"-DBOOST_TEST_DYN_LINK=1",
 			],
 			"LIBS" : [
 				"Gander",
+				"boost_test_exec_monitor" + boostLibSuffix
+			],
+		},
+	},
+	"EigenTest" : {
+		"envAppends" : {
+			"CPPFLAGS" : [
+			],
+			"LIBS" : [
 				"boost_test_exec_monitor" + boostLibSuffix
 			],
 		},
