@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,44 +31,20 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+#ifndef __GANDERTEST_DECOMPOSERQ3x3TEST_H__
+#define __GANDERTEST_DECOMPOSERQ3x3TEST_H__
 
-#include <iostream>
+#include <vector>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include "unsupported/Eigen/NonLinearOptimization"
+#include "Gander/ErrorFunctions.h"
+#include "boost/test/unit_test.hpp"
 
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/AngleConversionTest.h"
-#include "GanderTest/DecomposeRQ3x3Test.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace GanderTest;
-using namespace Gander;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace GanderTest
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-		addAngleConversionTest(test);
-		addDecomposeRQ3x3Test(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+void addDecomposeRQ3x3Test( boost::unit_test::test_suite *test );
 
-	return test;
-}
+}; // namespace GanderTest
+
+#endif // __GANDERTEST_DECOMPOSERQ3x3TEST_H__

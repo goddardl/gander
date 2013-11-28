@@ -31,44 +31,25 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+#ifndef __GANDER_DECOMPOSERQ3x3_H__
+#define __GANDER_DECOMPOSERQ3x3_H__
 
-#include <iostream>
+#include <vector>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include "Gander/Math.h"
 
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/AngleConversionTest.h"
-#include "GanderTest/DecomposeRQ3x3Test.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace GanderTest;
-using namespace Gander;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-		addAngleConversionTest(test);
-		addDecomposeRQ3x3Test(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+/// Performs RQ factorisation on a 3x3 matrix using Givens rotations.
+/// @param M The matrix to decompose.
+/// @param R The returned lower Triangular matrix.
+/// @param Q The returned orthogonal matrix.
+/// @param Qx The X Givens rotation.
+/// @param Qx The Y Givens rotation.
+/// @param Qx The Z Givens rotation.
+void givensDecomposeRQ3x3( const Eigen::Matrix3d &M, Eigen::Matrix3d &R, Eigen::Matrix3d &Q, Eigen::Matrix3d &Qx, Eigen::Matrix3d &Qy, Eigen::Matrix3d &Qz );
 
-	return test;
-}
+}; // namespace Gander
+
+#endif
