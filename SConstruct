@@ -143,6 +143,7 @@ options.Add(
 	"",
 )
 
+# Eigen
 options.Add(
 	BoolVariable( "BUILD_DEPENDENCY_EIGEN", "Set this to build eigen.", "$BUILD_DEPENDENCIES" )
 )
@@ -153,6 +154,7 @@ options.Add(
 	"$DEPENDENCIES_SRC_DIR/eigen-3.1.4",
 )
 
+# Boost
 options.Add(
 	BoolVariable( "BUILD_DEPENDENCY_BOOST", "Set this to build boost.", "$BUILD_DEPENDENCIES" )
 )
@@ -161,6 +163,17 @@ options.Add(
 	"BOOST_SRC_DIR",
 	"The location of the boost source to be used if BUILD_DEPENDENCY_BOOST is specified.",
 	"$DEPENDENCIES_SRC_DIR/boost_1_53_0",
+)
+
+# OIIO
+options.Add(
+	BoolVariable( "BUILD_DEPENDENCY_OIIO", "Set this to build OIIO.", "$BUILD_DEPENDENCIES" )
+)
+
+options.Add(
+	"OIIO_SRC_DIR",
+	"The location of the OIIO source to be used if BUILD_DEPENDENCY_OIIO is specified.",
+	"$DEPENDENCIES_SRC_DIR/oiio-Release-1.2.1",
 )
 
 # variables to be used when making a build which will use dependencies previously
@@ -189,9 +202,16 @@ options.Add(
 	"",
 )
 
+# Library Suffix
 options.Add(
 	"BOOST_LIB_SUFFIX",
 	"The suffix used when locating the boost libraries.",
+	"",
+)
+
+options.Add(
+	"OIIO_LIB_SUFFIX",
+	"The suffix used when locating the OpenImageIO libraries.",
 	"",
 )
 
@@ -287,6 +307,13 @@ if depEnv["BUILD_DEPENDENCY_BOOST"] :
 
 if depEnv["BUILD_DEPENDENCY_EIGEN"] :
 	runCommand( "mkdir -p $BUILD_DIR/Eigen && cp -R $EIGEN_SRC_DIR/Eigen $BUILD_DIR/Eigen/ && cp -R $EIGEN_SRC_DIR/unsupported $BUILD_DIR/Eigen/" )
+
+if depEnv["BUILD_DEPENDENCY_OIIO"] :
+	runCommand( "cd $OIIO_SRC_DIR && make clean && make THIRD_PARTY_TOOLS_HOME=$BUILD_DIR OCIO_PATH=$BUILD_DIR USE_OPENJPEG=0" )
+	if depEnv["PLATFORM"]=="darwin" :
+		runCommand( "cd $OIIO_SRC_DIR && cp -r dist/macosx/* $BUILD_DIR" )
+	else :
+		runCommand( "cd $OIIO_SRC_DIR && cp -r dist/linux64/* $BUILD_DIR" )
 
 ###############################################################################################
 # The basic environment for building libraries
@@ -480,9 +507,13 @@ for testModule, testDef in tests.items() :
 
 if buildingDependencies :
 
-	for l in [
+	licenses = [
 		( "boost", "$BOOST_SRC_DIR/LICENSE_1_0.txt" ),
-	] :
+		( "ilmbase", "$ILMBASE_SRC_DIR/COPYING" ),
+		( "openImageIO", "$OIIO_SRC_DIR/LICENSE" ),
+	]
+
+	for l in licenses :
 		license = env.InstallAs( "$BUILD_DIR/doc/licenses/" + l[0], l[1] )
 		env.Alias( "build", license )
 
@@ -490,9 +521,7 @@ if buildingDependencies :
 # Installation
 #########################################################################################################
 
-manifest = [
-	"bin/Gander",
-	"LICENSE",
+dependenciesManifest = [
 	"lib/libboost_thread" + boostLibSuffix + "$SHLIBSUFFIX*",
 	"lib/libboost_chrono" + boostLibSuffix + "$SHLIBSUFFIX*",
 	"lib/libboost_wave" + boostLibSuffix + "$SHLIBSUFFIX*",
@@ -502,10 +531,21 @@ manifest = [
 	"lib/libboost_filesystem" + boostLibSuffix + "$SHLIBSUFFIX*",
 	"lib/libboost_iostreams" + boostLibSuffix + "$SHLIBSUFFIX*",
 	"lib/libboost_system" + boostLibSuffix + "$SHLIBSUFFIX*",
+	"lib/libOpenImageIO*$SHLIBSUFFIX*",
+	"lib/libIex*$SHLIBSUFFIX*",
+	"lib/libHalf*$SHLIBSUFFIX*",
+	"lib/libImath*$SHLIBSUFFIX*",
+	"lib/libIlmImf*$SHLIBSUFFIX*",
+	"lib/libIlmThread*$SHLIBSUFFIX*",
+	"include/boost",
+]
+
+manifest = dependenciesManifest + [
+	"bin/Gander",
+	"LICENSE",
 	"lib/libGander*$SHLIBSUFFIX",
 	"lib/libGander*",
 	"include/Gander*",
-	"include/boost",
 ]
 
 def installer( target, source, env ) :

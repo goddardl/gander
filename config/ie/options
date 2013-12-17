@@ -54,6 +54,7 @@ compiler = getOption( "COMPILER", None )
 compilerVersion = getOption( "COMPILER_VERSION", None )
 targetApp = getOption( "APP", None )
 targetAppVersion = None
+oiioVersion = "1.1.10"
 
 targetApp = "gander"
 targetAppReg = cortexReg
@@ -88,6 +89,7 @@ if targetAppVersion :
 ##########################################################################
 
 LOCATE_DEPENDENCY_SYSTEMPATH = [
+	os.path.join( IEEnv.Environment.rootPath(), "apps", "OpenImageIO", oiioVersion, IEEnv.platform(), compiler, compilerVersion, "include" ),
 	os.path.join( IEEnv.Environment.rootPath(), "tools", "include", IEEnv.platform(), "boost", targetAppReg.get( "boostVersion", cortexReg["boostVersion"] ) ),
 ]
 
@@ -116,10 +118,8 @@ if getOption( "RELEASE", "0" )=="0" :
 ##########################################################################
 
 LOCATE_DEPENDENCY_LIBPATH = [
-
 	os.path.join( IEEnv.Environment.rootPath(), "tools", "lib", IEEnv.platform(), compiler, compilerVersion ),
 	os.path.join( IEEnv.Environment.rootPath(), "apps", "cortex", cortexMajorVersion, IEEnv.platform(), "base", "lib", compiler, compilerVersion ),
-
 ]
 
 if targetAppVersion :
@@ -160,6 +160,8 @@ boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
 boostVersionSuffix = "-mt-" + boostVersion.replace( ".", "_" )
 while boostVersionSuffix.endswith( "_0" ) :
 	boostVersionSuffix = boostVersionSuffix[:-2]
+
+OIIO_LIB_SUFFIX = "-%s" % oiioVersion
 
 BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
 
