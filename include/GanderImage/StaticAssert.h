@@ -61,6 +61,10 @@ struct static_assertion<true>
 		// For example, by using defining ChannelLayout< X, Chan_Red > and BrotherLayout< X, Brothers_RGB >
 		// as they both represent the red channel.
 		TEMPLATE_ARGUMENTS_TO_IMAGELAYOUT_MUST_ALL_REPRESENT_UNIQUE_CHANNELS,
+		// The layout class does not contain the requested channel.
+		CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT,
+		// The derived class has not implemented a function that is required by the base class.
+		DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS = -1,
 	};
 };
 

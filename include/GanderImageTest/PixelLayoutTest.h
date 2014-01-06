@@ -31,30 +31,23 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERIMAGE_OP__
-#define __GANDERIMAGE_OP__
+#ifndef __GANDERTEST_PIXELLAYOUTTEST_H__
+#define __GANDERTEST_PIXELLAYOUTTEST_H__
 
-#include <iostream>
+#include <vector>
 
-#include "Gander/Common.h"
-
-#include "GanderImage/Channel.h"
-#include "GanderImage/ChannelBrothers.h"
+#include "boost/test/unit_test.hpp"
 
 namespace Gander
 {
 
-namespace Image
+namespace ImageTest
 {
 
-class Op
-{
-	public :
-	
-};
+void addPixelLayoutTest( boost::unit_test::test_suite *test );
 
-}; // namespace Image
+}; // namespace ImageTest
 
 }; // namespace Gander
 
-#endif
+#endif // __GANDERTEST_PIXELLAYOUTTEST_H__

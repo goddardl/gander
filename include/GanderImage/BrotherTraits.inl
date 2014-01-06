@@ -40,6 +40,9 @@ enum\
 {\
 	BrotherOfLowestValueMask = ( 1 << ( BrotherOfLowestValue - 1 ) ),\
 	FirstBrotherInBrothers = ( BrotherOfLowestValue ) + ( BrotherOrder1 == 0 ? 0 : BrotherOrder2 == 0 ? 1 : BrotherOrder3 == 0 ? 2 : BrotherOrder4 == 0 ? 3 : 0 ),\
+	SecondBrotherInBrothers = ( BrotherOfLowestValue ) + ( BrotherOrder1 == 1 ? 0 : BrotherOrder2 == 1 ? 1 : BrotherOrder3 == 1 ? 2 : BrotherOrder4 == 1 ? 3 : 0 ),\
+	ThirdBrotherInBrothers = ( BrotherOfLowestValue ) + ( BrotherOrder1 == 2 ? 0 : BrotherOrder2 == 2 ? 1 : BrotherOrder3 == 2 ? 2 : BrotherOrder4 == 2 ? 3 : 0 ),\
+	FourthBrotherInBrothers = ( BrotherOfLowestValue ) + ( BrotherOrder1 == 3 ? 0 : BrotherOrder2 == 3 ? 1 : BrotherOrder3 == 3 ? 2 : BrotherOrder4 == 3 ? 3 : 0 ),\
 	FirstBrotherInBrothersMask = ( 1 << ( FirstBrotherInBrothers - 1 ) ),\
 	BrothersMask =\
 		( ( 1 << BrotherOrder1 ) |\

@@ -31,26 +31,56 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERIMAGE_OP__
-#define __GANDERIMAGE_OP__
+#ifndef __GANDERIMAGE_CHANNELLAYOUT__
+#define __GANDERIMAGE_CHANNELLAYOUT__
 
+#include <type_traits>
 #include <iostream>
+#include <stdexcept>
+
+#include "boost/format.hpp"
 
 #include "Gander/Common.h"
 
+#include "Gander/StaticAssert.h"
+#include "GanderImage/StaticAssert.h"
+#include "GanderImage/Layout.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
 namespace Gander
 {
 
+/// Forward declaration of the test class. 
+namespace ImageTest { class ChannelLayoutTest; };
+
 namespace Image
 {
 
-class Op
+template< class T, ChannelDefault S >
+struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 {
-	public :
-	
+	typedef T StorageType;
+	enum
+	{
+		NumberOfChannels = 1,
+		ChannelMask = ChannelToMask<S>::Value,
+		ChannelBrothers = Brothers_None,
+	};
+
+	private :
+		
+		friend class Layout< ChannelLayout< T, S > >;	
+
+		inline ChannelSet _channels() const
+		{
+			return ChannelSet( static_cast<Gander::Image::ChannelMask>( ChannelLayout<T,S>::ChannelMask ) );
+		}
+		
+		inline unsigned int _numberOfChannels() const
+		{
+			return static_cast<unsigned int>( NumberOfChannels );
+		}
 };
 
 }; // namespace Image

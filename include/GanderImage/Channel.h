@@ -45,6 +45,12 @@ namespace Gander
 namespace Image
 {
 
+enum
+{
+	/// An enum that is used to indicate that the number of channels that the format requires is decided at runtime.
+	DYNAMIC_NUMBER_OF_CHANNELS = 99999
+};
+
 /// A class that defines some useful characteristics of the Channel enums.
 /// It is required that this struct is updated when new hard-coded defaults are added to the list of channel enums.
 /// The reason for this is that we create several look-up tables of channel numbers to indices for use in the

@@ -31,13 +31,20 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERIMAGE_OP__
-#define __GANDERIMAGE_OP__
+#ifndef __GANDERIMAGE_DYNAMICLAYOUT__
+#define __GANDERIMAGE_DYNAMICLAYOUT__
 
+#include <type_traits>
 #include <iostream>
+#include <stdexcept>
+
+#include "boost/format.hpp"
 
 #include "Gander/Common.h"
 
+#include "Gander/StaticAssert.h"
+#include "GanderImage/StaticAssert.h"
+#include "GanderImage/Layout.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
@@ -47,10 +54,40 @@ namespace Gander
 namespace Image
 {
 
-class Op
+template< class T >
+struct DynamicLayout
 {
-	public :
+	typedef T StorageType;
+	enum
+	{
+		NumberOfChannels = DYNAMIC_NUMBER_OF_CHANNELS,
+		ChannelMask = Mask_None,
+		ChannelBrothers = Brothers_None,
+	};
 	
+	template< ChannelDefault C >
+	struct ChannelTraits
+	{
+		typedef DynamicLayout<T> LayoutType;
+		typedef typename LayoutType::StorageType StorageType;
+		enum{ ChannelBrothers = LayoutType::ChannelBrothers, };
+	};
+	
+	private :
+		
+		friend class Layout< DynamicLayout< T > >;	
+
+		inline ChannelSet _channels() const
+		{
+			throw std::runtime_error("Not implemented yet.");
+			return ChannelSet();
+		}
+		
+		inline unsigned int _numberOfChannels() const
+		{
+			throw std::runtime_error("Not implemented yet.");
+			return 0;
+		}
 };
 
 }; // namespace Image

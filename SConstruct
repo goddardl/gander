@@ -71,7 +71,7 @@ options.Add(
 options.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-fPIC", "-pipe", "-Wall", "-Werror", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-funroll-loops" ]
+	[ "-fPIC", "-pipe", "-Wall", "-Werror", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-funroll-loops", "-std=gnu++0x" ]
 )
 
 options.Add(

@@ -31,29 +31,35 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERIMAGE_OP__
-#define __GANDERIMAGE_OP__
-
-#include <iostream>
+#ifndef __GANDER_STATICASSERT_H__
+#define __GANDER_STATICASSERT_H__
 
 #include "Gander/Common.h"
-
-#include "GanderImage/Channel.h"
-#include "GanderImage/ChannelBrothers.h"
 
 namespace Gander
 {
 
-namespace Image
+namespace Detail
 {
 
-class Op
+template<bool condition>
+struct static_assertion {};
+
+template<>
+struct static_assertion<true>
 {
-	public :
-	
+	enum
+	{
+		// The derived class has not implemented a function that is required by the base class.
+		DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS = -1,
+	};
 };
 
-}; // namespace Image
+}; // namespace Detail
+
+// Prints a compile time error when the code is compiled. This can be used to ensure that a template method is never compiled.
+#define GANDER_STATIC_ASSERT_ERROR(MSG) \
+	const int MSG; MSG = 1;
 
 }; // namespace Gander
 

@@ -1,3 +1,51 @@
+1) Complete the interface of the PixelLayout class to match the other layouts. This may require adding a LayoutTraits method to all the other layouts too.
+
+Finish the implementation of the PixelLayout and add the test cases for it. It should have the same interface as the other Layout clases.
+
+Move the tuple code into it's own file.
+
+Add test cases for the tuple code and create the tuple specialization that allows a single int to be used for RGB.
+
+Create the DynamicLayout class and the test cases for it.
+
+Extend the pixelLayout class so that it only accepts a DynamicLayout as the first template argument. Write test cases for it.
+
+Write the PixelBase class. It should accept a Layout class as the only template parameter. It should recursively derive from itself and create a member.
+E.G
+template< class Layout > class PixelBase : PixelBaseRecurse< Layout, Layout::NumberOfLayouts>
+{
+   PixelBase()
+    {
+        We should assert that there are no dynamic channels here. If there are then the other constructor needs to be used.
+    }
+    PixelBase( Layout L ) : m_layout( L )
+    {
+    }
+
+    private:
+       Layout m_layout;
+}
+template< class Layout, unsigned Index > class PixelBaseRecurse : PixelBaseRecurse< Layout, Index - 1>
+{
+	    Tuple< typename LayoutTraits<Index>::StorageType, LayoutTraits<Index>::NumberOfChannels >
+}
+
+Add ChannelTraits methods to the PixelBase.
+
+Add methods for accessing the values of the channel data using either an index by the channel index or the ChannelDefault.
+
+Add methods for adding channels. If the Layout is not dynamic, then assert a Static assertion.
+
+Typedef the PixelBase with tuples that hold values and not pointers as a Pixel.
+
+Derive from PixelBase to create the PixelAccessor. This class should add increment and decrement methods along with the methods required to set the pointers (requiredChannels and setChannelPointer) .
+
+
+
+
+
+
+
 2)
 Change the RunTimeChannelFormat class to hold a value for ChanIndexToStep, ChanIndexToOffset and ChanIndexToPtrIndex. These types should be of size EnumType.
 These values can then be used in the pointerIndex( index ), step( index ) and pointerOffset( index ) methods in the same way that the ChannelFormat currently does.
