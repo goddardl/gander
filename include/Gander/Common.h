@@ -34,6 +34,10 @@
 #ifndef __GANDER_TYPES_H__
 #define __GANDER_TYPES_H__
 
+/// A macro for concatenating two tokens. 
+#define CAT_(a, b) a ## b
+#define CAT(a, b) CAT_(a, b)
+
 /// We create several defines for the basic types. This allows use to configure the types using 
 /// the compiler's command line.
 #ifndef GANDER_INT8
