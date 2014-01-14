@@ -90,10 +90,6 @@ struct ChannelLayoutTest
 		typedef ChannelLayout<int, Chan_Z> Layout2;
 		typedef ChannelLayout<short, Chan_Red> Layout3;
 
-		BOOST_CHECK_EQUAL( Layout1::ChannelTraits<Chan_Alpha>::ChannelBrothers, Brothers_None );
-		BOOST_CHECK_EQUAL( Layout2::ChannelTraits<Chan_Z>::ChannelBrothers, Brothers_None );
-		BOOST_CHECK_EQUAL( Layout3::ChannelTraits<Chan_Red>::ChannelBrothers, Brothers_None );
-
 		BOOST_CHECK( int( std::is_same< Layout1::ChannelTraits<Chan_Alpha>::LayoutType, Layout1 >::value ) );
 		BOOST_CHECK( int( std::is_same< Layout2::ChannelTraits<Chan_Z>::LayoutType, Layout2 >::value ) );
 		BOOST_CHECK( int( std::is_same< Layout3::ChannelTraits<Chan_Red>::LayoutType, Layout3 >::value ) );
@@ -116,10 +112,6 @@ struct ChannelLayoutTest
 		BOOST_CHECK_EQUAL( int(Layout1::ChannelMask), int( Mask_Alpha ) );
 		BOOST_CHECK_EQUAL( int(Layout2::ChannelMask), int( Mask_Z ) );
 		BOOST_CHECK_EQUAL( int(Layout3::ChannelMask), int( Mask_Red ) );
-
-		BOOST_CHECK_EQUAL( int(Layout1::ChannelBrothers), int( Brothers_None ) );
-		BOOST_CHECK_EQUAL( int(Layout2::ChannelBrothers), int( Brothers_None ) );
-		BOOST_CHECK_EQUAL( int(Layout3::ChannelBrothers), int( Brothers_None ) );
 	}
 };
 

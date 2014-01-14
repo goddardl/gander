@@ -65,7 +65,6 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 	{
 		NumberOfChannels = 1,
 		ChannelMask = ChannelToMask<S>::Value,
-		ChannelBrothers = Brothers_None,
 	};
 
 	private :

@@ -56,7 +56,7 @@ namespace Image
 {
 
 /// An empty struct for use as a default template argument to the PixelLayout class.
-namespace Detail { struct None { struct LayoutTraits { }; }; };
+namespace Detail { struct None { struct LayoutTraits { }; enum { ChannelMask = 0 }; }; };
 
 /// Forward declaration of the PixelLayout class.
 template<
@@ -192,11 +192,6 @@ struct PixelLayoutRecurse< Derived, None, None, None, None, None, None, None, No
 		{
 			typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::StorageType StorageType;
 			typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::LayoutType LayoutType;
-
-			enum
-			{
-				ChannelBrothers = LayoutType::ChannelBrothers,
-			};
 		};
 };
 
@@ -217,7 +212,7 @@ struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, T1, T2, T3, T4, 
 		// Assert that the template arguments have been supplied with the Pixels representing channels ordered
 		// from left to right in order of the channels of the lowest value first.
 		GANDER_IMAGE_STATIC_ASSERT(
-			( EnumType( T0::ChannelMask ) < BaseType::ChannelMask ) | ( BaseType::ChannelMask == 0 ),
+			( ( EnumType( T0::ChannelMask ) < EnumType( T1::ChannelMask ) ) || ( std::is_same< T1, Detail::None >::value == true ) ),
 			TEMPLATE_ARGUMENTS_TO_IMAGELAYOUT_MUST_BE_SUPPLIED_IN_ORDER_OF_CHANNEL_VALUE
 		);
 
@@ -235,6 +230,7 @@ struct PixelLayout : public Detail::PixelLayoutRecurse< PixelLayout< T0, T1, T2,
 	typedef T0 Type0;	typedef T1 Type1;	typedef T2 Type2;	typedef T3 Type3;
 	typedef T4 Type4;	typedef T5 Type5;	typedef T6 Type6;	typedef T7 Type7;
 	typedef Detail::PixelLayoutRecurse< PixelLayout< T0, T1, T2, T3, T4, T5, T6, T7 >, T0, T1, T2, T3, T4, T5, T6, T7 > BaseType;
+	typedef PixelLayout< T0, T1, T2, T3, T4, T6, T7 > Derived;
 		
 	enum
 	{
@@ -242,6 +238,62 @@ struct PixelLayout : public Detail::PixelLayoutRecurse< PixelLayout< T0, T1, T2,
 		NumberOfChannels = BaseType::NumberOfChannels,
 		ChannelMask = BaseType::ChannelMask,
 	};
+	
+	private :
+		
+		friend class Layout< Derived >;	
+
+		inline ChannelSet _channels() const
+		{
+			return ChannelSet( static_cast<Gander::Image::ChannelMask>( Derived::ChannelMask ) );
+		}
+		
+		inline unsigned int _numberOfChannels() const
+		{
+			return static_cast<unsigned int>( NumberOfChannels );
+		}
+};
+
+template< class L, unsigned N >
+struct PixelBaseRecurse;
+
+template< class L >
+struct PixelBaseRecurse< L, 0 >
+{
+};
+
+template< class L, unsigned N >
+struct PixelBaseRecurse : public PixelBaseRecurse< L, N - 1 >
+{
+	typedef PixelBaseRecurse< L, N - 1  > BaseType;
+};
+
+template< class L >
+class PixelBase : public PixelBaseRecurse< L, L::NumberOfLayouts >
+{
+	typedef PixelBaseRecurse< L, L::NumberOfLayouts + 1  > BaseType;
+	
+	public :
+		
+		/// The default constructor.
+		/// The default constructor can be used for all layouts which aren't dynamic.
+		/// For dynamic layouts, please use the other constructor.
+		PixelBase()
+		{
+			GANDER_IMAGE_STATIC_ASSERT( !L::IS_DYNAMIC, CLASS_CONTAINS_A_DYNAMIC_LAYOUT_PLEASE_USE_THE_CONSTRUCTOR_THAT_INITIALIZES_IT );
+		}
+		/// The dynamic constructor.
+		/// A basic constructor that just initializes the internal instance of the layout to the parameter that is passed to it.
+		/// This constructor must be used when using a dynamic layout to ensure that the layout is initialized correctly.
+		PixelBase( const L &layout ) :
+			m_layout( layout )
+		{
+		}
+
+	private :
+
+		L m_layout;
+
 };
 
 }; // namespace Image

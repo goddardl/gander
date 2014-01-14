@@ -63,8 +63,8 @@ struct static_assertion<true>
 		TEMPLATE_ARGUMENTS_TO_IMAGELAYOUT_MUST_ALL_REPRESENT_UNIQUE_CHANNELS,
 		// The layout class does not contain the requested channel.
 		CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT,
-		// The derived class has not implemented a function that is required by the base class.
-		DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS = -1,
+		// The Pixel class uses a dynamic layout and therefore the default constructor cannot be used.
+		CLASS_CONTAINS_A_DYNAMIC_LAYOUT_PLEASE_USE_THE_CONSTRUCTOR_THAT_INITIALIZES_IT,
 	};
 };
 

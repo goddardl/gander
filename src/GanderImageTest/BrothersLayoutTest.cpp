@@ -90,18 +90,6 @@ struct BrothersLayoutTest
 		typedef BrothersLayout<int, Brothers_RGBA> Layout2;
 		typedef BrothersLayout<short, Brothers_VU> Layout3;
 
-		BOOST_CHECK_EQUAL( Layout1::ChannelTraits<Chan_Blue>::ChannelBrothers, Brothers_BGR );
-		BOOST_CHECK_EQUAL( Layout1::ChannelTraits<Chan_Green>::ChannelBrothers, Brothers_BGR );
-		BOOST_CHECK_EQUAL( Layout1::ChannelTraits<Chan_Red>::ChannelBrothers, Brothers_BGR );
-		
-		BOOST_CHECK_EQUAL( Layout2::ChannelTraits<Chan_Red>::ChannelBrothers, Brothers_RGBA );
-		BOOST_CHECK_EQUAL( Layout2::ChannelTraits<Chan_Green>::ChannelBrothers, Brothers_RGBA );
-		BOOST_CHECK_EQUAL( Layout2::ChannelTraits<Chan_Blue>::ChannelBrothers, Brothers_RGBA );
-		BOOST_CHECK_EQUAL( Layout2::ChannelTraits<Chan_Alpha>::ChannelBrothers, Brothers_RGBA );
-		
-		BOOST_CHECK_EQUAL( Layout3::ChannelTraits<Chan_U>::ChannelBrothers, Brothers_VU );
-		BOOST_CHECK_EQUAL( Layout3::ChannelTraits<Chan_V>::ChannelBrothers, Brothers_VU );
-
 		BOOST_CHECK( int( std::is_same< Layout1::ChannelTraits<Chan_Red>::LayoutType, Layout1 >::value ) );
 		BOOST_CHECK( int( std::is_same< Layout1::ChannelTraits<Chan_Green>::LayoutType, Layout1 >::value ) );
 		BOOST_CHECK( int( std::is_same< Layout1::ChannelTraits<Chan_Blue>::LayoutType, Layout1 >::value ) );
@@ -140,10 +128,6 @@ struct BrothersLayoutTest
 		BOOST_CHECK_EQUAL( int(Layout1::ChannelMask), int( Mask_RGB ) );
 		BOOST_CHECK_EQUAL( int(Layout2::ChannelMask), int( Mask_RGBA ) );
 		BOOST_CHECK_EQUAL( int(Layout3::ChannelMask), int( Mask_UV ) );
-
-		BOOST_CHECK_EQUAL( int(Layout1::ChannelBrothers), int( Brothers_BGR ) );
-		BOOST_CHECK_EQUAL( int(Layout2::ChannelBrothers), int( Brothers_RGBA ) );
-		BOOST_CHECK_EQUAL( int(Layout3::ChannelBrothers), int( Brothers_VU ) );
 	}
 };
 

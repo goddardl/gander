@@ -62,7 +62,6 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 	{
 		NumberOfChannels = BrotherTraits<B>::NumberOfBrothers,
 		ChannelMask = BrotherTraits<B>::BrothersMask,
-		ChannelBrothers = B,
 	};
 	
 	private :

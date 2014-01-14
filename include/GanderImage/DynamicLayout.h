@@ -58,24 +58,22 @@ template< class T >
 struct DynamicLayout
 {
 	typedef T StorageType;
+
 	enum
 	{
 		NumberOfChannels = DYNAMIC_NUMBER_OF_CHANNELS,
-		ChannelMask = Mask_None,
-		ChannelBrothers = Brothers_None,
-	};
-	
-	template< ChannelDefault C >
-	struct ChannelTraits
-	{
-		typedef DynamicLayout<T> LayoutType;
-		typedef typename LayoutType::StorageType StorageType;
-		enum{ ChannelBrothers = LayoutType::ChannelBrothers, };
+		ChannelMask = DYNAMIC_CHANNEL_MASK,
 	};
 	
 	private :
 		
-		friend class Layout< DynamicLayout< T > >;	
+		friend class Layout< DynamicLayout< T > >;
+		template< class, class > friend class PixelBase;
+	
+		enum
+		{
+			IS_DYNAMIC = true,
+		};
 
 		inline ChannelSet _channels() const
 		{

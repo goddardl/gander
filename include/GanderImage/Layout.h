@@ -50,9 +50,6 @@
 namespace Gander
 {
 
-/// Forward declaration of the test class. 
-namespace ImageTest { class ChannelLayoutTest; };
-
 namespace Image
 {
 
@@ -67,6 +64,12 @@ struct Layout
 	
 	public :
 	
+		enum
+		{
+			NumberOfLayouts = 1,
+			IS_DYNAMIC = false,
+		};
+
 		inline ChannelSet channels() const
 		{
 			return static_cast< Derived const * >( this )->_channels();

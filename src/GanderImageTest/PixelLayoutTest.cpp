@@ -35,6 +35,7 @@
 #include <cstdlib>
 
 #include "GanderImage/PixelLayout.h"
+#include "GanderImage/DynamicLayout.h"
 #include "GanderImage/ChannelLayout.h"
 #include "GanderImage/BrothersLayout.h"
 #include "GanderImageTest/PixelLayoutTest.h"
@@ -55,7 +56,6 @@ template< EnumType ID, ChannelDefault S > struct TestLayout
 	{
 		NumberOfChannels = 1,
 		ChannelMask = ChannelToMask<S>::Value,
-		ChannelBrothers = Brothers_None,
 		Id = ID,
 	};
 		
@@ -64,7 +64,6 @@ template< EnumType ID, ChannelDefault S > struct TestLayout
 	{
 		typedef TestLayout< ID, S > LayoutType;
 		typedef typename LayoutType::StorageType StorageType;
-		enum{ ChannelBrothers = LayoutType::ChannelBrothers };
 	};
 };
 
@@ -90,11 +89,6 @@ struct PixelLayoutTest
 		BOOST_CHECK_EQUAL( int(Layout::LayoutTraits<1>::LayoutType::Id), 1 );
 		BOOST_CHECK_EQUAL( int(Layout::LayoutTraits<2>::LayoutType::Id), 2 );
 		BOOST_CHECK_EQUAL( int(Layout::LayoutTraits<3>::LayoutType::Id), 3 );
-
-// ***************************************************************************
-//\TODO: Find out why this doens't cause a static error.
-// typedef PixelLayout< Storage1, Storage0, Storage2, Storage3 > ErrorLayout;
-
 	};
 	
 	void testChannelTraits()
