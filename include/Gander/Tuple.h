@@ -84,6 +84,11 @@ struct Tuple< T, NumberOfElements, false >
 		{
 			return m_data+NumberOfElements;
 		};
+		
+		inline void clear()
+		{
+			memset( &m_data[0], 0, sizeof( StorageType ) * NumberOfElements );
+		}
 
 		inline unsigned int size() const { return NumberOfElements; };
 
@@ -133,6 +138,11 @@ struct Tuple< T, NumberOfElements, true >
 		{
 			return m_data.size();
 		};
+		
+		inline void clear()
+		{
+			m_data.resize( size(), 0 );
+		}
 
 		inline const_iterator begin() const
 		{

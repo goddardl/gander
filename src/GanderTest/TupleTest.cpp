@@ -48,7 +48,38 @@ using namespace boost::unit_test;
 template< class T, unsigned N >
 void staticTupleTest()
 {
+	T values[N];
+	memset( values, 0, sizeof( T ) * N ); // Clear the array to 0.
+	
 	typedef Tuple<T, N, false> TestTuple;
+	TestTuple tuple;
+	tuple.clear(); // Clear the tuple to 0.
+
+	// Test random access.
+	for( unsigned int i = 0; i < 100; ++i )
+	{
+		int index = rand() % N;
+		T value = ( rand() % 100 ) / 7;
+		values[index] = value;
+		tuple[index] = value;
+	}
+
+	for( unsigned int i = 0; i < N; ++i )
+	{
+		BOOST_CHECK( values[i] == tuple[i] );
+	}
+
+	// Test the size() method.
+	BOOST_CHECK_EQUAL( N, tuple.size() );
+
+	// Test the iterator lengths.
+	BOOST_CHECK_EQUAL( N, int( tuple.end() - tuple.begin() ) );
+
+	// Test the iterators.
+	for( typename TestTuple::iterator it = tuple.begin(); it != tuple.end(); it++ )
+	{
+		BOOST_CHECK_EQUAL( (*it), values[ it-tuple.begin() ] );
+	}
 };
 
 namespace Gander
@@ -61,8 +92,13 @@ struct TupleTest
 {
 	void testStaticTuple()
 	{
+		srand(1);
+
 		// Test a range of Tuple sizes and types.
-		staticTupleTest< float, 5 >();
+		staticTupleTest< float, 15 >();
+		staticTupleTest< double, 30 >();
+		staticTupleTest< int, 17 >();
+		staticTupleTest< short, 12 >();
 	}
 };
 
