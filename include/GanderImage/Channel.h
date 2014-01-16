@@ -48,7 +48,7 @@ namespace Image
 enum
 {
 	/// An enum that is used to indicate that the number of channels that the format requires is decided at runtime.
-	DYNAMIC_NUMBER_OF_CHANNELS = 99999
+	DYNAMIC_NUMBER_OF_CHANNELS = 99999,
 	/// An enum that is used to indicate that the channel mask cannot be determind at compile time as the number of channels is dynamic.
 	DYNAMIC_CHANNEL_MASK = 99998
 };
