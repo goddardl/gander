@@ -57,7 +57,7 @@ namespace Image
 /// The Layout class defines an interface for the derived classes using static polymorphism.
 /// The Derived classes need to implement several Enum values, a type declaration for the StorageType of the channels,
 /// a _channels() method and a _numberOfChannels() method.
-/// In addition to these, the isEqualTo method can be optionally overridden.
+/// In addition to these, the equalTo method can be optionally overridden.
 template< class Derived >
 struct Layout
 {
@@ -80,15 +80,14 @@ struct Layout
 			return static_cast< Derived const * >( this )->_numberOfChannels();
 		}
 
-		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->isEqualTo( rhs ); }
-		template< class L > inline bool operator != ( L const &rhs ) const { return !static_cast< Derived const * >( this )->isEqualTo( rhs ); }
+		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
+		template< class L > inline bool operator != ( L const &rhs ) const { return !static_cast< Derived const * >( this )->equalTo( rhs ); }
 
 		template< ChannelDefault C >
 		struct ChannelTraits
 		{
 			typedef Derived LayoutType;
 			typedef typename LayoutType::StorageType StorageType;
-			enum{ ChannelBrothers = LayoutType::ChannelBrothers };
 		
 			// Assert that the layout actually contains the requested channel.
 			GANDER_IMAGE_STATIC_ASSERT( ( LayoutType::ChannelMask & ChannelToMask<C>::Value ) != 0, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
@@ -115,7 +114,7 @@ struct Layout
 		/// A function for comapring two Layouts. The overloaded equality operators call this method on the Derived class,
 		/// allowing the Derived class to overload this function.
 		template< class L >
-		inline bool isEqualTo( const L &rhs ) const
+		inline bool equalTo( const L &rhs ) const
 		{
 			return (
 				rhs.channels() == channels() &&

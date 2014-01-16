@@ -49,9 +49,6 @@
 namespace Gander
 {
 
-/// Forward declaration of the test class. 
-namespace ImageTest { class PixelLayoutTest; };
-
 namespace Image
 {
 
