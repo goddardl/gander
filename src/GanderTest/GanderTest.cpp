@@ -48,6 +48,8 @@
 #include "GanderTest/CommonTest.h"
 #include "GanderTest/EnumHelperTest.h"
 #include "GanderTest/BitTwiddlerTest.h"
+#include "GanderTest/TupleTest.h"
+#include "GanderTest/InterfacesTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -68,6 +70,8 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addCommonTest(test);
 		addEnumHelperTest(test);
 		addBitTwiddlerTest(test);
+		addTupleTest(test);
+		addInterfacesTest(test);
 	}
 	catch (std::exception &ex)
 	{
