@@ -1,3 +1,11 @@
+todo:
+3) Write the test cases for the tuple classes. Add tests for the iterators too.
+4) Work how how the bit array class can be used to provide sub-int channels.
+
+
+
+
+
 1) Complete the interface of the PixelLayout class to match the other layouts. This may require adding a LayoutTraits method to all the other layouts too.
 
 Finish the implementation of the PixelLayout and add the test cases for it. It should have the same interface as the other Layout clases.
