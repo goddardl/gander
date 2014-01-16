@@ -51,11 +51,17 @@ struct static_assertion<true>
 	enum
 	{
 		// The derived class has not implemented a function that is required by the base class.
-		DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS = -1,
+		DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS,
+		// The tuple class can be defined as either being static or dynamic. In the static case,
+		// all of the dynamic methods raise this static error.
+		THIS_METHOD_CANNOT_BE_CALLED_ON_A_STATIC_TUPLE,
 	};
 };
 
 }; // namespace Detail
+
+#define GANDER_STATIC_ASSERT(CONDITION,MSG) \
+	enum{ CAT( CAT(ERROR, __AT__ ), __LINE__ ) = Detail::static_assertion<bool(CONDITION)>::MSG };
 
 // Prints a compile time error when the code is compiled. This can be used to ensure that a template method is never compiled.
 #define GANDER_STATIC_ASSERT_ERROR(MSG) \
