@@ -86,12 +86,12 @@ struct PixelBaseTest
 			typedef TestLayout<3, Chan_U> Storage3;
 
 			typedef PixelLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
-
-			//PixelBase< Layout > pixel;
-			std::cerr << PixelBase< Layout >::ChannelTraits< Chan_Red >::LayoutType::Id << std::endl;
-			std::cerr << PixelBase< Layout >::ChannelTraits< Chan_Blue >::LayoutType::Id << std::endl;
-			std::cerr << PixelBase< Layout >::ChannelTraits< Chan_U >::LayoutType::Id << std::endl;
-			std::cerr << PixelBase< Layout >::NumberOfLayouts << std::endl;
+			
+			BOOST_CHECK_EQUAL( int( PixelBase< Layout >::ChannelTraits< Chan_Red >::LayoutType::Id ), 0 );
+			BOOST_CHECK_EQUAL( int( PixelBase< Layout >::ChannelTraits< Chan_Blue >::LayoutType::Id ), 1 );
+			BOOST_CHECK_EQUAL( int( PixelBase< Layout >::ChannelTraits< Chan_Z >::LayoutType::Id ), 2 );
+			BOOST_CHECK_EQUAL( int( PixelBase< Layout >::ChannelTraits< Chan_U >::LayoutType::Id ), 3 );
+			BOOST_CHECK_EQUAL( int( PixelBase< Layout >::NumberOfLayouts ), 4 );
 		}
 	};
 };
