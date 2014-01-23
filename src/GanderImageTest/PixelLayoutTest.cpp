@@ -54,6 +54,7 @@ template< EnumType ID, ChannelDefault S > struct TestLayout
 	typedef float StorageType;
 	enum
 	{
+		IsDynamic = false,
 		NumberOfChannels = 1,
 		ChannelMask = ChannelToMask<S>::Value,
 		Id = ID,
@@ -110,7 +111,6 @@ struct PixelLayoutTest
 			BOOST_CHECK_EQUAL( int(Layout::ChannelTraits<Chan_Blue>::LayoutType::Id), 1 );
 			BOOST_CHECK_EQUAL( int(Layout::ChannelTraits<Chan_Z>::LayoutType::Id), 2 );
 			BOOST_CHECK_EQUAL( int(Layout::ChannelTraits<Chan_U>::LayoutType::Id), 3 );
-
 		}
 	};
 

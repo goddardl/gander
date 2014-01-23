@@ -67,7 +67,7 @@ struct Layout
 		enum
 		{
 			NumberOfLayouts = 1,
-			IS_DYNAMIC = false,
+			IsDynamic = false,
 		};
 
 		inline ChannelSet channels() const

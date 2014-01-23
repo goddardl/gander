@@ -65,6 +65,9 @@ struct static_assertion<true>
 		CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT,
 		// The Pixel class uses a dynamic layout and therefore the default constructor cannot be used.
 		CLASS_CONTAINS_A_DYNAMIC_LAYOUT_PLEASE_USE_THE_CONSTRUCTOR_THAT_INITIALIZES_IT,
+		// The PixelLayout class requires that any dynamic layouts used as template arguments
+		// be the last argument on the right.
+		ONLY_ONE_DYNAMIC_LAYOUT_MUST_BE_SPECIFED_AS_THE_LAST_TEMPLATE_ARGUMENT,
 	};
 };
 

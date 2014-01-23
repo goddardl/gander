@@ -40,6 +40,7 @@
 #include "boost/format.hpp"
 
 #include "Gander/Common.h"
+#include "Gander/Tuple.h"
 
 #include "GanderImage/StaticAssert.h"
 #include "GanderImage/Layout.h"
@@ -53,7 +54,7 @@ namespace Image
 {
 
 /// An empty struct for use as a default template argument to the PixelLayout class.
-namespace Detail { struct None { struct LayoutTraits { }; enum { ChannelMask = 0 }; }; };
+namespace Detail { struct None { struct LayoutTraits { }; enum { ChannelMask = 0, IsDynamic = false }; }; };
 
 /// Forward declaration of the PixelLayout class.
 template<
@@ -124,13 +125,21 @@ template< class T > struct TypeSwitch<T, 6> { typedef typename T::Type6 Type; };
 template< class T > struct TypeSwitch<T, 7> { typedef typename T::Type7 Type; };
 
 /// Forward declaration of the recursive base of the PixelLayout class.
-template< class Derived, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
+template< class Derived, bool IS_DYNAMIC, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
 struct PixelLayoutRecurse;
 
-/// The last recursive base of the PixelLayout class.
 template < class Derived >
-struct PixelLayoutRecurse< Derived, None, None, None, None, None, None, None, None > : public Layout< Derived >
+struct PixelLayoutRecurseBase : public Layout< Derived >
 {
+	public :
+	
+		template< EnumType LayoutIndex >
+		struct LayoutTraits
+		{
+			typedef typename Detail::TypeSwitch< Derived, LayoutIndex >::Type LayoutType;
+			typedef typename LayoutType::StorageType StorageType;
+		};
+
 	protected :
 
 		enum
@@ -138,13 +147,6 @@ struct PixelLayoutRecurse< Derived, None, None, None, None, None, None, None, No
 			NumberOfLayouts = 0,
 			NumberOfChannels = 0,
 			ChannelMask = 0,
-		};
-	
-		template< EnumType LayoutIndex >
-		struct LayoutTraits
-		{
-			typedef typename Detail::TypeSwitch< Derived, LayoutIndex >::Type LayoutType;
-			typedef typename LayoutType::StorageType StorageType;
 		};
 	
 		template< EnumType ChannelIndex >
@@ -192,12 +194,31 @@ struct PixelLayoutRecurse< Derived, None, None, None, None, None, None, None, No
 		};
 };
 
+/// The last recursive base of the PixelLayout class.
+template < class Derived >
+struct PixelLayoutRecurse< Derived, false, None, None, None, None, None, None, None, None > : public PixelLayoutRecurseBase< Derived >
+{
+	enum
+	{
+		IsDynamic = false,
+	};
+};
+
+template < class Derived, class T0 >
+struct PixelLayoutRecurse< Derived, true, T0, None, None, None, None, None, None, None > : public PixelLayoutRecurseBase< Derived >
+{
+	enum
+	{
+		IsDynamic = true,
+	};
+};
+
 /// The body of the recursive PixelLayoutRecurse class.
-template< class Derived, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
-struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, T1, T2, T3, T4, T5, T6, T7, None >
+template< class Derived, bool IS_DYNAMIC, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
+struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, T2, T3, T4, T5, T6, T7, None >
 {
 	protected :
-		typedef PixelLayoutRecurse< Derived, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
+		typedef PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
 
 		enum
 		{
@@ -215,18 +236,31 @@ struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, T1, T2, T3, T4, 
 
 		// Assert that the template arguments each relate to unique channels.
 		GANDER_IMAGE_STATIC_ASSERT( ( ( EnumType( T0::ChannelMask ) & BaseType::ChannelMask ) == 0 ), TEMPLATE_ARGUMENTS_TO_IMAGELAYOUT_MUST_ALL_REPRESENT_UNIQUE_CHANNELS );
+
+		// Assert that the any dynamic layouts are the last argument.			
+		GANDER_IMAGE_STATIC_ASSERT( !T0::IsDynamic, ONLY_ONE_DYNAMIC_LAYOUT_MUST_BE_SPECIFED_AS_THE_LAST_TEMPLATE_ARGUMENT );
 };
 
 }; // namespace Detail
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
-struct PixelLayout : public Detail::PixelLayoutRecurse< PixelLayout< T0, T1, T2, T3, T4, T5, T6, T7 >, T0, T1, T2, T3, T4, T5, T6, T7 >
+struct PixelLayout : public Detail::PixelLayoutRecurse<
+	PixelLayout< T0, T1, T2, T3, T4, T5, T6, T7 >,
+	T0::IsDynamic | T1::IsDynamic | T2::IsDynamic | T3::IsDynamic |T4::IsDynamic | T5::IsDynamic | T6::IsDynamic | T7::IsDynamic,
+	T0, T1, T2, T3, T4, T5, T6, T7
+>
 {
 	// We create a typedef for each of the template parameters so that we can use the
 	// TypeSwitch class to selectively choose one of the template arguments using an index.
 	typedef T0 Type0;	typedef T1 Type1;	typedef T2 Type2;	typedef T3 Type3;
 	typedef T4 Type4;	typedef T5 Type5;	typedef T6 Type6;	typedef T7 Type7;
-	typedef Detail::PixelLayoutRecurse< PixelLayout< T0, T1, T2, T3, T4, T5, T6, T7 >, T0, T1, T2, T3, T4, T5, T6, T7 > BaseType;
+
+	typedef Detail::PixelLayoutRecurse<
+		PixelLayout< T0, T1, T2, T3, T4, T5, T6, T7 >,
+		T0::IsDynamic | T1::IsDynamic | T2::IsDynamic | T3::IsDynamic |T4::IsDynamic | T5::IsDynamic | T6::IsDynamic | T7::IsDynamic,
+		T0, T1, T2, T3, T4, T5, T6, T7
+	> BaseType;
+
 	typedef PixelLayout< T0, T1, T2, T3, T4, T6, T7 > Derived;
 		
 	enum
@@ -249,48 +283,6 @@ struct PixelLayout : public Detail::PixelLayoutRecurse< PixelLayout< T0, T1, T2,
 		{
 			return static_cast<unsigned int>( NumberOfChannels );
 		}
-};
-
-template< class L, unsigned N >
-struct PixelBaseRecurse;
-
-template< class L >
-struct PixelBaseRecurse< L, 0 >
-{
-};
-
-template< class L, unsigned N >
-struct PixelBaseRecurse : public PixelBaseRecurse< L, N - 1 >
-{
-	typedef PixelBaseRecurse< L, N - 1  > BaseType;
-};
-
-template< class L >
-class PixelBase : public PixelBaseRecurse< L, L::NumberOfLayouts >
-{
-	typedef PixelBaseRecurse< L, L::NumberOfLayouts + 1  > BaseType;
-	
-	public :
-		
-		/// The default constructor.
-		/// The default constructor can be used for all layouts which aren't dynamic.
-		/// For dynamic layouts, please use the other constructor.
-		PixelBase()
-		{
-			GANDER_IMAGE_STATIC_ASSERT( !L::IS_DYNAMIC, CLASS_CONTAINS_A_DYNAMIC_LAYOUT_PLEASE_USE_THE_CONSTRUCTOR_THAT_INITIALIZES_IT );
-		}
-		/// The dynamic constructor.
-		/// A basic constructor that just initializes the internal instance of the layout to the parameter that is passed to it.
-		/// This constructor must be used when using a dynamic layout to ensure that the layout is initialized correctly.
-		PixelBase( const L &layout ) :
-			m_layout( layout )
-		{
-		}
-
-	private :
-
-		L m_layout;
-
 };
 
 }; // namespace Image

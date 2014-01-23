@@ -54,6 +54,7 @@
 #include "GanderImageTest/PixelTest.h"
 #include "GanderImageTest/PixelIteratorTest.h"
 #include "GanderImageTest/RowTest.h"
+#include "GanderImageTest/PixelBaseTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -76,6 +77,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addCompoundLayoutTest(test);
 		addCompoundLayoutContainerTest(test);
 		addOpTest(test);
+		addPixelBaseTest(test);
 	}
 	catch (std::exception &ex)
 	{

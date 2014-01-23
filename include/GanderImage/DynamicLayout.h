@@ -65,27 +65,27 @@ struct DynamicLayout
 		ChannelMask = DYNAMIC_CHANNEL_MASK,
 	};
 	
+	enum
+	{
+		IsDynamic = true,
+	};
+	
 	private :
 		
 		friend class Layout< DynamicLayout< T > >;
-		template< class, class > friend class PixelBase;
-	
-		enum
-		{
-			IS_DYNAMIC = true,
-		};
 
 		inline ChannelSet _channels() const
 		{
-			throw std::runtime_error("Not implemented yet.");
-			return ChannelSet();
+			return m_channels;
 		}
 		
 		inline unsigned int _numberOfChannels() const
 		{
-			throw std::runtime_error("Not implemented yet.");
-			return 0;
+			return m_channels.size();
 		}
+		
+		/// The channels that this format represents.
+		ChannelSet m_channels;
 };
 
 }; // namespace Image
