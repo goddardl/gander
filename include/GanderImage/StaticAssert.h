@@ -68,6 +68,9 @@ struct static_assertion<true>
 		// The PixelLayout class requires that any dynamic layouts used as template arguments
 		// be the last argument on the right.
 		ONLY_ONE_DYNAMIC_LAYOUT_MUST_BE_SPECIFED_AS_THE_LAST_TEMPLATE_ARGUMENT,
+		// An index was given which is out of bounds when looking up a Layout. This is most likely the
+		// result of calling PixelBase::LayoutTraits<X> where X is an index that is out of bounds.
+		THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST,
 	};
 };
 

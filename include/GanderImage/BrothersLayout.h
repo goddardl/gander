@@ -64,6 +64,14 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 		ChannelMask = BrotherTraits<B>::BrothersMask,
 	};
 	
+	template< EnumType LayoutIndex >
+	struct LayoutTraits
+	{
+		GANDER_IMAGE_STATIC_ASSERT( LayoutIndex == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
+		typedef BrothersLayout< T, B > LayoutType;
+		typedef T StorageType;
+	};
+
 	private :
 		
 		friend class Layout< BrothersLayout< T, B > >;	

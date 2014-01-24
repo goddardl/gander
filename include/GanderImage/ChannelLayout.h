@@ -66,6 +66,14 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 		NumberOfChannels = 1,
 		ChannelMask = ChannelToMask<S>::Value,
 	};
+		
+	template< EnumType LayoutIndex >
+	struct LayoutTraits
+	{
+		GANDER_IMAGE_STATIC_ASSERT( LayoutIndex == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
+		typedef ChannelLayout< T, S > LayoutType;
+		typedef T StorageType;
+	};
 
 	private :
 		

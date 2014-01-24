@@ -136,6 +136,10 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 		template< EnumType LayoutIndex >
 		struct LayoutTraits
 		{
+			GANDER_IMAGE_STATIC_ASSERT(
+				EnumType( Derived::NumberOfLayouts ) > LayoutIndex,
+				THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST
+			);
 			typedef typename Detail::TypeSwitch< Derived, LayoutIndex >::Type LayoutType;
 			typedef typename LayoutType::StorageType StorageType;
 		};

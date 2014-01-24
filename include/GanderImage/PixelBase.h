@@ -103,6 +103,10 @@ class PixelBase : public PixelBaseRecurse< L, L::NumberOfLayouts >
 		template< ChannelDefault C >
 		struct ChannelTraits : public LayoutType::template ChannelTraits< C >
 		{};
+		
+		template< EnumType LayoutIndex >
+		struct LayoutTraits : public LayoutType::template LayoutTraits< LayoutIndex >
+		{};
 
 	private :
 

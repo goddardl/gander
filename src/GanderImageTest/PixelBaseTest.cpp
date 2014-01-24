@@ -76,6 +76,34 @@ namespace ImageTest
 
 struct PixelBaseTest
 {
+	void testDifferentLayoutTraits()
+	{
+		typedef ChannelLayout< float, Chan_Red > Layout1;
+		typedef PixelBase< Layout1 > Base1;
+		BOOST_CHECK( int( std::is_same< Base1::ChannelTraits< Chan_Red >::LayoutType, Layout1 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base1::LayoutTraits< 0 >::LayoutType, Layout1 >::value ) );
+
+		typedef BrothersLayout< float, Brothers_UV > Layout2;
+		typedef PixelBase< Layout2 > Base2;
+		BOOST_CHECK( int( std::is_same< Base2::ChannelTraits< Chan_U >::LayoutType, Layout2 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base2::LayoutTraits< 0 >::LayoutType, Layout2 >::value ) );
+
+		typedef DynamicLayout< float > Layout3;
+		typedef PixelBase< Layout3 > Base3;
+		BOOST_CHECK( int( std::is_same< Base3::ChannelTraits< Chan_Z >::LayoutType, Layout3 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base3::LayoutTraits< 0 >::LayoutType, Layout3 >::value ) );
+		
+		typedef PixelLayout< Layout1, Layout2, Layout3 > Layout4;
+		typedef PixelBase< Layout4 > Base4;
+		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_Red >::LayoutType, Layout1 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_U >::LayoutType, Layout2 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_V >::LayoutType, Layout2 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_Z >::LayoutType, Layout3 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 0 >::LayoutType, Layout3 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 1 >::LayoutType, Layout2 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 2 >::LayoutType, Layout1 >::value ) );
+	}
+
 	void testChannelTraits()
 	{
 		/// Test the we can access the layouts using the ChannelTraits struct.
@@ -102,6 +130,7 @@ struct PixelBaseTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<PixelBaseTest> instance( new PixelBaseTest() );
 		add( BOOST_CLASS_TEST_CASE( &PixelBaseTest::testChannelTraits, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelBaseTest::testDifferentLayoutTraits, instance ) );
 	}
 };
 

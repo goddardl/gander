@@ -55,19 +55,27 @@ namespace Image
 {
 
 template< class T >
-struct DynamicLayout
+struct DynamicLayout : Layout< DynamicLayout< T > > 
 {
 	typedef T StorageType;
 
 	enum
 	{
 		NumberOfChannels = DYNAMIC_NUMBER_OF_CHANNELS,
-		ChannelMask = DYNAMIC_CHANNEL_MASK,
+		ChannelMask = Mask_All,
 	};
 	
 	enum
 	{
 		IsDynamic = true,
+	};
+	
+	template< EnumType LayoutIndex >
+	struct LayoutTraits
+	{
+		GANDER_IMAGE_STATIC_ASSERT( LayoutIndex == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
+		typedef DynamicLayout< T > LayoutType;
+		typedef T StorageType;
 	};
 	
 	private :
