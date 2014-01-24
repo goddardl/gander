@@ -76,20 +76,36 @@ namespace ImageTest
 
 struct PixelBaseTest
 {
+	void testRequiredChannels()
+	{
+		typedef ChannelLayout< float, Chan_Red > Layout1;
+		typedef BrothersLayout< float, Brothers_UV > Layout2;
+		typedef DynamicLayout< float > Layout3;
+		typedef PixelLayout< Layout1, Layout2, Layout3 > Layout4;
+		
+		BOOST_CHECK_EQUAL( PixelBase< Layout1 >().requiredChannels(), ChannelSet( Layout1().requiredChannels()) );
+		BOOST_CHECK_EQUAL( PixelBase< Layout2 >().requiredChannels(), ChannelSet( Layout2().requiredChannels()) );
+		BOOST_CHECK_EQUAL( PixelBase< Layout3 >( Layout3() ).requiredChannels(), ChannelSet( Layout3().requiredChannels()) );
+		BOOST_CHECK_EQUAL( PixelBase< Layout4 >( Layout4() ).requiredChannels(), ChannelSet( Layout4().requiredChannels()) );
+	}
+
 	void testDifferentLayoutTraits()
 	{
 		typedef ChannelLayout< float, Chan_Red > Layout1;
 		typedef PixelBase< Layout1 > Base1;
+		BOOST_CHECK_EQUAL( int( Layout1::NumberOfLayouts ), 1 );
 		BOOST_CHECK( int( std::is_same< Base1::ChannelTraits< Chan_Red >::LayoutType, Layout1 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base1::LayoutTraits< 0 >::LayoutType, Layout1 >::value ) );
 
 		typedef BrothersLayout< float, Brothers_UV > Layout2;
 		typedef PixelBase< Layout2 > Base2;
+		BOOST_CHECK_EQUAL( int( Layout2::NumberOfLayouts ), 1 );
 		BOOST_CHECK( int( std::is_same< Base2::ChannelTraits< Chan_U >::LayoutType, Layout2 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base2::LayoutTraits< 0 >::LayoutType, Layout2 >::value ) );
 
 		typedef DynamicLayout< float > Layout3;
 		typedef PixelBase< Layout3 > Base3;
+		BOOST_CHECK_EQUAL( int( Layout3::NumberOfLayouts ), 1 );
 		BOOST_CHECK( int( std::is_same< Base3::ChannelTraits< Chan_Z >::LayoutType, Layout3 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base3::LayoutTraits< 0 >::LayoutType, Layout3 >::value ) );
 		
@@ -105,25 +121,6 @@ struct PixelBaseTest
 		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 1 >::LayoutType, Layout2 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 2 >::LayoutType, Layout3 >::value ) );
 	}
-
-	void testChannelTraits()
-	{
-		/// Test the we can access the layouts using the ChannelTraits struct.
-		{
-			typedef TestLayout<0, Chan_Red> Storage0;
-			typedef TestLayout<1, Chan_Blue> Storage1;
-			typedef TestLayout<2, Chan_Z> Storage2;
-			typedef TestLayout<3, Chan_U> Storage3;
-
-			typedef PixelLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
-			
-			BOOST_CHECK_EQUAL( int( PixelBase< Layout >::ChannelTraits< Chan_Red >::LayoutType::Id ), 0 );
-			BOOST_CHECK_EQUAL( int( PixelBase< Layout >::ChannelTraits< Chan_Blue >::LayoutType::Id ), 1 );
-			BOOST_CHECK_EQUAL( int( PixelBase< Layout >::ChannelTraits< Chan_Z >::LayoutType::Id ), 2 );
-			BOOST_CHECK_EQUAL( int( PixelBase< Layout >::ChannelTraits< Chan_U >::LayoutType::Id ), 3 );
-			BOOST_CHECK_EQUAL( int( PixelBase< Layout >::NumberOfLayouts ), 4 );
-		}
-	};
 };
 
 struct PixelBaseTestSuite : public boost::unit_test::test_suite
@@ -131,7 +128,6 @@ struct PixelBaseTestSuite : public boost::unit_test::test_suite
 	PixelBaseTestSuite() : boost::unit_test::test_suite( "PixelBaseTestSuite" )
 	{
 		boost::shared_ptr<PixelBaseTest> instance( new PixelBaseTest() );
-		add( BOOST_CLASS_TEST_CASE( &PixelBaseTest::testChannelTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelBaseTest::testDifferentLayoutTraits, instance ) );
 	}
 };

@@ -53,6 +53,9 @@ namespace Gander
 namespace Image
 {
 
+namespace Detail
+{
+
 template< class L, unsigned N >
 struct PixelBaseRecurse;
 
@@ -71,10 +74,12 @@ struct PixelBaseRecurse : public PixelBaseRecurse< L, N - 1 >
 	Tuple< StorageType, LayoutType::NumberOfChannels, LayoutType::IsDynamic > m_data;
 };
 
+};
+
 template< class L >
-class PixelBase : public PixelBaseRecurse< L, L::NumberOfLayouts >
+class PixelBase : public Detail::PixelBaseRecurse< L, L::NumberOfLayouts >
 {
-	typedef PixelBaseRecurse< L, L::NumberOfLayouts + 1  > BaseType;
+	typedef Detail::PixelBaseRecurse< L, L::NumberOfLayouts + 1  > BaseType;
 	
 	public :
 		
@@ -84,6 +89,14 @@ class PixelBase : public PixelBaseRecurse< L, L::NumberOfLayouts >
 		};
 
 		typedef L LayoutType;
+
+		template< ChannelDefault C >
+		struct ChannelTraits : public LayoutType::template ChannelTraits< C >
+		{};
+		
+		template< EnumType LayoutIndex >
+		struct LayoutTraits : public LayoutType::template LayoutTraits< LayoutIndex >
+		{};
 		
 		/// The default constructor.
 		/// The default constructor can be used for all layouts which aren't dynamic.
@@ -99,14 +112,13 @@ class PixelBase : public PixelBaseRecurse< L, L::NumberOfLayouts >
 			m_layout( layout )
 		{
 		}
-
-		template< ChannelDefault C >
-		struct ChannelTraits : public LayoutType::template ChannelTraits< C >
-		{};
 		
-		template< EnumType LayoutIndex >
-		struct LayoutTraits : public LayoutType::template LayoutTraits< LayoutIndex >
-		{};
+		/// Returns a ChannelSet of the channels that pointers are required for in order
+		/// to access all of the channels in this layout.
+		inline ChannelSet requiredChannels() const
+		{
+			return m_layout.requiredChannels();
+		}
 
 	private :
 

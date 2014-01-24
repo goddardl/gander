@@ -82,18 +82,30 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 		
 		friend class Layout< DynamicLayout< T > >;
 
+		/// Returns the channels represented by this layout.
 		inline ChannelSet _channels() const
 		{
 			return m_channels;
 		}
 		
+		/// Returns the number of channels that this layout represents.
 		inline unsigned int _numberOfChannels() const
 		{
 			return m_channels.size();
 		}
 		
+		/// Returns a ChannelSet of the channels that pointers are required for in order
+		/// to access all of the channels in this layout.
+		inline ChannelSet _requiredChannels() const
+		{
+			return m_channels;
+		}
+		
 		/// The channels that this format represents.
 		ChannelSet m_channels;
+	
+		/// The step values for each channel.
+		std::vector< int8u > m_steps;
 };
 
 }; // namespace Image

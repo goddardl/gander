@@ -182,6 +182,11 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 			};
 		};
 	
+		inline ChannelSet _requiredChannels() const
+		{
+			return ChannelSet();
+		}
+
 	public :
 
 		/// The public interface to a Channel's traits.
@@ -219,13 +224,31 @@ struct PixelLayoutRecurse< Derived, true, T0, None, None, None, None, None, None
 		NumberOfLayouts = BaseType::NumberOfLayouts + 1,
 		IsDynamic = true,
 	};
+	
+	/// Returns a ChannelSet of the channels that pointers are required for in order
+	/// to access all of the channels in this layout. As this layout is dynamic, this
+	/// method isn't static and has to be determind at runtime.
+	inline ChannelSet requiredChannels() const
+	{
+		return m_dynamicLayout.requiredChannels() + BaseType::requiredChannels();
+	}
+
+	T0 m_dynamicLayout;
 };
 
 /// The body of the recursive PixelLayoutRecurse class.
 template< class Derived, bool IS_DYNAMIC, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
 struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, T2, T3, T4, T5, T6, T7, None >
 {
+	public :
+		
+		inline ChannelSet requiredChannels() const
+		{
+			return BaseType::requiredChannels() + m_layout.requiredChannels();
+		}
+
 	protected :
+
 		typedef PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
 
 		enum
@@ -247,6 +270,8 @@ struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, 
 
 		// Assert that the any dynamic layouts are the last argument.			
 		GANDER_IMAGE_STATIC_ASSERT( !T0::IsDynamic, ONLY_ONE_DYNAMIC_LAYOUT_MUST_BE_SPECIFED_AS_THE_LAST_TEMPLATE_ARGUMENT );
+
+		T0 m_layout;
 };
 
 }; // namespace Detail
@@ -282,14 +307,23 @@ struct PixelLayout : public Detail::PixelLayoutRecurse<
 		
 		friend class Layout< Derived >;	
 
+		/// Returns the channels represented by this layout.
 		inline ChannelSet _channels() const
 		{
 			return ChannelSet( static_cast<Gander::Image::ChannelMask>( Derived::ChannelMask ) );
 		}
 		
+		/// Returns the number of channels that this layout represents.
 		inline unsigned int _numberOfChannels() const
 		{
 			return static_cast<unsigned int>( NumberOfChannels );
+		}
+
+		/// Returns a ChannelSet of the channels that pointers are required for in order
+		/// to access all of the channels in this layout.
+		inline ChannelSet _requiredChannels() const
+		{
+			return BaseType::_requiredChannels();
 		}
 };
 

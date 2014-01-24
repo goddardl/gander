@@ -56,7 +56,7 @@ namespace Image
 /// The base class for defining how a set of channels are grouped together and of what type they are.
 /// The Layout class defines an interface for the derived classes using static polymorphism.
 /// The Derived classes need to implement several Enum values, a type declaration for the StorageType of the channels,
-/// a _channels() method and a _numberOfChannels() method.
+/// a _channels() method, a _requiredChannels() method and a _numberOfChannels() method.
 /// In addition to these, the equalTo method can be optionally overridden.
 template< class Derived >
 struct Layout
@@ -78,6 +78,11 @@ struct Layout
 		inline unsigned int numberOfChannels() const
 		{
 			return static_cast< Derived const * >( this )->_numberOfChannels();
+		}
+
+		inline ChannelSet requiredChannels() const
+		{
+			return static_cast< Derived const * >( this )->_requiredChannels();
 		}
 
 		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
@@ -106,6 +111,14 @@ struct Layout
 		/// Deried classes need to override this function to return the number of channels that this layout represents.
 		/// If they do not, a static assertion prevents the code from compiling.
 		inline unsigned int _numberOfChannels() const
+		{
+			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
+			return 0; // We never get here.
+		}
+		
+		/// Returns a ChannelSet of the channels that pointers are required for in order
+		/// to access all of the channels in this layout.
+		inline ChannelSet _requiredChannels() const
 		{
 			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 			return 0; // We never get here.

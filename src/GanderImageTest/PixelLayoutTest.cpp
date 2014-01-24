@@ -125,6 +125,14 @@ struct PixelLayoutTest
 		BOOST_CHECK_EQUAL( int(Layout::NumberOfLayouts), 4 );
 		BOOST_CHECK_EQUAL( int(Layout::NumberOfChannels), 7 );
 		BOOST_CHECK_EQUAL( int(Layout::ChannelMask), int( Mask_RGB | Mask_Alpha | Mask_Z | Mask_UV ) );
+
+		BOOST_CHECK_EQUAL( Layout().requiredChannels(), ChannelSet( Mask_Red | Mask_Alpha | Mask_Z | Mask_V ) );
+	}
+	
+	void testDynamicLayout()
+	{
+		typedef PixelLayout< ChannelLayout< float, Chan_Red >, DynamicLayout< float > > Layout;
+		Layout l;
 	}
 };
 
@@ -135,6 +143,7 @@ struct PixelLayoutTestSuite : public boost::unit_test::test_suite
 		boost::shared_ptr<PixelLayoutTest> instance( new PixelLayoutTest() );
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testLayoutTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testChannelTraits, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testDynamicLayout, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testCommonLayoutAttributes, instance ) );
 	}
 };

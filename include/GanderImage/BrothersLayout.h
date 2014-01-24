@@ -85,6 +85,13 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 		{
 			return static_cast<unsigned int>( NumberOfChannels );
 		}
+		
+		/// Returns a ChannelSet of the channels that pointers are required for in order
+		/// to access all of the channels in this layout.
+		inline ChannelSet _requiredChannels() const
+		{
+			return ChannelSet( ChannelDefault( BrotherTraits<B>::FirstBrotherInBrothers ) );
+		}
 };
 
 }; // namespace Image

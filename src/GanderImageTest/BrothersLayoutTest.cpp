@@ -82,6 +82,10 @@ struct BrothersLayoutTest
 		BOOST_CHECK_EQUAL( l1.numberOfChannels(), 3 );
 		BOOST_CHECK_EQUAL( l2.numberOfChannels(), 4 );
 		BOOST_CHECK_EQUAL( l3.numberOfChannels(), 2 );
+		
+		BOOST_CHECK_EQUAL( l1.requiredChannels(), ChannelSet( Mask_Blue ) );
+		BOOST_CHECK_EQUAL( l2.requiredChannels(), ChannelSet( Mask_Red ) );
+		BOOST_CHECK_EQUAL( l3.requiredChannels(), ChannelSet( Mask_V ) );
 	}
 
 	void testChannelTraits()

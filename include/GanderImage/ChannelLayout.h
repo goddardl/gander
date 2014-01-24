@@ -79,14 +79,23 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 		
 		friend class Layout< ChannelLayout< T, S > >;	
 
+		/// Returns the channels represented by this layout.
 		inline ChannelSet _channels() const
 		{
 			return ChannelSet( static_cast<Gander::Image::ChannelMask>( ChannelLayout<T,S>::ChannelMask ) );
 		}
 		
+		/// Returns the number of channels that this layout represents.
 		inline unsigned int _numberOfChannels() const
 		{
 			return static_cast<unsigned int>( NumberOfChannels );
+		}
+		
+		/// Returns a ChannelSet of the channels that pointers are required for in order
+		/// to access all of the channels in this layout.
+		inline ChannelSet _requiredChannels() const
+		{
+			return ChannelSet( S );
 		}
 };
 

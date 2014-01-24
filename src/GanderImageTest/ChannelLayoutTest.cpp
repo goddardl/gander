@@ -82,6 +82,10 @@ struct ChannelLayoutTest
 		BOOST_CHECK_EQUAL( l1.numberOfChannels(), 1 );
 		BOOST_CHECK_EQUAL( l2.numberOfChannels(), 1 );
 		BOOST_CHECK_EQUAL( l3.numberOfChannels(), 1 );
+		
+		BOOST_CHECK_EQUAL( l1.requiredChannels(), ChannelSet( Mask_Alpha ) );
+		BOOST_CHECK_EQUAL( l2.requiredChannels(), ChannelSet( Mask_Z ) );
+		BOOST_CHECK_EQUAL( l3.requiredChannels(), ChannelSet( Mask_Red ) );
 	}
 
 	void testChannelTraits()
