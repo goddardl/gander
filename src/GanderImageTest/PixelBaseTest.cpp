@@ -94,14 +94,16 @@ struct PixelBaseTest
 		BOOST_CHECK( int( std::is_same< Base3::LayoutTraits< 0 >::LayoutType, Layout3 >::value ) );
 		
 		typedef PixelLayout< Layout1, Layout2, Layout3 > Layout4;
+		BOOST_CHECK_EQUAL( int( Layout4::NumberOfLayouts ), 3 );
+		
 		typedef PixelBase< Layout4 > Base4;
 		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_Red >::LayoutType, Layout1 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_U >::LayoutType, Layout2 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_V >::LayoutType, Layout2 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_Z >::LayoutType, Layout3 >::value ) );
-		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 0 >::LayoutType, Layout3 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 0 >::LayoutType, Layout1 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 1 >::LayoutType, Layout2 >::value ) );
-		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 2 >::LayoutType, Layout1 >::value ) );
+		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 2 >::LayoutType, Layout3 >::value ) );
 	}
 
 	void testChannelTraits()

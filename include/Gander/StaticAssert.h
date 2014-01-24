@@ -55,6 +55,8 @@ struct static_assertion<true>
 		// The tuple class can be defined as either being static or dynamic. In the static case,
 		// all of the dynamic methods raise this static error.
 		THIS_METHOD_CANNOT_BE_CALLED_ON_A_STATIC_TUPLE,
+		// An index of value is outside of the required range.
+		VALUE_IS_OUT_OUT_BOUNDS,
 	};
 };
 

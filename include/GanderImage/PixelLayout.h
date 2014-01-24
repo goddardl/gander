@@ -114,7 +114,7 @@ struct ChannelIndexToLayoutIndex : public ChannelIndexToLayoutIndex< Index, T1, 
 /// one of the Types as 'Type'.
 /// For example :
 /// TypeSwitch< T, 3 >::Type // Choose Type3 of class T.
-template< class T, EnumType Index > struct TypeSwitch {};
+template< class T, EnumType Index > struct TypeSwitch{ GANDER_STATIC_ASSERT( ( Index <= 7 ) && ( Index >= 0 ), VALUE_IS_OUT_OUT_BOUNDS ); };
 template< class T > struct TypeSwitch<T, 0> { typedef typename T::Type0 Type; };
 template< class T > struct TypeSwitch<T, 1> { typedef typename T::Type1 Type; };
 template< class T > struct TypeSwitch<T, 2> { typedef typename T::Type2 Type; };
@@ -208,11 +208,15 @@ struct PixelLayoutRecurse< Derived, false, None, None, None, None, None, None, N
 	};
 };
 
+/// The specialization of the PixelLayoutRecurse class for the dynamic layout.
 template < class Derived, class T0 >
 struct PixelLayoutRecurse< Derived, true, T0, None, None, None, None, None, None, None > : public PixelLayoutRecurseBase< Derived >
 {
+	typedef PixelLayoutRecurseBase< Derived > BaseType;
+
 	enum
 	{
+		NumberOfLayouts = BaseType::NumberOfLayouts + 1,
 		IsDynamic = true,
 	};
 };
