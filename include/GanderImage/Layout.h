@@ -40,6 +40,7 @@
 
 #include "boost/format.hpp"
 
+#include "Gander/Assert.h"
 #include "Gander/Common.h"
 
 #include "Gander/StaticAssert.h"
@@ -53,17 +54,42 @@ namespace Gander
 namespace Image
 {
 
+namespace Detail
+{
+
+template< class LayoutType >
+struct ChannelTraitsInterface
+{
+	public :
+	
+		ChannelTraitsInterface( const LayoutType &l, Channel channel = Chan_None ) :
+			m_step( l.template step( channel ) )
+		{
+		}
+
+		int8u step() const
+		{
+			return m_step;
+		}
+
+	private :
+
+		int8u m_step;
+};
+
+}; // namespace Detail
+
 /// The base class for defining how a set of channels are grouped together and of what type they are.
 /// The Layout class defines an interface for the derived classes using static polymorphism.
 /// The Derived classes need to implement several Enum values, a type declaration for the StorageType of the channels,
-/// a _channels() method, a _requiredChannels() method and a _numberOfChannels() method.
+/// a several accessor methods.
 /// In addition to these, the equalTo method can be optionally overridden.
 template< class Derived >
 struct Layout
 {
-	
+
 	public :
-	
+
 		enum
 		{
 			NumberOfLayouts = 1,
@@ -84,19 +110,28 @@ struct Layout
 		{
 			return static_cast< Derived const * >( this )->_requiredChannels();
 		}
+		
+		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			static_cast< Derived const * >( this )->_addChannels( c, b );
+		}
+		
+		/// Returns the step value for a given channel.
+		template< ChannelDefault C = Chan_None >
+		inline int8u step( Channel channel = Chan_None ) const
+		{
+			GANDER_ASSERT( ( C == Chan_None || channel == Chan_None || channel == C ), "Specify either a compile-time argument or a runtime parameter but not both." );
+			return static_cast< Derived const * >( this )->_step<C>( channel );
+		}
+		
+		/// Returns whether the layout represents the given channel.
+		inline bool contains( ChannelSet channels ) const
+		{
+			return static_cast< Derived const * >( this )->_contains( channels );
+		}
 
 		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
 		template< class L > inline bool operator != ( L const &rhs ) const { return !static_cast< Derived const * >( this )->equalTo( rhs ); }
-
-		template< ChannelDefault C >
-		struct ChannelTraits
-		{
-			typedef Derived LayoutType;
-			typedef typename LayoutType::StorageType StorageType;
-		
-			// Assert that the layout actually contains the requested channel.
-			GANDER_IMAGE_STATIC_ASSERT( ( LayoutType::ChannelMask & ChannelToMask<C>::Value ) != 0, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-		};
 
 	private :	
 
@@ -122,6 +157,27 @@ struct Layout
 		{
 			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 			return 0; // We never get here.
+		}
+
+		/// Returns the step value for a given channel.
+		template< ChannelDefault C = Chan_None >
+		inline int8u _step( Channel channel = Chan_None ) const
+		{
+			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
+			return 0; // We never get here.
+		}
+
+		/// Returns whether the layout represents the given channel.
+		inline bool _contains( ChannelSet channels ) const
+		{
+			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
+			return 0; // We never get here.
+		}
+			
+		/// Adds the channel to the Layout and logs all pertenant information.
+		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			GANDER_IMAGE_STATIC_ASSERT( Derived::IsDynamic, THE_LAYOUT_MUST_BE_DYNAMIC_IN_ORDER_TO_ADD_CHANNELS_TO_IT )
 		}
 
 		/// A function for comapring two Layouts. The overloaded equality operators call this method on the Derived class,

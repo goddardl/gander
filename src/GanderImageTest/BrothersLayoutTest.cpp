@@ -86,6 +86,46 @@ struct BrothersLayoutTest
 		BOOST_CHECK_EQUAL( l1.requiredChannels(), ChannelSet( Mask_Blue ) );
 		BOOST_CHECK_EQUAL( l2.requiredChannels(), ChannelSet( Mask_Red ) );
 		BOOST_CHECK_EQUAL( l3.requiredChannels(), ChannelSet( Mask_V ) );
+		
+		BOOST_CHECK_EQUAL( l1.contains( Chan_Red ), true );
+		BOOST_CHECK_EQUAL( l1.contains( Chan_Blue ), true );
+		BOOST_CHECK_EQUAL( l1.contains( Chan_Green ), true );
+		BOOST_CHECK_EQUAL( l1.contains( Chan_Alpha ), false );
+		
+		BOOST_CHECK_EQUAL( l2.contains( Chan_Red ), true );
+		BOOST_CHECK_EQUAL( l2.contains( Chan_Blue ), true );
+		BOOST_CHECK_EQUAL( l2.contains( Chan_Green ), true );
+		BOOST_CHECK_EQUAL( l2.contains( Chan_Alpha ), true );
+		BOOST_CHECK_EQUAL( l2.contains( Chan_Z ), false );
+		
+		BOOST_CHECK_EQUAL( l3.contains( Chan_Alpha ), false );
+		BOOST_CHECK_EQUAL( l3.contains( Chan_V ), true );
+		BOOST_CHECK_EQUAL( l3.contains( Chan_U ), true );
+		BOOST_CHECK_EQUAL( l3.contains( Mask_UV ), true );
+		
+		BOOST_CHECK_EQUAL( l1.step( Chan_Red ), 3 );
+		BOOST_CHECK_EQUAL( l1.step( Chan_Blue ), 3 );
+		BOOST_CHECK_EQUAL( l1.step( Chan_Green ), 3 );
+		BOOST_CHECK_EQUAL( l1.step<Chan_Red>(), 3 );
+		BOOST_CHECK_EQUAL( l1.step<Chan_Blue>(), 3 );
+		BOOST_CHECK_EQUAL( l1.step<Chan_Green>(), 3 );
+
+		BOOST_CHECK_EQUAL( l2.step( Chan_Red ), 4 );
+		BOOST_CHECK_EQUAL( l2.step( Chan_Blue ), 4 );
+		BOOST_CHECK_EQUAL( l2.step( Chan_Green ), 4 );
+		BOOST_CHECK_EQUAL( l2.step( Chan_Alpha ), 4 );
+		BOOST_CHECK_EQUAL( l2.step<Chan_Red>(), 4 );
+		BOOST_CHECK_EQUAL( l2.step<Chan_Blue>(), 4 );
+		BOOST_CHECK_EQUAL( l2.step<Chan_Green>(), 4 );
+		BOOST_CHECK_EQUAL( l2.step<Chan_Alpha>(), 4 );
+		
+		BOOST_CHECK_EQUAL( l3.step( Chan_U ), 2 );
+		BOOST_CHECK_EQUAL( l3.step( Chan_V ), 2 );
+		BOOST_CHECK_EQUAL( l3.step<Chan_U>(), 2 );
+		BOOST_CHECK_EQUAL( l3.step<Chan_V>(), 2 );
+		
+		BOOST_CHECK_THROW( l1.step( Chan_Alpha ), std::runtime_error );
+		BOOST_CHECK_THROW( l1.step<Chan_Alpha>(), std::runtime_error );
 	}
 
 	void testChannelTraits()

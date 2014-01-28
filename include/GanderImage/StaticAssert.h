@@ -71,6 +71,8 @@ struct static_assertion<true>
 		// An index was given which is out of bounds when looking up a Layout. This is most likely the
 		// result of calling PixelBase::LayoutTraits<X> where X is an index that is out of bounds.
 		THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST,
+		// You can only add channels to a DynamicLayout.
+		THE_LAYOUT_MUST_BE_DYNAMIC_IN_ORDER_TO_ADD_CHANNELS_TO_IT,
 	};
 };
 

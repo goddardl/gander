@@ -122,7 +122,10 @@ enum ChannelMask
 	Mask_All   = 0xFFFFFFFF
 };
 
-template< ChannelDefault C > struct ChannelToMask { enum{ Value = ChannelMask( 1 << ( C - 1) ) }; };
+template< EnumType C > struct ChannelToMask { enum{ Value = EnumType( 1 << ( C - 1 ) ) }; };
+template<> struct ChannelToMask< Chan_None > { enum{ Value = EnumType( Mask_None ) }; };
+
+template< EnumType M, EnumType C > struct MaskContainsChannel { enum{ Value = ( EnumType( M ) & EnumType( ChannelToMask< C >::Value ) ) != 0 }; };
 
 /// Declares the "ChannelSet" FlagSet.
 GANDER_DEFINE_FLAGSET( int32u, ChannelTraits::NumberOfDefaultChannels, ChannelDefault, ChannelMask, Channel, ChannelSet );

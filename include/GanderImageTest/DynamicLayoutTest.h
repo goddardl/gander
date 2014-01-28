@@ -31,70 +31,23 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDER_COMMON_H__
-#define __GANDER_COMMON_H__
+#ifndef __GANDERTEST_DYNAMICLAYOUTTEST_H__
+#define __GANDERTEST_DYNAMICLAYOUTTEST_H__
 
-/// A macro for concatenating two tokens. 
-#define CAT_(a, b) a ## b
-#define CAT(a, b) CAT_(a, b)
+#include <vector>
 
-/// We create several defines for the basic types. This allows use to configure the types using 
-/// the compiler's command line.
-#ifndef GANDER_INT8
-#define GANDER_INT8 signed char
-#endif
-
-#ifndef GANDER_INT8U
-#define GANDER_INT8U unsigned char
-#endif
-
-#ifndef GANDER_INT16
-#define GANDER_INT16 short
-#endif
-
-#ifndef GANDER_INT16U
-#define GANDER_INT16U unsigned short
-#endif
-
-#ifndef GANDER_INT32
-#define GANDER_INT32 int
-#endif
-
-#ifndef GANDER_INT32U
-#define GANDER_INT32U unsigned int
-#endif
-
-#ifndef GANDER_INT64
-#define GANDER_INT64 signed long long
-#endif
-
-#ifndef GANDER_INT64U
-#define GANDER_INT64U unsigned long long
-#endif
-
-#ifndef GANDER_FLOAT32
-#define GANDER_FLOAT32 float
-#endif
+#include "boost/test/unit_test.hpp"
 
 namespace Gander
 {
 
-typedef GANDER_INT8 int8;
-typedef GANDER_INT8U int8u;
-typedef GANDER_INT16 int16;
-typedef GANDER_INT16U int16u;
-typedef GANDER_INT32 int32;
-typedef GANDER_INT32U int32u;
-typedef GANDER_INT64 int64;
-typedef GANDER_INT64U int64u;
-typedef GANDER_FLOAT32 float32;
+namespace ImageTest
+{
 
-/// Set this typedef to the longest (most bytes)
-/// datatype that can represent an unsigned int.
-typedef int64u intLongestu;
-typedef intLongestu EnumType;
+void addDynamicLayoutTest( boost::unit_test::test_suite *test );
+
+}; // namespace ImageTest
 
 }; // namespace Gander
 
-
-#endif
+#endif // __GANDERTEST_DYNAMICLAYOUTTEST_H__

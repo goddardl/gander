@@ -41,6 +41,7 @@
 #include "boost/format.hpp"
 
 #include "Gander/Common.h"
+#include "Gander/Assert.h"
 
 #include "Gander/StaticAssert.h"
 #include "GanderImage/StaticAssert.h"
@@ -57,29 +58,88 @@ namespace Image
 template< class T >
 struct DynamicLayout : Layout< DynamicLayout< T > > 
 {
-	typedef T StorageType;
+	public :
 
-	enum
-	{
-		NumberOfChannels = DYNAMIC_NUMBER_OF_CHANNELS,
-		ChannelMask = Mask_All,
-	};
-	
-	enum
-	{
-		IsDynamic = true,
-	};
-	
-	template< EnumType LayoutIndex >
-	struct LayoutTraits
-	{
-		GANDER_IMAGE_STATIC_ASSERT( LayoutIndex == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
-		typedef DynamicLayout< T > LayoutType;
+		typedef DynamicLayout<T> Type;
 		typedef T StorageType;
-	};
+
+		enum
+		{
+			NumberOfChannels = DYNAMIC_NUMBER_OF_CHANNELS,
+			ChannelMask = Mask_All,
+		};
+
+		enum
+		{
+			IsDynamic = true,
+		};
+
+		template< EnumType LayoutIndex >
+		struct LayoutTraits
+		{
+			GANDER_IMAGE_STATIC_ASSERT( LayoutIndex == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
+			typedef DynamicLayout< T > LayoutType;
+			typedef T StorageType;
+		};
+		
+		template< ChannelDefault C = Chan_None >
+		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
+		{
+			typedef Type LayoutType;
+			typedef T StorageType;
+
+			ChannelTraits( const LayoutType &l, Channel channel = Chan_None ) :
+				Detail::ChannelTraitsInterface< LayoutType >( l, channel )
+			{
+			}
+		};
 	
 	private :
-		
+
+		/// Adds the channel to the Layout and logs all pertenant information.
+		void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			if( b != Brothers_None && !BrotherTraits<>::channels( b ).contains( c ) )
+			{
+				throw std::runtime_error( ( boost::format( "RunTimeChannelFormat: Channels \"%s\" do not belong to the specified brothers.") % c ).str() );
+			}
+
+			if( m_allBrothers.contains( c ) )
+			{
+				throw std::runtime_error(
+					( boost::format( "RunTimeChannelFormat: Channels \"%s\" cannot be added as another set of ChannelBrothers represents it.") % c ).str()
+					);
+			}
+
+			int8u step = 1;
+			if( b != Brothers_None )
+			{
+				m_allBrothers += BrotherTraits<>::brotherMask( b );
+				step = BrotherTraits<>::numberOfBrothers( b );
+			}
+			else
+			{
+				m_allBrothers += c;
+			}
+
+			ChannelSet newChannels( c - m_channels );
+			ChannelSet existingChannels( c - newChannels );
+
+			if( existingChannels.size() != 0 )
+			{
+				throw std::runtime_error( ( boost::format( "RunTimeChannelFormat: Cannot add channels \"%s\" as they already exist.") % existingChannels ).str() );
+			}
+
+			ChannelSet::const_iterator it( newChannels.begin() );
+			ChannelSet::const_iterator end( newChannels.end() );
+			for( ; it != end; ++it )
+			{
+				m_channels += *it;
+				int index = m_channels.index( *it );
+				m_steps.insert( m_steps.begin() + index, step );
+			}
+		}
+
 		friend class Layout< DynamicLayout< T > >;
 
 		/// Returns the channels represented by this layout.
@@ -87,23 +147,49 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 		{
 			return m_channels;
 		}
-		
+
 		/// Returns the number of channels that this layout represents.
 		inline unsigned int _numberOfChannels() const
 		{
 			return m_channels.size();
 		}
-		
+
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
 		inline ChannelSet _requiredChannels() const
 		{
 			return m_channels;
 		}
-		
+
+		/// Returns the step value for a given channel.
+		template< ChannelDefault C = Chan_None >
+		inline int8u _step( Channel channel = Chan_None ) const
+		{
+			if( C != Chan_None )
+			{
+				GANDER_ASSERT( m_channels.contains( C ), "Channel is not represented by this layout." )
+					return m_steps[ m_channels.index( C ) ];
+			}
+			else
+			{
+				GANDER_ASSERT( m_channels.contains( channel ), "Channel is not represented by this layout." )
+					return m_steps[ m_channels.index( channel ) ];
+			}
+			GANDER_ASSERT( 0, "No valid channel specified." )
+		}
+
+		/// Returns true is this layout contains the given channels.
+		inline bool _contains( ChannelSet channels ) const
+		{
+			return m_channels.contains( channels );
+		}
+
 		/// The channels that this format represents.
 		ChannelSet m_channels;
-	
+
+		/// All channel brothers associated with the channels that this layout contains.
+		ChannelSet m_allBrothers;
+
 		/// The step values for each channel.
 		std::vector< int8u > m_steps;
 };

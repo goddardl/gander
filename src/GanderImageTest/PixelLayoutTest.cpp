@@ -113,6 +113,52 @@ struct PixelLayoutTest
 			BOOST_CHECK_EQUAL( int(Layout::ChannelTraits<Chan_U>::LayoutType::Id), 3 );
 		}
 	};
+	
+	void testContains()
+	{
+		typedef BrothersLayout<float, Brothers_RGB> Storage0;
+		typedef ChannelLayout<float, Chan_Alpha> Storage1;
+		typedef BrothersLayout<float, Brothers_VU> Storage2;
+		
+		typedef PixelLayout< Storage0, Storage1, Storage2 > Layout;
+		Layout l;
+		BOOST_CHECK_EQUAL( int( l.contains( Chan_Alpha ) ), true );
+		BOOST_CHECK_EQUAL( int( l.contains( Chan_Blue ) ), true );
+		BOOST_CHECK_EQUAL( int( l.contains( Chan_Red ) ), true );
+		BOOST_CHECK_EQUAL( int( l.contains( Chan_Green ) ), true );
+		BOOST_CHECK_EQUAL( int( l.contains( Chan_U ) ), true );
+		BOOST_CHECK_EQUAL( int( l.contains( Chan_V ) ), true );
+		BOOST_CHECK_EQUAL( int( l.contains( Chan_Z ) ), false );
+	}
+
+	void testStep()
+	{
+		typedef BrothersLayout<float, Brothers_RGB> Storage0;
+		typedef ChannelLayout<float, Chan_Alpha> Storage1;
+		typedef ChannelLayout<float, Chan_Z> Storage2;
+		typedef DynamicLayout<float> Storage3;
+		
+		typedef PixelLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
+		Layout l;
+		l.addChannels( Mask_UV, Brothers_VU );
+		
+		BOOST_CHECK_EQUAL( int( l.step<Chan_Alpha>() ), 1 );
+		BOOST_CHECK_EQUAL( int( l.step<Chan_Red>() ), 3 );
+		BOOST_CHECK_EQUAL( int( l.step<Chan_Green>() ), 3 );
+		BOOST_CHECK_EQUAL( int( l.step<Chan_Blue>() ), 3 );
+		BOOST_CHECK_EQUAL( int( l.step<Chan_U>() ), 2 );
+		BOOST_CHECK_EQUAL( int( l.step<Chan_V>() ), 2 );
+		BOOST_CHECK_EQUAL( int( l.step( Chan_U ) ), 2 );
+		BOOST_CHECK_EQUAL( int( l.step( Chan_V ) ), 2 );
+
+		BOOST_CHECK_EQUAL( int( l.step( Chan_Alpha ) ), 1 );
+		BOOST_CHECK_THROW( l.step( Chan_Mask ), std::runtime_error );
+		BOOST_CHECK_THROW( l.step<Chan_Mask>(), std::runtime_error );
+		
+		l.addChannels( Mask_Mask );
+		BOOST_CHECK_EQUAL( int( l.step( Chan_Mask ) ), 1 );
+		BOOST_CHECK_EQUAL( int( l.step<Chan_Mask>() ), 1 );
+	}
 
 	void testCommonLayoutAttributes()
 	{
@@ -144,6 +190,8 @@ struct PixelLayoutTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testLayoutTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testChannelTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testDynamicLayout, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testStep, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testContains, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testCommonLayoutAttributes, instance ) );
 	}
 };

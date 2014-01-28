@@ -40,7 +40,7 @@
 #include "boost/format.hpp"
 
 #include "Gander/Common.h"
-#include "Gander/Tuple.h"
+#include "Gander/Assert.h"
 
 #include "GanderImage/StaticAssert.h"
 #include "GanderImage/Layout.h"
@@ -195,11 +195,37 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 		/// The most useful type that this struct declares is ChannelType. ChannelType is the type used to represent the
 		/// channel within the image. ChannelTraits also reveals the LayoutType that the channel was declared within
 		/// along with useful enum values such the Channel's ChannelBrothers.
-		template< ChannelDefault C >
-		struct ChannelTraits
+		template< ChannelDefault C = Chan_None >
+		struct ChannelTraits  
 		{
 			typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::StorageType StorageType;
 			typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::LayoutType LayoutType;
+
+			public :
+			
+				ChannelTraits( const Derived &l, Channel channel = Chan_None ) 
+				{
+					if( C == Chan_None )
+					{
+						m_step = l.template step( channel );
+					}
+					else
+					{
+						m_step = l.template step<C>();
+					}
+				}
+				
+				int8u step() const
+				{
+					return m_step;
+				}
+
+			private :
+			
+				// Assert that the layout actually contains the requested channel.
+				GANDER_IMAGE_STATIC_ASSERT( ( ( ( LayoutType::ChannelMask & ChannelToMask<C>::Value ) != 0 ) || ( C == Chan_None ) ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+
+				int8u m_step;
 		};
 };
 
@@ -207,33 +233,72 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 template < class Derived >
 struct PixelLayoutRecurse< Derived, false, None, None, None, None, None, None, None, None > : public PixelLayoutRecurseBase< Derived >
 {
-	enum
-	{
-		IsDynamic = false,
-	};
+	public :
+
+		enum
+		{
+			IsDynamic = false,
+		};
+
+	protected :
+		
+		/// Returns true is this layout contains the given channel.
+		inline bool _contains( ChannelSet channels ) const
+		{
+			return ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ).contains( channels );
+		}
+
+		template< ChannelDefault C = Chan_None >
+		inline int8u _step( Channel channel = Chan_None ) const
+		{
+			GANDER_ASSERT( 0, "Layout does not contain the requested channel." );
+			return 0;
+		}
 };
 
 /// The specialization of the PixelLayoutRecurse class for the dynamic layout.
 template < class Derived, class T0 >
 struct PixelLayoutRecurse< Derived, true, T0, None, None, None, None, None, None, None > : public PixelLayoutRecurseBase< Derived >
 {
-	typedef PixelLayoutRecurseBase< Derived > BaseType;
+	public :
 
-	enum
-	{
-		NumberOfLayouts = BaseType::NumberOfLayouts + 1,
-		IsDynamic = true,
-	};
+		typedef PixelLayoutRecurseBase< Derived > BaseType;
+
+		enum
+		{
+			NumberOfLayouts = BaseType::NumberOfLayouts + 1,
+			IsDynamic = true,
+		};
+
+		/// Returns a ChannelSet of the channels that pointers are required for in order
+		/// to access all of the channels in this layout. As this layout is dynamic, this
+		/// method isn't static and has to be determind at runtime.
+		inline ChannelSet requiredChannels() const
+		{
+			return m_dynamicLayout.requiredChannels() + BaseType::requiredChannels();
+		}
+
+	protected :	
 	
-	/// Returns a ChannelSet of the channels that pointers are required for in order
-	/// to access all of the channels in this layout. As this layout is dynamic, this
-	/// method isn't static and has to be determind at runtime.
-	inline ChannelSet requiredChannels() const
-	{
-		return m_dynamicLayout.requiredChannels() + BaseType::requiredChannels();
-	}
+		/// Adds the channel to the Layout and logs all pertenant information.
+		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			m_dynamicLayout.addChannels( c, b );
+		}
+		
+		/// Returns true is this layout contains the given channel.
+		inline bool _contains( ChannelSet channels ) const
+		{
+			return ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ).contains( channels ) || m_dynamicLayout.channels().contains( channels );
+		}
 
-	T0 m_dynamicLayout;
+		template< ChannelDefault C = Chan_None >
+		inline int8u _step( Channel channel = Chan_None ) const
+		{
+			return m_dynamicLayout.step( channel );
+		}
+
+		T0 m_dynamicLayout;
 };
 
 /// The body of the recursive PixelLayoutRecurse class.
@@ -241,7 +306,7 @@ template< class Derived, bool IS_DYNAMIC, class T0, class T1, class T2, class T3
 struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, T2, T3, T4, T5, T6, T7, None >
 {
 	public :
-		
+
 		inline ChannelSet requiredChannels() const
 		{
 			return BaseType::requiredChannels() + m_layout.requiredChannels();
@@ -271,6 +336,18 @@ struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, 
 		// Assert that the any dynamic layouts are the last argument.			
 		GANDER_IMAGE_STATIC_ASSERT( !T0::IsDynamic, ONLY_ONE_DYNAMIC_LAYOUT_MUST_BE_SPECIFED_AS_THE_LAST_TEMPLATE_ARGUMENT );
 
+		inline int8u _step( Channel channel ) const
+		{
+			if( m_layout.contains( channel ) )
+			{
+				return m_layout.step( channel );
+			}
+			else
+			{
+				return BaseType::_step( channel );
+			}
+		}
+
 		T0 m_layout;
 };
 
@@ -278,9 +355,9 @@ struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, 
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
 struct PixelLayout : public Detail::PixelLayoutRecurse<
-	PixelLayout< T0, T1, T2, T3, T4, T5, T6, T7 >,
-	T0::IsDynamic | T1::IsDynamic | T2::IsDynamic | T3::IsDynamic |T4::IsDynamic | T5::IsDynamic | T6::IsDynamic | T7::IsDynamic,
-	T0, T1, T2, T3, T4, T5, T6, T7
+	 PixelLayout< T0, T1, T2, T3, T4, T5, T6, T7 >,
+	 T0::IsDynamic | T1::IsDynamic | T2::IsDynamic | T3::IsDynamic |T4::IsDynamic | T5::IsDynamic | T6::IsDynamic | T7::IsDynamic,
+	 T0, T1, T2, T3, T4, T5, T6, T7
 >
 {
 	// We create a typedef for each of the template parameters so that we can use the
@@ -295,36 +372,58 @@ struct PixelLayout : public Detail::PixelLayoutRecurse<
 	> BaseType;
 
 	typedef PixelLayout< T0, T1, T2, T3, T4, T6, T7 > Derived;
-		
+
 	enum
 	{
 		NumberOfLayouts = BaseType::NumberOfLayouts,
 		NumberOfChannels = BaseType::NumberOfChannels,
 		ChannelMask = BaseType::ChannelMask,
 	};
-	
+
 	private :
-		
-		friend class Layout< Derived >;	
 
-		/// Returns the channels represented by this layout.
-		inline ChannelSet _channels() const
-		{
-			return ChannelSet( static_cast<Gander::Image::ChannelMask>( Derived::ChannelMask ) );
-		}
-		
-		/// Returns the number of channels that this layout represents.
-		inline unsigned int _numberOfChannels() const
-		{
-			return static_cast<unsigned int>( NumberOfChannels );
-		}
+	friend class Layout< Derived >;	
 
-		/// Returns a ChannelSet of the channels that pointers are required for in order
-		/// to access all of the channels in this layout.
-		inline ChannelSet _requiredChannels() const
+	/// Returns the channels represented by this layout.
+	inline ChannelSet _channels() const
+	{
+		return ChannelSet( static_cast<Gander::Image::ChannelMask>( Derived::ChannelMask ) );
+	}
+
+	/// Returns the number of channels that this layout represents.
+	inline unsigned int _numberOfChannels() const
+	{
+		return static_cast<unsigned int>( NumberOfChannels );
+	}
+
+	/// Returns a ChannelSet of the channels that pointers are required for in order
+	/// to access all of the channels in this layout.
+	inline ChannelSet _requiredChannels() const
+	{
+		return BaseType::_requiredChannels();
+	}
+
+	/// Returns the step value for a given channel.
+	template< ChannelDefault C = Chan_None >
+	inline int8u _step( Channel channel = Chan_None ) const
+	{
+		if( C != Chan_None )
 		{
-			return BaseType::_requiredChannels();
+			if( ( !Derived::IsDynamic ) || ( Gander::Image::template MaskContainsChannel< ChannelMask, C >::Value == true ) )
+			{
+				typedef typename BaseType::template ChannelTraits< C >::LayoutType LayoutType;
+				return LayoutType().template step<C>();
+			}
+			else
+			{
+				return BaseType::_step( C );
+			}
 		}
+		else
+		{
+			return BaseType::_step( channel );
+		}
+	}
 };
 
 }; // namespace Image

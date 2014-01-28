@@ -90,9 +90,14 @@ class PixelBase : public Detail::PixelBaseRecurse< L, L::NumberOfLayouts >
 
 		typedef L LayoutType;
 
-		template< ChannelDefault C >
+		template< ChannelDefault C = Chan_None >
 		struct ChannelTraits : public LayoutType::template ChannelTraits< C >
-		{};
+		{
+			ChannelTraits( L layout, Channel channel ) :
+				LayoutType::template ChannelTraits< C >( layout, channel )
+			{
+			}
+		};
 		
 		template< EnumType LayoutIndex >
 		struct LayoutTraits : public LayoutType::template LayoutTraits< LayoutIndex >
@@ -118,6 +123,13 @@ class PixelBase : public Detail::PixelBaseRecurse< L, L::NumberOfLayouts >
 		inline ChannelSet requiredChannels() const
 		{
 			return m_layout.requiredChannels();
+		}
+
+		/// The runtime creator of the channel traits struct.
+		template< ChannelDefault C = Chan_None >
+		ChannelTraits<C> channelTraits( Channel channel )
+		{
+			return ChannelTraits<C>( m_layout, channel );
 		}
 
 	private :

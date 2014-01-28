@@ -74,6 +74,13 @@ struct ChannelLayoutTest
 		BOOST_CHECK( int( l1 != l3 ) );
 		BOOST_CHECK( int( l2 != l3 ) );
 		BOOST_CHECK( int( l3 != l1 ) );
+		
+		BOOST_CHECK_EQUAL( l1.contains( Chan_Alpha ), true );
+		BOOST_CHECK_EQUAL( l1.contains( Chan_Red ), false );
+		BOOST_CHECK_EQUAL( l2.contains( Chan_Z ), true );
+		BOOST_CHECK_EQUAL( l2.contains( Chan_Alpha ), false );
+		BOOST_CHECK_EQUAL( l3.contains( Chan_Red ), true );
+		BOOST_CHECK_EQUAL( l3.contains( Chan_Z ), false );
 
 		BOOST_CHECK_EQUAL( l1.channels(), ChannelSet( Mask_Alpha ) );
 		BOOST_CHECK_EQUAL( l2.channels(), ChannelSet( Mask_Z ) );
@@ -86,6 +93,12 @@ struct ChannelLayoutTest
 		BOOST_CHECK_EQUAL( l1.requiredChannels(), ChannelSet( Mask_Alpha ) );
 		BOOST_CHECK_EQUAL( l2.requiredChannels(), ChannelSet( Mask_Z ) );
 		BOOST_CHECK_EQUAL( l3.requiredChannels(), ChannelSet( Mask_Red ) );
+		
+		BOOST_CHECK_EQUAL( l1.step( Chan_Alpha ), 1 );
+		BOOST_CHECK_EQUAL( l1.step<Chan_Alpha>(), 1 );
+		
+		BOOST_CHECK_THROW( l1.step( Chan_Red ), std::runtime_error );
+		BOOST_CHECK_THROW( l1.step<Chan_Red>(), std::runtime_error );
 	}
 
 	void testChannelTraits()

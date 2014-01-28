@@ -89,6 +89,61 @@ struct PixelBaseTest
 		BOOST_CHECK_EQUAL( PixelBase< Layout4 >( Layout4() ).requiredChannels(), ChannelSet( Layout4().requiredChannels()) );
 	}
 
+	void testRuntimeChannelTraits()
+	{
+		typedef ChannelLayout< float, Chan_Z > Layout1;
+		typedef BrothersLayout< float, Brothers_UV > Layout2;
+		typedef DynamicLayout< float > Layout3;
+		typedef PixelLayout< Layout1, Layout2, Layout3 > Layout4;
+		
+		{
+			typedef PixelBase< Layout1 > Base;
+			Base::ChannelTraits<> traits1 = Base().channelTraits( Chan_Z );
+			BOOST_CHECK_EQUAL( traits1.step(), 1 );
+		}
+
+		{	
+			typedef PixelBase< Layout2 > Base;
+			Base::ChannelTraits<> traits2 = Base().channelTraits( Chan_U );
+			BOOST_CHECK_EQUAL( traits2.step(), 2 );
+		}
+			
+		{	
+			typedef PixelBase< Layout3 > Base;
+			Layout3 layout;
+			layout.addChannels( Chan_Blue | Chan_Green, Brothers_RGBA );
+
+			Base::ChannelTraits<> traits3 = Base( layout ).channelTraits( Chan_Blue );
+			BOOST_CHECK_EQUAL( traits3.step(), 4 );
+
+			Base::ChannelTraits<> traits4 = Base( layout ).channelTraits( Chan_Green );
+			BOOST_CHECK_EQUAL( traits4.step(), 4 );
+		}
+		
+		{
+			typedef PixelBase< Layout4 > Base;
+			
+			Layout4 l;
+			l.addChannels( Chan_Blue | Chan_Green, Brothers_RGBA );
+			Base b( l );
+
+			Base::ChannelTraits<> traits = b.channelTraits( Chan_Z );
+			BOOST_CHECK_EQUAL( traits.step(), 1 );
+			
+			traits = b.channelTraits( Chan_U );
+			BOOST_CHECK_EQUAL( traits.step(), 2 );
+			
+			traits = b.channelTraits( Chan_V );
+			BOOST_CHECK_EQUAL( traits.step(), 2 );
+			
+			traits = b.channelTraits( Chan_Blue );
+			BOOST_CHECK_EQUAL( traits.step(), 4 );
+			
+			traits = b.channelTraits( Chan_Green );
+			BOOST_CHECK_EQUAL( traits.step(), 4 );
+		}
+	}
+
 	void testDifferentLayoutTraits()
 	{
 		typedef ChannelLayout< float, Chan_Red > Layout1;
@@ -129,6 +184,7 @@ struct PixelBaseTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<PixelBaseTest> instance( new PixelBaseTest() );
 		add( BOOST_CLASS_TEST_CASE( &PixelBaseTest::testDifferentLayoutTraits, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelBaseTest::testRuntimeChannelTraits, instance ) );
 	}
 };
 
