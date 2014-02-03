@@ -91,6 +91,7 @@ if targetAppVersion :
 LOCATE_DEPENDENCY_SYSTEMPATH = [
 	os.path.join( IEEnv.Environment.rootPath(), "apps", "OpenImageIO", oiioVersion, IEEnv.platform(), compiler, compilerVersion, "include" ),
 	os.path.join( IEEnv.Environment.rootPath(), "tools", "include", IEEnv.platform(), "boost", targetAppReg.get( "boostVersion", cortexReg["boostVersion"] ) ),
+	"/software/tools/include/eigen/3.2.0/cent6.x86_64/include/Eigen/",
 ]
 
 if targetAppVersion :
