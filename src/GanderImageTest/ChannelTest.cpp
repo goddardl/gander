@@ -122,6 +122,12 @@ struct ChannelTest
 		BOOST_CHECK_EQUAL( ga - Mask_Green, a );
 		BOOST_CHECK_EQUAL( ga - g, a );
 	}
+	
+	void testCombineMasks()
+	{
+		BOOST_CHECK_EQUAL( ChannelSet( ChannelMask( CombineMasks< Mask_Red, Mask_U >::Value ) ), ChannelSet( Mask_Red | Mask_U ) );
+		BOOST_CHECK_EQUAL( ChannelSet( ChannelMask( CombineMasks< Mask_Red, Mask_Z, Mask_Blue, Mask_Alpha, Mask_Green, Mask_U >::Value ) ), ChannelSet( Mask_RGBA | Mask_U | Mask_Z ) );
+	}
 
 	void testEquality()
 	{
@@ -321,6 +327,7 @@ struct ChannelTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testIterator, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testIoStream, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testNewFlags, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testCombineMasks, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ChannelTest::testIndex, instance ) );
 	}
 };

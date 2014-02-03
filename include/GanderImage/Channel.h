@@ -125,6 +125,18 @@ enum ChannelMask
 template< EnumType C > struct ChannelToMask { enum{ Value = EnumType( 1 << ( C - 1 ) ) }; };
 template<> struct ChannelToMask< Chan_None > { enum{ Value = EnumType( Mask_None ) }; };
 
+/// A simple helper template class that can be used to combine channel masks.
+template<
+	EnumType T0, EnumType T1 = Mask_None, EnumType T2 = Mask_None, EnumType T3 = Mask_None,
+	EnumType T4 = Mask_None, EnumType T5 = Mask_None, EnumType T6 = Mask_None, EnumType T7 = Mask_None >
+struct CombineMasks
+{
+	enum
+	{	
+		Value = ChannelMask( T0 | T1 | T2 | T3 | T4 | T5| T6 | T7 )
+	};
+};
+
 template< EnumType M, EnumType C > struct MaskContainsChannel { enum{ Value = ( EnumType( M ) & EnumType( ChannelToMask< C >::Value ) ) != 0 }; };
 
 /// Declares the "ChannelSet" FlagSet.
