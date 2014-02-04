@@ -66,7 +66,8 @@ namespace Detail
 {
 
 /// The ChannelIndexToLayoutIndex class is a helper class that returns the index of the Layout within the template arguments that contains the channel of the given index.
-template< EnumType Index, class T0 = None, class T1 = None, class T2 = None, class T3 = None, class T4 = None, class T5 = None, class T6 = None, class T7 = None >
+template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType M = Mask_All,
+	class T0 = None, class T1 = None, class T2 = None, class T3 = None, class T4 = None, class T5 = None, class T6 = None, class T7 = None >
 struct ChannelIndexToLayoutIndex;
 
 /// Forward declaration of the ChannelToLayoutIndex class which calculates the index of the Layout within template parameters that contains the given channel.
@@ -87,25 +88,38 @@ struct ChannelToLayoutIndex : public ChannelToLayoutIndex< C, NumberOfLayouts, T
 	typedef ChannelToLayoutIndex< C, NumberOfLayouts, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
 	enum
 	{
-		Count = BaseType::Count + 1,
+		Count = T0::NumberOfChannels > 0 ? BaseType::Count + 1 : BaseType::Count,
 		Value = ( ( ChannelToMask<C>::Value & T0::ChannelMask ) != 0 ) ? NumberOfLayouts - Count - 1 : BaseType::Value
 	};
 };
 
 /// The last recursive base of the ChannelIndexToLayoutIndex helper class. 
-template< EnumType Index >
-struct ChannelIndexToLayoutIndex< Index, None, None, None, None, None, None, None, None > { enum { NumberOfChannels = 0, Count = -1, Value = 0 }; };
+template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType ChannelMask >
+struct ChannelIndexToLayoutIndex< NumberOfLayouts, CompleteChannelMask, ChannelIndex, ChannelMask, None, None, None, None, None, None, None, None >
+{
+	enum
+	{
+		NumberOfChannels = 0,
+		NumberOfMaskedChannels = 0,
+		LayoutNumber = 0,
+		Value = -1,
+		CompleteNumberOfMaskedChannels = Gander::template EnumHelper< CompleteChannelMask & ChannelMask >::NumberOfSetBits
+	};
+};
 
 /// The body of the ChannelIndexToLayoutIndex class.
-template< EnumType Index, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
-struct ChannelIndexToLayoutIndex : public ChannelIndexToLayoutIndex< Index, T1, T2, T3, T4, T5, T6, T7, None >
+template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType Index, EnumType M, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
+struct ChannelIndexToLayoutIndex : public ChannelIndexToLayoutIndex< NumberOfLayouts, CompleteChannelMask, Index, M, T1, T2, T3, T4, T5, T6, T7, None >
 {
-	typedef ChannelIndexToLayoutIndex< Index, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
+	typedef ChannelIndexToLayoutIndex< NumberOfLayouts, CompleteChannelMask, Index, M, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
 	enum
 	{
 		NumberOfChannels = BaseType::NumberOfChannels + T0::NumberOfChannels,
-		Count = BaseType::Count + 1,
-		Value = ( Index <= NumberOfChannels && Index > BaseType::NumberOfChannels ) ? Count : BaseType::Value,
+		NumberOfMaskedChannelsInT0 = Gander::template EnumHelper< T0::ChannelMask & M >::NumberOfSetBits,
+		NumberOfMaskedChannels = BaseType::NumberOfMaskedChannels + NumberOfMaskedChannelsInT0,
+		LayoutNumber = BaseType::LayoutNumber + 1,
+		InverseIndex = BaseType::CompleteNumberOfMaskedChannels - Index,
+		Value = InverseIndex <= NumberOfMaskedChannels && InverseIndex > BaseType::NumberOfMaskedChannels && NumberOfMaskedChannelsInT0 > 0 ? NumberOfLayouts - LayoutNumber : BaseType::Value,
 	};
 };
 
@@ -153,18 +167,27 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 			ChannelMask = 0,
 		};
 	
-		template< EnumType ChannelIndex >
+		template< EnumType ChannelIndex, EnumType M = Mask_All >
 		struct ChannelIndexToLayoutIndex
 		{
-			enum
-			{
-				Value = Detail::ChannelIndexToLayoutIndex
+			private :
+
+				typedef typename Detail::ChannelIndexToLayoutIndex
 				<
+					Derived::NumberOfLayouts,
+					Derived::ChannelMask,
 					ChannelIndex,
+					M,
 					typename Derived::Type0, typename Derived::Type1, typename Derived::Type2, typename Derived::Type3,
 					typename Derived::Type4, typename Derived::Type5, typename Derived::Type6, typename Derived::Type7
-				>::Value,
-			};
+				> IndexHelper;
+
+			public :
+
+				enum
+				{
+					Value = IndexHelper::Value,
+				};
 		};
 		
 		template< ChannelDefault C >

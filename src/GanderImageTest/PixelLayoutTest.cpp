@@ -92,6 +92,41 @@ struct PixelLayoutTest
 		BOOST_CHECK_EQUAL( int(Layout::LayoutTraits<3>::LayoutType::Id), 3 );
 	};
 	
+	void testMaskedLayoutTraits()
+	{
+		/// Here we test the use of the helper class that can convert an index into the number of
+		/// channels - possibly masked - to the index of the layout that represents the channel.
+		typedef BrothersLayout<float, Brothers_RGB> Layout1;
+		typedef ChannelLayout<float, Chan_Alpha> Layout2;
+		typedef ChannelLayout<float, Chan_Z> Layout3;
+		typedef BrothersLayout<float, Brothers_UV> Layout4;
+		typedef PixelLayout< Layout1, Layout2, Layout3, Layout4 > Layout;
+		
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<0, Mask_All>::Value ), 0 ); // Red 
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<1, Mask_All>::Value ), 0 ); // Green 
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<2, Mask_All>::Value ), 0 ); // Blue
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<3, Mask_All>::Value ), 1 ); // Alpha
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<4>::Value ), 2 ); // Z
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<5>::Value ), 3 ); // U
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<6>::Value ), 3 ); // V
+		
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<0, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<1, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<2, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<3, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 2 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<4, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 3 );
+		
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<0, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<1, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 1 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<2, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 2 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<3, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 3 );
+		
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<0, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 1 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<1, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 2 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<2, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 3 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<3, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 3 );
+	};
+	
 	void testChannelTraits()
 	{
 		/// Test the we can access the layouts using the ChannelTraits struct.
@@ -188,6 +223,7 @@ struct PixelLayoutTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<PixelLayoutTest> instance( new PixelLayoutTest() );
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testLayoutTraits, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testMaskedLayoutTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testChannelTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testDynamicLayout, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testStep, instance ) );
