@@ -44,7 +44,7 @@ namespace Test { struct EnumHelperTest; }
 
 /// A helpful struct that counts the number of set bits
 /// in a value and sets the enum NumberOfSetBits to it.
-template< intLongestu M >
+template< EnumType M >
 struct EnumHelper
 {
 	private :
@@ -90,38 +90,38 @@ struct EnumHelper
 		enum
 		{
 			MinimumRequiredBitWidth =
-				M <= intLongestu( 1 << 0 ) ? 1 :
-				M < intLongestu( 1 << 1 ) ? 1 :
-				M < intLongestu( 1 << 2 ) ? 2 :
-				M < intLongestu( 1 << 3 ) ? 3 :
-				M < intLongestu( 1 << 4 ) ? 4 :
-				M < intLongestu( 1 << 5 ) ? 5 :
-				M < intLongestu( 1 << 6 ) ? 6 :
-				M < intLongestu( 1 << 7 ) ? 7 :
-				M < intLongestu( 1 << 8 ) ? 8 :
-				M < intLongestu( 1 << 9 ) ? 9 :
-				M < intLongestu( 1 << 10 ) ? 10 :
-				M < intLongestu( 1 << 11 ) ? 11 :
-				M < intLongestu( 1 << 12 ) ? 12 :
-				M < intLongestu( 1 << 13 ) ? 13 :
-				M < intLongestu( 1 << 14 ) ? 14 :
-				M < intLongestu( 1 << 15 ) ? 15 :
-				M < intLongestu( 1 << 16 ) ? 16 :
-				M < intLongestu( 1 << 17 ) ? 17 :
-				M < intLongestu( 1 << 18 ) ? 18 :
-				M < intLongestu( 1 << 19 ) ? 19 :
-				M < intLongestu( 1 << 20 ) ? 20 :
-				M < intLongestu( 1 << 21 ) ? 21 :
-				M < intLongestu( 1 << 22 ) ? 22 :
-				M < intLongestu( 1 << 23 ) ? 23 :
-				M < intLongestu( 1 << 24 ) ? 24 :
-				M < intLongestu( 1 << 25 ) ? 25 :
-				M < intLongestu( 1 << 26 ) ? 26 :
-				M < intLongestu( 1 << 27 ) ? 27 :
-				M < intLongestu( 1 << 28 ) ? 28 :
-				M < intLongestu( 1 << 29 ) ? 39 :
-				M < intLongestu( 1 << 30 ) ? 30 :
-				M < intLongestu( 1 << 31 ) ? 31 :
+				M <= EnumType( 1 << 0 ) ? 1 :
+				M < EnumType( 1 << 1 ) ? 1 :
+				M < EnumType( 1 << 2 ) ? 2 :
+				M < EnumType( 1 << 3 ) ? 3 :
+				M < EnumType( 1 << 4 ) ? 4 :
+				M < EnumType( 1 << 5 ) ? 5 :
+				M < EnumType( 1 << 6 ) ? 6 :
+				M < EnumType( 1 << 7 ) ? 7 :
+				M < EnumType( 1 << 8 ) ? 8 :
+				M < EnumType( 1 << 9 ) ? 9 :
+				M < EnumType( 1 << 10 ) ? 10 :
+				M < EnumType( 1 << 11 ) ? 11 :
+				M < EnumType( 1 << 12 ) ? 12 :
+				M < EnumType( 1 << 13 ) ? 13 :
+				M < EnumType( 1 << 14 ) ? 14 :
+				M < EnumType( 1 << 15 ) ? 15 :
+				M < EnumType( 1 << 16 ) ? 16 :
+				M < EnumType( 1 << 17 ) ? 17 :
+				M < EnumType( 1 << 18 ) ? 18 :
+				M < EnumType( 1 << 19 ) ? 19 :
+				M < EnumType( 1 << 20 ) ? 20 :
+				M < EnumType( 1 << 21 ) ? 21 :
+				M < EnumType( 1 << 22 ) ? 22 :
+				M < EnumType( 1 << 23 ) ? 23 :
+				M < EnumType( 1 << 24 ) ? 24 :
+				M < EnumType( 1 << 25 ) ? 25 :
+				M < EnumType( 1 << 26 ) ? 26 :
+				M < EnumType( 1 << 27 ) ? 27 :
+				M < EnumType( 1 << 28 ) ? 28 :
+				M < EnumType( 1 << 29 ) ? 39 :
+				M < EnumType( 1 << 30 ) ? 30 :
+				M < EnumType( 1 << 31 ) ? 31 :
 				0,			
 
 			NumberOfSetBits =
@@ -212,14 +212,14 @@ struct EnumHelper
 /// Value:{ 11, 01, 00, 11, 01 } = 0x34D
 ///
 /// For more information of it's usage, see the EnumHelperTest test cases.
-template< intLongestu Array, intLongestu Width >
+template< EnumType Array, EnumType Width >
 struct EnumArrayHelper
 {
 	protected :
 	
 	enum
 	{
-		MaskAll = ~intLongestu( 0 ),
+		MaskAll = ~EnumType( 0 ),
 	};
 
 	public :
@@ -229,7 +229,7 @@ struct EnumArrayHelper
 		return ( ( Array >> ( index * Width ) ) & ( ~( MaskAll << Width ) ) );
 	}
 
-	template< intLongestu Index >
+	template< EnumType Index >
 	struct Element
 	{
 		public :
@@ -240,7 +240,7 @@ struct EnumArrayHelper
 			};
 	};
 
-	template< intLongestu Index, intLongestu Element >
+	template< EnumType Index, EnumType Element >
 	struct InsertElement
 	{
 		private :
@@ -258,7 +258,7 @@ struct EnumArrayHelper
 			};
 	};
 
-	template< intLongestu Index >
+	template< EnumType Index >
 	struct RemoveElement
 	{
 		private :
@@ -279,7 +279,7 @@ struct EnumArrayHelper
 			friend class Gander::Test::EnumHelperTest;
 	};
 	
-	template< intLongestu Mask >
+	template< EnumType Mask >
 	struct PadElements
 	{
 		private :
@@ -330,7 +330,7 @@ struct EnumArrayHelper
 			friend class Gander::Test::EnumHelperTest;
 	};
 
-	template< intLongestu Mask >
+	template< EnumType Mask >
 	struct RemoveElements
 	{
 		private :
