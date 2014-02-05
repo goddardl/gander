@@ -113,7 +113,7 @@ struct Layout
 		
 		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
-			static_cast< Derived const * >( this )->_addChannels( c, b );
+			static_cast< Derived * >( this )->_addChannels( c, b );
 		}
 		
 		/// Returns the step value for a given channel.
