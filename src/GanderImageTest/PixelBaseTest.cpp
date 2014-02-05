@@ -76,6 +76,30 @@ namespace ImageTest
 
 struct PixelBaseTest
 {
+	void testChannelAtIndex()
+	{
+		todo:
+		/*
+		 * 1) Test the channelAtIndex code with PixelBases that use ChannelLayout and BrothersLayout the Layout.
+		 * 2) Make the test cases more robust.
+		 * 3) Add support for dynamic channels.
+		 * 4) Make the PixelBase take the Tuple type from the Layout. That way we can make the Layout dictate the type of container required and therefore add support for access to channel
+		 *    values when there are more than one in an int. How would this be implemented?
+		 * 5) Work out how we are going to access pointers etc. maybe a different method?
+		 */
+		typedef ChannelLayout< float, Chan_Red > Layout1;
+		typedef BrothersLayout< float, Brothers_UV > Layout2;
+		typedef PixelLayout< Layout1, Layout2 > Layout3;
+		typedef PixelBase< Layout3 > Base;
+		Base base;
+		base.channelAtIndex< float >( 0 ) = 1.5;
+		base.channelAtIndex< float >( 1 ) = 2.5;
+		base.channelAtIndex< float >( 2 ) = 3.5;
+		std::cerr << base.channelAtIndex< float >( 0 ) << std::endl;	
+		std::cerr << base.channelAtIndex< float >( 1 ) << std::endl;	
+		std::cerr << base.channelAtIndex< float >( 2 ) << std::endl;	
+	}
+	
 	void testRequiredChannels()
 	{
 		typedef ChannelLayout< float, Chan_Red > Layout1;
@@ -185,6 +209,8 @@ struct PixelBaseTestSuite : public boost::unit_test::test_suite
 		boost::shared_ptr<PixelBaseTest> instance( new PixelBaseTest() );
 		add( BOOST_CLASS_TEST_CASE( &PixelBaseTest::testDifferentLayoutTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelBaseTest::testRuntimeChannelTraits, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelBaseTest::testRequiredChannels, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelBaseTest::testChannelAtIndex, instance ) );
 	}
 };
 

@@ -65,10 +65,10 @@ template<
 namespace Detail
 {
 
-/// The ChannelIndexToLayoutIndex class is a helper class that returns the index of the Layout within the template arguments that contains the channel of the given index.
+/// The ChannelIndexHelper class is a helper class that returns the index of the Layout within the template arguments that contains the channel of the given index.
 template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType M = Mask_All,
 	class T0 = None, class T1 = None, class T2 = None, class T3 = None, class T4 = None, class T5 = None, class T6 = None, class T7 = None >
-struct ChannelIndexToLayoutIndex;
+struct ChannelIndexHelper;
 
 /// Forward declaration of the ChannelToLayoutIndex class which calculates the index of the Layout within template parameters that contains the given channel.
 template<
@@ -93,9 +93,9 @@ struct ChannelToLayoutIndex : public ChannelToLayoutIndex< C, NumberOfLayouts, T
 	};
 };
 
-/// The last recursive base of the ChannelIndexToLayoutIndex helper class. 
+/// The last recursive base of the ChannelIndexHelper helper class. 
 template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType ChannelMask >
-struct ChannelIndexToLayoutIndex< NumberOfLayouts, CompleteChannelMask, ChannelIndex, ChannelMask, None, None, None, None, None, None, None, None >
+struct ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, ChannelIndex, ChannelMask, None, None, None, None, None, None, None, None >
 {
 	enum
 	{
@@ -103,15 +103,16 @@ struct ChannelIndexToLayoutIndex< NumberOfLayouts, CompleteChannelMask, ChannelI
 		NumberOfMaskedChannels = 0,
 		LayoutNumber = 0,
 		Value = -1,
+		ChannelIndexInLayout = 0,
 		CompleteNumberOfMaskedChannels = Gander::template EnumHelper< CompleteChannelMask & ChannelMask >::NumberOfSetBits
 	};
 };
 
-/// The body of the ChannelIndexToLayoutIndex class.
+/// The body of the ChannelIndexHelper class.
 template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType Index, EnumType M, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
-struct ChannelIndexToLayoutIndex : public ChannelIndexToLayoutIndex< NumberOfLayouts, CompleteChannelMask, Index, M, T1, T2, T3, T4, T5, T6, T7, None >
+struct ChannelIndexHelper : public ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, Index, M, T1, T2, T3, T4, T5, T6, T7, None >
 {
-	typedef ChannelIndexToLayoutIndex< NumberOfLayouts, CompleteChannelMask, Index, M, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
+	typedef ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, Index, M, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
 	enum
 	{
 		NumberOfChannels = BaseType::NumberOfChannels + T0::NumberOfChannels,
@@ -120,6 +121,8 @@ struct ChannelIndexToLayoutIndex : public ChannelIndexToLayoutIndex< NumberOfLay
 		LayoutNumber = BaseType::LayoutNumber + 1,
 		InverseIndex = BaseType::CompleteNumberOfMaskedChannels - Index,
 		Value = InverseIndex <= NumberOfMaskedChannels && InverseIndex > BaseType::NumberOfMaskedChannels && NumberOfMaskedChannelsInT0 > 0 ? NumberOfLayouts - LayoutNumber : BaseType::Value,
+		ChannelIndexInLayout = InverseIndex <= NumberOfMaskedChannels && InverseIndex > BaseType::NumberOfMaskedChannels && NumberOfMaskedChannelsInT0 > 0 ?
+			NumberOfMaskedChannels - InverseIndex : BaseType::ChannelIndexInLayout,
 	};
 };
 
@@ -168,11 +171,11 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 		};
 	
 		template< EnumType ChannelIndex, EnumType M = Mask_All >
-		struct ChannelIndexToLayoutIndex
+		struct ChannelIndexHelper
 		{
 			private :
 
-				typedef typename Detail::ChannelIndexToLayoutIndex
+				typedef typename Detail::ChannelIndexHelper
 				<
 					Derived::NumberOfLayouts,
 					Derived::ChannelMask,
@@ -187,6 +190,7 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 				enum
 				{
 					Value = IndexHelper::Value,
+					ChannelIndexInLayout = IndexHelper::ChannelIndexInLayout,
 				};
 		};
 		
@@ -221,11 +225,11 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 		template< ChannelDefault C = Chan_None >
 		struct ChannelTraits  
 		{
-			typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::StorageType StorageType;
-			typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::LayoutType LayoutType;
-
 			public :
-			
+	
+				typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::StorageType StorageType;
+				typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::LayoutType LayoutType;
+
 				ChannelTraits( const Derived &l, Channel channel = Chan_None ) 
 				{
 					if( C == Chan_None )
@@ -250,6 +254,15 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 
 				int8u m_step;
 		};
+		
+		template< int Index, EnumType Mask = Mask_All  >
+		struct ChannelTraitsAtIndex : public LayoutTraits< ChannelIndexHelper< Index, Mask >::Value >
+		{
+		};
+
+		template< class L > friend class PixelBase;
+		template< class L, EnumType N > friend class PixelBaseRecurse;
+
 };
 
 /// The last recursive base of the PixelLayout class.

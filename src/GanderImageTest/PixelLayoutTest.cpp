@@ -102,29 +102,44 @@ struct PixelLayoutTest
 		typedef BrothersLayout<float, Brothers_UV> Layout4;
 		typedef PixelLayout< Layout1, Layout2, Layout3, Layout4 > Layout;
 		
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<0, Mask_All>::Value ), 0 ); // Red 
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<1, Mask_All>::Value ), 0 ); // Green 
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<2, Mask_All>::Value ), 0 ); // Blue
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<3, Mask_All>::Value ), 1 ); // Alpha
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<4>::Value ), 2 ); // Z
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<5>::Value ), 3 ); // U
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<6>::Value ), 3 ); // V
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<0, Mask_All>::Value ), 0 ); // Red 
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<1, Mask_All>::Value ), 0 ); // Green 
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<2, Mask_All>::Value ), 0 ); // Blue
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<3, Mask_All>::Value ), 1 ); // Alpha
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<4>::Value ), 2 ); // Z
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<5>::Value ), 3 ); // U
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<6>::Value ), 3 ); // V
 		
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<0, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 0 );
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<1, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 0 );
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<2, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 0 );
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<3, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 2 );
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<4, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 3 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<0, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<1, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<2, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<3, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 2 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<4, CombineMasks< Mask_RGB, Mask_Z, Mask_U >::Value >::Value ), 3 );
 		
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<0, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 0 );
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<1, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 1 );
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<2, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 2 );
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<3, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 3 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<0, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<1, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 1 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<2, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 2 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<3, CombineMasks< Mask_Green, Mask_Alpha, Mask_Z, Mask_V >::Value >::Value ), 3 );
 		
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<0, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 1 );
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<1, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 2 );
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<2, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 3 );
-		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexToLayoutIndex<3, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 3 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<0, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 1 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<1, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 2 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<2, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 3 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<3, CombineMasks< Mask_Alpha, Mask_Z, Mask_UV >::Value >::Value ), 3 );
+
+		/// Check that we can calculate the index of the channel within the layout.
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<0, CombineMasks< Mask_RGB, Mask_Z, Mask_UV >::Value >::ChannelIndexInLayout ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<1, CombineMasks< Mask_RGB, Mask_Z, Mask_UV >::Value >::ChannelIndexInLayout ), 1 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<2, CombineMasks< Mask_RGB, Mask_Z, Mask_UV >::Value >::ChannelIndexInLayout ), 2 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<3, CombineMasks< Mask_RGB, Mask_Z, Mask_UV >::Value >::ChannelIndexInLayout ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<4, CombineMasks< Mask_RGB, Mask_Z, Mask_UV >::Value >::ChannelIndexInLayout ), 0 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<5, CombineMasks< Mask_RGB, Mask_Z, Mask_UV >::Value >::ChannelIndexInLayout ), 1 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<0, Mask_All>::ChannelIndexInLayout ), 0 ); 
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<1, Mask_All>::ChannelIndexInLayout ), 1 );
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<2, Mask_All>::ChannelIndexInLayout ), 2 ); 
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<3, Mask_All>::ChannelIndexInLayout ), 0 ); 
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<4, Mask_All>::ChannelIndexInLayout ), 0 ); 
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<5>::ChannelIndexInLayout ), 0 ); 
+		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<6>::ChannelIndexInLayout ), 1 ); 
 	};
 	
 	void testChannelTraits()

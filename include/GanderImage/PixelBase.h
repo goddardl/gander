@@ -56,22 +56,59 @@ namespace Image
 namespace Detail
 {
 
-template< class L, unsigned N >
+template< class L, EnumType N >
 struct PixelBaseRecurse;
 
 template< class L >
 struct PixelBaseRecurse< L, 0 >
 {
+		template< class ChannelType, ChannelMask Mask, EnumType Index >
+		inline ChannelType &channelAtIndex()
+		{
+			//\todo: The requested channel does not exist so report it with an error...
+			static ChannelType t( 0 );
+			return t;
+		};
 };
 
-template< class L, unsigned N >
+template< class L, EnumType N >
 struct PixelBaseRecurse : public PixelBaseRecurse< L, N - 1 >
 {
-	typedef PixelBaseRecurse< L, N - 1  > BaseType;
-	typedef typename L::template LayoutTraits< N - 1 >::LayoutType LayoutType;
-	typedef typename LayoutType::StorageType StorageType;
-	
-	Tuple< StorageType, LayoutType::NumberOfChannels, LayoutType::IsDynamic > m_data;
+	private :
+
+		enum
+		{
+			LayoutIndex = L::NumberOfLayouts - N
+		};
+
+	public :
+
+		typedef PixelBaseRecurse< L, N - 1  > BaseType;
+		typedef typename L::template LayoutTraits< L::NumberOfLayouts - N >::LayoutType LayoutType;
+		typedef typename LayoutType::StorageType StorageType;
+
+		Tuple< StorageType, LayoutType::NumberOfChannels, LayoutType::IsDynamic > m_data;
+
+		template< class ChannelType, ChannelMask Mask, EnumType Index >
+		inline ChannelType &channelAtIndex()
+		{
+			enum
+			{
+				RequestedIndex = L::template ChannelIndexHelper< Index, Mask >::Value,
+				ChannelIndexInLayout = L::template ChannelIndexHelper< Index, Mask >::ChannelIndexInLayout 
+			};
+			
+			std::cerr << "Layout " << LayoutIndex << ", index " << Index << ", channelIndex " << ChannelIndexInLayout << " channels " << ChannelMask( LayoutType::ChannelMask ) << std::endl;
+
+			if( RequestedIndex == EnumType( LayoutIndex ) )
+			{
+				return m_data[ChannelIndexInLayout];
+			}
+			else
+			{
+				return BaseType::template channelAtIndex< ChannelType, Mask, Index >();
+			}
+		}
 };
 
 };
@@ -79,7 +116,7 @@ struct PixelBaseRecurse : public PixelBaseRecurse< L, N - 1 >
 template< class L >
 class PixelBase : public Detail::PixelBaseRecurse< L, L::NumberOfLayouts >
 {
-	typedef Detail::PixelBaseRecurse< L, L::NumberOfLayouts + 1  > BaseType;
+	typedef Detail::PixelBaseRecurse< L, L::NumberOfLayouts > BaseType;
 	
 	public :
 		
@@ -130,6 +167,23 @@ class PixelBase : public Detail::PixelBaseRecurse< L, L::NumberOfLayouts >
 		ChannelTraits<C> channelTraits( Channel channel )
 		{
 			return ChannelTraits<C>( m_layout, channel );
+		}
+
+		template< class ChannelType, ChannelMask Mask = Mask_All >
+		inline ChannelType &channelAtIndex( unsigned int index )
+		{
+			switch( index )
+			{
+				case( 0 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 0 >(); break;
+				case( 1 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 1 >(); break;
+				case( 2 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 2 >(); break;
+				case( 3 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 3 >(); break;
+				case( 4 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 4 >(); break;
+				case( 5 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 5 >(); break;
+			};
+			
+			static ChannelType t( 0 );
+			return t;
 		}
 
 	private :
