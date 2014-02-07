@@ -260,8 +260,8 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 		{
 		};
 
-		template< class L > friend class PixelBase;
-		template< class L, EnumType N > friend class PixelBaseRecurse;
+		template< class L > friend class Pixel;
+		template< class L, EnumType N > friend class PixelRecurse;
 
 };
 

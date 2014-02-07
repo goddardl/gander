@@ -42,8 +42,9 @@
 
 #include "Gander/Common.h"
 #include "Gander/Assert.h"
-
 #include "Gander/StaticAssert.h"
+#include "Gander/Tuple.h"
+
 #include "GanderImage/StaticAssert.h"
 #include "GanderImage/Layout.h"
 #include "GanderImage/Channel.h"
@@ -61,10 +62,11 @@ namespace Image
 template< class T, ChannelDefault S >
 struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 {
-	public :
+	private :
 
-		typedef ChannelLayout< T, S > Type;
-		typedef T StorageType;
+		typedef Layout< ChannelLayout< T, S > > BaseType;
+
+	public :
 
 		enum
 		{
@@ -72,13 +74,10 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 			ChannelMask = ChannelToMask<S>::Value,
 		};
 
-		template< EnumType LayoutIndex >
-		struct LayoutTraits
-		{
-			GANDER_IMAGE_STATIC_ASSERT( LayoutIndex == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
-			typedef ChannelLayout< T, S > LayoutType;
-			typedef T StorageType;
-		};
+		typedef ChannelLayout< T, S > Type;
+		typedef T StorageType;
+		typedef typename Gander::template Tuple< StorageType, NumberOfChannels, false > ChannelContainer;
+		typedef typename Gander::template Tuple< StorageType *, NumberOfChannels, false > PtrToChannelContainer;
 
 		template< ChannelDefault C = Chan_None >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >

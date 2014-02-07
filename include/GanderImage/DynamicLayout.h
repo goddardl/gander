@@ -42,6 +42,7 @@
 
 #include "Gander/Common.h"
 #include "Gander/Assert.h"
+#include "Gander/Tuple.h"
 
 #include "Gander/StaticAssert.h"
 #include "GanderImage/StaticAssert.h"
@@ -60,27 +61,17 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 {
 	public :
 
-		typedef DynamicLayout<T> Type;
-		typedef T StorageType;
-
 		enum
 		{
 			NumberOfChannels = DYNAMIC_NUMBER_OF_CHANNELS,
 			ChannelMask = Mask_All,
-		};
-
-		enum
-		{
 			IsDynamic = true,
 		};
 
-		template< EnumType LayoutIndex >
-		struct LayoutTraits
-		{
-			GANDER_IMAGE_STATIC_ASSERT( LayoutIndex == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
-			typedef DynamicLayout< T > LayoutType;
-			typedef T StorageType;
-		};
+		typedef DynamicLayout<T> Type;
+		typedef T StorageType;
+		typedef typename Gander::template Tuple< StorageType, NumberOfChannels, true > ChannelContainer;
+		typedef typename Gander::template Tuple< StorageType *, NumberOfChannels, true > PtrToChannelContainer;
 		
 		template< ChannelDefault C = Chan_None >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
@@ -167,13 +158,13 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 		{
 			if( C != Chan_None )
 			{
-				GANDER_ASSERT( m_channels.contains( C ), "Channel is not represented by this layout." )
-					return m_steps[ m_channels.index( C ) ];
+				GANDER_ASSERT( m_channels.contains( C ), "Channel is not represented by this layout." );
+				return m_steps[ m_channels.index( C ) ];
 			}
 			else
 			{
-				GANDER_ASSERT( m_channels.contains( channel ), "Channel is not represented by this layout." )
-					return m_steps[ m_channels.index( channel ) ];
+				GANDER_ASSERT( m_channels.contains( channel ), "Channel is not represented by this layout." );
+				return m_steps[ m_channels.index( channel ) ];
 			}
 			GANDER_ASSERT( 0, "No valid channel specified." )
 		}

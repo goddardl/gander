@@ -130,6 +130,29 @@ struct Layout
 			return static_cast< Derived const * >( this )->_contains( channels );
 		}
 
+		template< EnumType C = Chan_None >
+		inline bool containsChannel( Gander::Image::Channel c = Chan_None ) const
+		{
+			if( C == Chan_None )
+			{
+				return static_cast< Derived const * >( this )->_contains( ChannelSet( c ) );
+			}
+			else
+			{
+				return ( ChannelToMask< C >::Value & Derived::ChannelMask ) != 0;
+			}
+		}
+
+		template< EnumType LayoutIndex >
+		struct LayoutTraits
+		{
+			GANDER_IMAGE_STATIC_ASSERT( LayoutIndex == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
+			typedef Derived LayoutType;
+			typedef typename LayoutType::StorageType StorageType;
+			typedef typename LayoutType::ChannelContainer ChannelContainer;
+			typedef typename LayoutType::PtrToChannelContainer PtrToChannelContainer;
+		};
+
 		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
 		template< class L > inline bool operator != ( L const &rhs ) const { return !static_cast< Derived const * >( this )->equalTo( rhs ); }
 

@@ -77,7 +77,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addCompoundLayoutTest(test);
 		addCompoundLayoutContainerTest(test);
 		addOpTest(test);
-		addPixelBaseTest(test);
+		addPixelTest(test);
 	}
 	catch (std::exception &ex)
 	{

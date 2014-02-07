@@ -31,8 +31,8 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_PIXELBASETEST_H__
-#define __GANDERTEST_PIXELBASETEST_H__
+#ifndef __GANDERTEST_PIXELTEST_H__
+#define __GANDERTEST_PIXELTEST_H__
 
 #include <vector>
 
@@ -44,7 +44,7 @@ namespace Gander
 namespace ImageTest
 {
 
-void addPixelBaseTest( boost::unit_test::test_suite *test );
+void addPixelTest( boost::unit_test::test_suite *test );
 
 }; // namespace ImageTest
 
