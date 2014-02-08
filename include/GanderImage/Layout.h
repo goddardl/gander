@@ -42,6 +42,7 @@
 
 #include "Gander/Assert.h"
 #include "Gander/Common.h"
+#include "Gander/Tuple.h"
 
 #include "Gander/StaticAssert.h"
 #include "GanderImage/StaticAssert.h"
@@ -56,6 +57,58 @@ namespace Image
 
 namespace Detail
 {
+
+template< class Layout >
+struct ChannelContainer
+{
+	public :
+		
+		ChannelContainer()
+		{
+			GANDER_IMAGE_STATIC_ASSERT( !Layout::IsDynamic, CLASS_CONTAINS_A_DYNAMIC_LAYOUT_PLEASE_USE_THE_CONSTRUCTOR_THAT_INITIALIZES_IT );
+		}
+
+		ChannelContainer( const Layout &layout ) :
+			m_layout( layout )
+		{
+		}
+
+		inline const Layout &layout() const
+		{
+			return m_layout;
+		}
+		
+		template< class ChannelType, ChannelMask Mask = Mask_All >
+		inline ChannelType &channelAtIndex( unsigned int index )
+		{
+			Implement this
+		}
+
+		template< class ChannelType, ChannelMask Mask, EnumType Channel >
+		inline ChannelType &channel()
+		{
+			if( m_layout.template containsChannel< Channel >() )
+			{
+				return the channel here.
+
+				return m_data[0];
+			}
+			else
+			{
+				GANDER_ASSERT( 0, "Channel does not exist in the ChannelContainer." );
+				return 0;
+			}
+		}
+
+	private :
+		
+		typedef Gander::template Tuple< typename Layout::StorageType, Layout::NumberOfChannels, Layout::IsDynamic > ChannelContainerType;
+
+		ChannelContainerType m_data;
+	
+		Layout m_layout;
+
+};
 
 template< class LayoutType >
 struct ChannelTraitsInterface
