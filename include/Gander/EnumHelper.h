@@ -265,8 +265,11 @@ struct EnumArrayHelper
 
 			enum
 			{
-				MaskTop = ( MaskAll << ( Width * ( Index + 1 ) ) ),
-				MaskBottom = ~( MaskAll << ( Width * Index) )
+				MaxIndex = ( EnumTypeSize * 8 ) / Width - 1,
+				LowerClampedIndex = Index > MaxIndex ? MaxIndex : Index,
+				UpperClampedIndex = Index + 1 > MaxIndex ? MaxIndex : Index + 1,
+				MaskTop = Index + 1 > MaxIndex ? 0 : EnumType( MaskAll << ( Width * UpperClampedIndex ) ),
+				MaskBottom = Index > MaxIndex ? MaskAll : ~EnumType( MaskAll << ( Width * LowerClampedIndex ) )
 			};
 		
 		public :

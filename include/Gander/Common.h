@@ -94,6 +94,9 @@ typedef GANDER_FLOAT32 float32;
 typedef int64u intLongestu;
 typedef intLongestu EnumType;
 
+//\todo: This should be part of a traits class rather than an explicit declaration.
+enum{ EnumTypeSize = 8 };
+
 }; // namespace Gander
 
 

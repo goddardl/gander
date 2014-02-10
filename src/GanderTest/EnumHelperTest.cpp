@@ -149,6 +149,14 @@ struct EnumHelperTest
 		BOOST_CHECK_EQUAL( int( Array::RemoveElement<3>::Value ), int( 205 ) );
 		BOOST_CHECK_EQUAL( int( Array::RemoveElement<4>::Value ), int( 77 ) );
 		}
+		
+		// Test the removal of elements that are near the end or over the end of the array datatype.
+		{
+		typedef EnumArrayHelper<0xF300000000000000ull, 4> Array;
+		BOOST_CHECK_EQUAL( EnumType( Array::RemoveElement<14>::Value ), EnumType( 0xF00000000000000ull ) );
+		BOOST_CHECK_EQUAL( EnumType( Array::RemoveElement<15>::Value ), EnumType( 0x300000000000000ull ) );
+		BOOST_CHECK_EQUAL( EnumType( Array::RemoveElement<16>::Value ), EnumType( 0xF300000000000000ull ) );
+		}
 
 		// Test the removal of elements from an array that is 1 bit wide.
 		{
