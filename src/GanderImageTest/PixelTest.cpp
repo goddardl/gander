@@ -80,7 +80,7 @@ struct PixelTest
 	{
 		typedef ChannelLayout< float, Chan_Red > Layout1;
 		typedef BrothersLayout< float, Brothers_UV > Layout2;
-		typedef PixelLayout< Layout1, Layout2 > Layout3;
+		typedef CompoundLayout< Layout1, Layout2 > Layout3;
 		typedef Pixel< Layout3 > Base;
 		Base base;
 		base.channel< float >( Chan_Red ) = 1.5;
@@ -98,7 +98,7 @@ struct PixelTest
 		 */
 		typedef ChannelLayout< float, Chan_Red > Layout1;
 		typedef BrothersLayout< float, Brothers_UV > Layout2;
-		typedef PixelLayout< Layout1, Layout2 > Layout3;
+		typedef CompoundLayout< Layout1, Layout2 > Layout3;
 		typedef Pixel< Layout3 > Base;
 		Base base;
 		base.channelAtIndex< float >( 0 ) = 1.5;
@@ -114,7 +114,7 @@ struct PixelTest
 		typedef ChannelLayout< float, Chan_Red > Layout1;
 		typedef BrothersLayout< float, Brothers_UV > Layout2;
 		typedef DynamicLayout< float > Layout3;
-		typedef PixelLayout< Layout1, Layout2, Layout3 > Layout4;
+		typedef CompoundLayout< Layout1, Layout2, Layout3 > Layout4;
 		
 		BOOST_CHECK_EQUAL( Pixel< Layout1 >().requiredChannels(), ChannelSet( Layout1().requiredChannels()) );
 		BOOST_CHECK_EQUAL( Pixel< Layout2 >().requiredChannels(), ChannelSet( Layout2().requiredChannels()) );
@@ -127,7 +127,7 @@ struct PixelTest
 		typedef ChannelLayout< float, Chan_Z > Layout1;
 		typedef BrothersLayout< float, Brothers_UV > Layout2;
 		typedef DynamicLayout< float > Layout3;
-		typedef PixelLayout< Layout1, Layout2, Layout3 > Layout4;
+		typedef CompoundLayout< Layout1, Layout2, Layout3 > Layout4;
 		
 		{
 			typedef Pixel< Layout1 > Base;
@@ -197,7 +197,7 @@ struct PixelTest
 		BOOST_CHECK( int( std::is_same< Base3::ChannelTraits< Chan_Z >::LayoutType, Layout3 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base3::LayoutTraits< 0 >::LayoutType, Layout3 >::value ) );
 		
-		typedef PixelLayout< Layout1, Layout2, Layout3 > Layout4;
+		typedef CompoundLayout< Layout1, Layout2, Layout3 > Layout4;
 		BOOST_CHECK_EQUAL( int( Layout4::NumberOfLayouts ), 3 );
 		
 		typedef Pixel< Layout4 > Base4;

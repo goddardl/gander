@@ -53,14 +53,14 @@ namespace Gander
 namespace Image
 {
 
-/// An empty struct for use as a default template argument to the PixelLayout class.
+/// An empty struct for use as a default template argument to the CompoundLayout class.
 namespace Detail { struct None { struct LayoutTraits { }; enum { ChannelMask = 0, IsDynamic = false }; }; };
 
-/// Forward declaration of the PixelLayout class.
+/// Forward declaration of the CompoundLayout class.
 template<
 	class T0 = Detail::None, class T1 = Detail::None, class T2 = Detail::None, class T3 = Detail::None,
 	class T4 = Detail::None, class T5 = Detail::None, class T6 = Detail::None, class T7 = Detail::None
-> struct PixelLayout;
+> struct CompoundLayout;
 
 namespace Detail
 {
@@ -141,12 +141,12 @@ template< class T > struct TypeSwitch<T, 5> { typedef typename T::Type5 Type; };
 template< class T > struct TypeSwitch<T, 6> { typedef typename T::Type6 Type; };
 template< class T > struct TypeSwitch<T, 7> { typedef typename T::Type7 Type; };
 
-/// Forward declaration of the recursive base of the PixelLayout class.
+/// Forward declaration of the recursive base of the CompoundLayout class.
 template< class Derived, bool IS_DYNAMIC, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
-struct PixelLayoutRecurse;
+struct CompoundLayoutRecurse;
 
 template < class Derived >
-struct PixelLayoutRecurseBase : public Layout< Derived >
+struct CompoundLayoutRecurseBase : public Layout< Derived >
 {
 	public :
 	
@@ -287,9 +287,9 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 
 };
 
-/// The last recursive base of the PixelLayout class.
+/// The last recursive base of the CompoundLayout class.
 template < class Derived >
-struct PixelLayoutRecurse< Derived, false, None, None, None, None, None, None, None, None > : public PixelLayoutRecurseBase< Derived >
+struct CompoundLayoutRecurse< Derived, false, None, None, None, None, None, None, None, None > : public CompoundLayoutRecurseBase< Derived >
 {
 	public :
 
@@ -314,13 +314,13 @@ struct PixelLayoutRecurse< Derived, false, None, None, None, None, None, None, N
 		}
 };
 
-/// The specialization of the PixelLayoutRecurse class for the dynamic layout.
+/// The specialization of the CompoundLayoutRecurse class for the dynamic layout.
 template < class Derived, class T0 >
-struct PixelLayoutRecurse< Derived, true, T0, None, None, None, None, None, None, None > : public PixelLayoutRecurseBase< Derived >
+struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, None, None > : public CompoundLayoutRecurseBase< Derived >
 {
 	public :
 
-		typedef PixelLayoutRecurseBase< Derived > BaseType;
+		typedef CompoundLayoutRecurseBase< Derived > BaseType;
 
 		enum
 		{
@@ -359,9 +359,9 @@ struct PixelLayoutRecurse< Derived, true, T0, None, None, None, None, None, None
 		T0 m_dynamicLayout;
 };
 
-/// The body of the recursive PixelLayoutRecurse class.
+/// The body of the recursive CompoundLayoutRecurse class.
 template< class Derived, bool IS_DYNAMIC, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
-struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, T2, T3, T4, T5, T6, T7, None >
+struct CompoundLayoutRecurse : public CompoundLayoutRecurse< Derived, IS_DYNAMIC, T1, T2, T3, T4, T5, T6, T7, None >
 {
 	public :
 
@@ -372,7 +372,7 @@ struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, 
 
 	protected :
 
-		typedef PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
+		typedef CompoundLayoutRecurse< Derived, IS_DYNAMIC, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
 
 		enum
 		{
@@ -412,8 +412,8 @@ struct PixelLayoutRecurse : public PixelLayoutRecurse< Derived, IS_DYNAMIC, T1, 
 }; // namespace Detail
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
-struct PixelLayout : public Detail::PixelLayoutRecurse<
-	 PixelLayout< T0, T1, T2, T3, T4, T5, T6, T7 >,
+struct CompoundLayout : public Detail::CompoundLayoutRecurse<
+	 CompoundLayout< T0, T1, T2, T3, T4, T5, T6, T7 >,
 	 T0::IsDynamic | T1::IsDynamic | T2::IsDynamic | T3::IsDynamic |T4::IsDynamic | T5::IsDynamic | T6::IsDynamic | T7::IsDynamic,
 	 T0, T1, T2, T3, T4, T5, T6, T7
 >
@@ -423,13 +423,13 @@ struct PixelLayout : public Detail::PixelLayoutRecurse<
 	typedef T0 Type0;	typedef T1 Type1;	typedef T2 Type2;	typedef T3 Type3;
 	typedef T4 Type4;	typedef T5 Type5;	typedef T6 Type6;	typedef T7 Type7;
 
-	typedef Detail::PixelLayoutRecurse<
-		PixelLayout< T0, T1, T2, T3, T4, T5, T6, T7 >,
+	typedef Detail::CompoundLayoutRecurse<
+		CompoundLayout< T0, T1, T2, T3, T4, T5, T6, T7 >,
 		T0::IsDynamic | T1::IsDynamic | T2::IsDynamic | T3::IsDynamic |T4::IsDynamic | T5::IsDynamic | T6::IsDynamic | T7::IsDynamic,
 		T0, T1, T2, T3, T4, T5, T6, T7
 	> BaseType;
 
-	typedef PixelLayout< T0, T1, T2, T3, T4, T6, T7 > Derived;
+	typedef CompoundLayout< T0, T1, T2, T3, T4, T6, T7 > Derived;
 
 	enum
 	{

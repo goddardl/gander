@@ -34,11 +34,11 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "GanderImage/PixelLayout.h"
+#include "GanderImage/CompoundLayout.h"
 #include "GanderImage/DynamicLayout.h"
 #include "GanderImage/ChannelLayout.h"
 #include "GanderImage/BrothersLayout.h"
-#include "GanderImageTest/PixelLayoutTest.h"
+#include "GanderImageTest/CompoundLayoutTest.h"
 
 #include "boost/test/floating_point_comparison.hpp"
 #include "boost/test/test_tools.hpp"
@@ -74,7 +74,7 @@ namespace Gander
 namespace ImageTest
 {
 
-struct PixelLayoutTest
+struct CompoundLayoutTest
 {
 	void testLayoutTraits()
 	{
@@ -84,7 +84,7 @@ struct PixelLayoutTest
 		typedef TestLayout<2, Chan_Z> Storage2;
 		typedef TestLayout<3, Chan_U> Storage3;
 
-		typedef PixelLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
+		typedef CompoundLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
 		BOOST_CHECK_EQUAL( int(Layout::NumberOfLayouts), 4 );
 		BOOST_CHECK_EQUAL( int(Layout::LayoutTraits<0>::LayoutType::Id), 0 );
 		BOOST_CHECK_EQUAL( int(Layout::LayoutTraits<1>::LayoutType::Id), 1 );
@@ -100,7 +100,7 @@ struct PixelLayoutTest
 		typedef ChannelLayout<float, Chan_Alpha> Layout2;
 		typedef ChannelLayout<float, Chan_Z> Layout3;
 		typedef BrothersLayout<float, Brothers_UV> Layout4;
-		typedef PixelLayout< Layout1, Layout2, Layout3, Layout4 > Layout;
+		typedef CompoundLayout< Layout1, Layout2, Layout3, Layout4 > Layout;
 		
 		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<0, Mask_All>::Value ), 0 ); // Red 
 		BOOST_CHECK_EQUAL( int( Layout::ChannelIndexHelper<1, Mask_All>::Value ), 0 ); // Green 
@@ -151,7 +151,7 @@ struct PixelLayoutTest
 			typedef TestLayout<2, Chan_Z> Storage2;
 			typedef TestLayout<3, Chan_U> Storage3;
 
-			typedef PixelLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
+			typedef CompoundLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
 			BOOST_CHECK_EQUAL( int(Layout::NumberOfLayouts), 4 );
 			BOOST_CHECK_EQUAL( int(Layout::ChannelToLayoutIndex<Chan_Red>::Value), 0 );
 			BOOST_CHECK_EQUAL( int(Layout::ChannelToLayoutIndex<Chan_Blue>::Value), 1 );
@@ -170,7 +170,7 @@ struct PixelLayoutTest
 		typedef ChannelLayout<float, Chan_Alpha> Storage1;
 		typedef BrothersLayout<float, Brothers_VU> Storage2;
 		
-		typedef PixelLayout< Storage0, Storage1, Storage2 > Layout;
+		typedef CompoundLayout< Storage0, Storage1, Storage2 > Layout;
 		Layout l;
 		BOOST_CHECK_EQUAL( int( l.contains( Chan_Alpha ) ), true );
 		BOOST_CHECK_EQUAL( int( l.contains( Chan_Blue ) ), true );
@@ -188,7 +188,7 @@ struct PixelLayoutTest
 		typedef ChannelLayout<float, Chan_Z> Storage2;
 		typedef DynamicLayout<float> Storage3;
 		
-		typedef PixelLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
+		typedef CompoundLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
 		Layout l;
 		l.addChannels( Mask_UV, Brothers_VU );
 		
@@ -217,7 +217,7 @@ struct PixelLayoutTest
 		typedef ChannelLayout<float, Chan_Z> Storage2;
 		typedef BrothersLayout<float, Brothers_VU> Storage3;
 			
-		typedef PixelLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
+		typedef CompoundLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
 		BOOST_CHECK_EQUAL( int(Layout::NumberOfLayouts), 4 );
 		BOOST_CHECK_EQUAL( int(Layout::NumberOfChannels), 7 );
 		BOOST_CHECK_EQUAL( int(Layout::ChannelMask), int( Mask_RGB | Mask_Alpha | Mask_Z | Mask_UV ) );
@@ -227,29 +227,29 @@ struct PixelLayoutTest
 	
 	void testDynamicLayout()
 	{
-		typedef PixelLayout< ChannelLayout< float, Chan_Red >, DynamicLayout< float > > Layout;
+		typedef CompoundLayout< ChannelLayout< float, Chan_Red >, DynamicLayout< float > > Layout;
 		Layout l;
 	}
 };
 
-struct PixelLayoutTestSuite : public boost::unit_test::test_suite
+struct CompoundLayoutTestSuite : public boost::unit_test::test_suite
 {
-	PixelLayoutTestSuite() : boost::unit_test::test_suite( "PixelLayoutTestSuite" )
+	CompoundLayoutTestSuite() : boost::unit_test::test_suite( "CompoundLayoutTestSuite" )
 	{
-		boost::shared_ptr<PixelLayoutTest> instance( new PixelLayoutTest() );
-		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testLayoutTraits, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testMaskedLayoutTraits, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testChannelTraits, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testDynamicLayout, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testStep, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testContains, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &PixelLayoutTest::testCommonLayoutAttributes, instance ) );
+		boost::shared_ptr<CompoundLayoutTest> instance( new CompoundLayoutTest() );
+		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testLayoutTraits, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testMaskedLayoutTraits, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testChannelTraits, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testDynamicLayout, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testStep, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testContains, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testCommonLayoutAttributes, instance ) );
 	}
 };
 
-void addPixelLayoutTest( boost::unit_test::test_suite *test )
+void addCompoundLayoutTest( boost::unit_test::test_suite *test )
 {
-	test->add( new PixelLayoutTestSuite() );
+	test->add( new CompoundLayoutTestSuite() );
 }
 
 } // namespace ImageTest

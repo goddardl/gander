@@ -45,7 +45,7 @@
 #include "GanderImage/StaticAssert.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
-#include "GanderImage/PixelLayout.h"
+#include "GanderImage/CompoundLayout.h"
 
 namespace Gander
 {

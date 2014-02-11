@@ -35,7 +35,7 @@
 #include <cstdlib>
 
 #include "GanderImage/Layout.h"
-#include "GanderImage/PixelLayout.h"
+#include "GanderImage/CompoundLayout.h"
 #include "GanderImage/ChannelLayout.h"
 #include "GanderImage/BrothersLayout.h"
 
@@ -87,7 +87,7 @@ struct LayoutTest
 	
 	void testCompoundChannelContainer()
 	{
-		typedef Gander::Image::PixelLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< int, Chan_Z >, ChannelLayout< int, Chan_V > > L1;
+		typedef Gander::Image::CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< int, Chan_Z >, ChannelLayout< int, Chan_V > > L1;
 		Gander::Image::Detail::CompoundChannelContainer< L1 > cc;
 
 		cc.container<0>().channel< Chan_Red >() = 1.;
