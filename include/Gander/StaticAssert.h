@@ -56,7 +56,7 @@ struct static_assertion<true>
 		// all of the dynamic methods raise this static error.
 		THIS_METHOD_CANNOT_BE_CALLED_ON_A_STATIC_TUPLE,
 		// An index of value is outside of the required range.
-		VALUE_IS_OUT_OUT_BOUNDS,
+		VALUE_IS_OUT_OF_BOUNDS,
 	};
 };
 
