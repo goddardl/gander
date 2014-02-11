@@ -1,6 +1,4 @@
 Todo:
-1) Finish the template options for disabling the static asserts so that it compiles.
-2) Finish testing the channel() and channelAtIndex() methods. Make sure to test that an exception is thrown when the wrong return type is specified.
 3) Get the ChannelContainer working correctly with DynamicLayouts and PixelLayouts that contain a DynamicLayout.
 4) Rename the PixelLayout to CompoundLayout.
 5) Move the CompoundChannelContainer into it's own file.
