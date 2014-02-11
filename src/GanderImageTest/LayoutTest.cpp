@@ -119,7 +119,7 @@ struct LayoutTest
 		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 1 ) ), 4. );
 		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< int, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 2 ) ), 6 );
 		BOOST_CHECK_THROW( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 2 ) ), std::runtime_error );
-	/*	
+		
 		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Green, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 2. );
 		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Alpha, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 4. );
 		BOOST_CHECK_EQUAL( ( cc.channel< Chan_V, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 6 );
@@ -127,8 +127,6 @@ struct LayoutTest
 		BOOST_CHECK_EQUAL( ( cc.channel< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_Green ) ), 2. );
 		BOOST_CHECK_EQUAL( ( cc.channel< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_Alpha ) ), 4. );
 		BOOST_CHECK_EQUAL( ( cc.channel< int, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_V ) ), 6 );
-		*/
-		
 	}
 };
 

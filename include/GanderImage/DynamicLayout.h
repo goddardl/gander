@@ -207,11 +207,11 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 		}
 		
 		/// Returns the index of a channel in the layout when masked.
-		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All >
+		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline int _maskedChannelIndex() const
 		{
 			ChannelSet i = m_channels.intersection( Mask );
-			GANDER_ASSERT( Index < i.size(), "Index is out of bounds when accessing a channel in a masked set." );
+			GANDER_ASSERT( Index < i.size() || DisableStaticAsserts, "Index is out of bounds when accessing a channel in a masked set." );
 			return m_channels.index( i[ Index ] );
 		}
 

@@ -145,7 +145,7 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 		}
 		
 		/// Returns the index of a channel within the layout.	
-		template< EnumType Channel, EnumType Mask = Mask_All >
+		template< EnumType Channel, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline unsigned int _indexOfChannel() const
 		{
 			enum
@@ -168,13 +168,13 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 						Channel == BrotherTraits<B>::FourthBrotherInBrothers && Contains4 ? 3 : BadIndex,
 			};
 			
-			GANDER_IMAGE_STATIC_ASSERT( Value != BadIndex, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			GANDER_IMAGE_STATIC_ASSERT( Value != BadIndex || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
 						
 			return Value;
 		}
 		
 		/// Returns the index of a channel in the layout when masked.
-		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All >
+		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline int _maskedChannelIndex() const
 		{
 			enum
@@ -208,7 +208,7 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 						Contains4 == true && ( Contains1 + Contains2 + Contains3 == 3 ) ? 3 : BadIndex : BadIndex
 			};
 			
-			GANDER_IMAGE_STATIC_ASSERT( Value != BadIndex, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			GANDER_IMAGE_STATIC_ASSERT( Value != BadIndex || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
 
 			return Value;
 		}

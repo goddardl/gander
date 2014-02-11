@@ -94,11 +94,11 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 			}
 		};
 		
-		template< int Index, EnumType Mask = Mask_All  >
+		template< int Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false   >
 		struct ChannelTraitsAtIndex : public BaseType::template LayoutTraits< 0 >
 		{
-			GANDER_IMAGE_STATIC_ASSERT( ( Mask & BaseType::template LayoutTraits< 0 >::LayoutType::ChannelMask ) != 0, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-			GANDER_STATIC_ASSERT( Index == 0, VALUE_IS_OUT_OF_BOUNDS );
+			GANDER_IMAGE_STATIC_ASSERT( ( Mask & BaseType::template LayoutTraits< 0 >::LayoutType::ChannelMask ) != 0 || DisableStaticAsserts,  CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			GANDER_STATIC_ASSERT( Index == 0 || DisableStaticAsserts, VALUE_IS_OUT_OF_BOUNDS );
 			
 			enum
 			{	
@@ -152,18 +152,18 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 		}
 		
 		/// Returns the index of a channel in the layout when masked.
-		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All >
+		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline int _maskedChannelIndex() const
 		{
-			GANDER_IMAGE_STATIC_ASSERT( ( Mask & ChannelMask ) != 0, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			GANDER_IMAGE_STATIC_ASSERT( ( Mask & ChannelMask ) != 0 || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
 			return 0;
 		}
 		
 		/// Returns the index of a channel within the layout.	
-		template< EnumType Channel, EnumType Mask = Mask_All >
+		template< EnumType Channel, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline unsigned int _indexOfChannel() const
 		{
-			GANDER_IMAGE_STATIC_ASSERT( ( Mask & ChannelMask ) != 0, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			GANDER_IMAGE_STATIC_ASSERT( ( Mask & ChannelMask ) != 0 || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
 			return 0;
 		}
 };

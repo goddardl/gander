@@ -81,22 +81,22 @@ struct ChannelContainer
 			return m_layout;
 		}
 	
-		template< EnumType Index, ChannelMask Mask = Mask_All >
+		template< EnumType Index, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline StorageType &channelAtIndex()
 		{
-			return m_data[ m_layout.template maskedChannelIndex< Index, Mask >() ];
+			return m_data[ m_layout.template maskedChannelIndex< Index, Mask, DisableStaticAsserts >() ];
 		}
 
-		template< ChannelDefault C, ChannelMask Mask = Mask_All >
+		template< ChannelDefault C, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline StorageType &channel()
 		{
 			if( m_layout.template containsChannel< C >() )
 			{
-				return m_data[ m_layout.template indexOfChannel< C, Mask >() ];
+				return m_data[ m_layout.template indexOfChannel< C, Mask, DisableStaticAsserts >() ];
 			}
 			else
 			{
-				GANDER_ASSERT( 0, "Channel does not exist in the ChannelContainer." );
+				GANDER_ASSERT( DisableStaticAsserts, "Channel does not exist in the ChannelContainer." );
 
 				// The compiler never reaches here but we need to return a valid value to prevent any warnings.
 				static StorageType unusedValue = StorageType(0);
@@ -195,7 +195,7 @@ class CompoundChannelContainer : public Gander::Image::Detail::CompoundChannelCo
 		template< EnumType Index >
 		inline ChannelContainer< typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType > &container()
 		{
-			return BaseType::template container< ChannelContainer< typename CompoundLayout::template LayoutTraits< Index >::LayoutType >, Index >();
+			return BaseType::template container< ChannelContainer< typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType >, Index >();
 		};
 
 		template< EnumType Index, ChannelMask Mask = Mask_All, class ChannelType = typename CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::StorageType >
@@ -203,26 +203,26 @@ class CompoundChannelContainer : public Gander::Image::Detail::CompoundChannelCo
 		{
 			enum
 			{
-				ContainerIndex = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::LayoutIndex,
-				ChannelIndexInLayout = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::ChannelIndexInLayout,
+				ContainerIndex = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, true >::LayoutIndex,
+				ChannelIndexInLayout = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, true >::ChannelIndexInLayout,
 			};
 			
-			GANDER_ASSERT( ( std::is_same< ChannelType, typename CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::StorageType >::value ), "Incorrect return type specified." );
+			GANDER_ASSERT( ( std::is_same< ChannelType, typename CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, true >::StorageType >::value ), "Incorrect return type specified." );
 		
-			return ( ChannelType & ) container< ContainerIndex >().template channelAtIndex< ChannelIndexInLayout, Mask >();
+			return ( ChannelType & ) container< ContainerIndex >().template channelAtIndex< ChannelIndexInLayout, Mask, true >();
 		}
 		
-		template< ChannelDefault C, ChannelMask Mask = Mask_All, class ChannelType = typename CompoundLayout::template ChannelTraits< C >::StorageType >
+		template< ChannelDefault C, ChannelMask Mask = Mask_All, class ChannelType = typename CompoundLayout::template ChannelTraits< C, true >::StorageType >
 		inline ChannelType &channel()
 		{
 			enum
 			{
-				ContainerIndex = CompoundLayout::template ChannelTraits< C >::LayoutIndex,
+				ContainerIndex = CompoundLayout::template ChannelTraits< C, true >::LayoutIndex,
 			};
 			
-			GANDER_ASSERT( ( std::is_same< ChannelType, typename CompoundLayout::template ChannelTraits< C >::StorageType >::value ), "Incorrect return type specified." );
+			GANDER_ASSERT( ( std::is_same< ChannelType, typename CompoundLayout::template ChannelTraits< C, true >::StorageType >::value ), "Incorrect return type specified." );
 			
-			return ( ChannelType & ) container< ContainerIndex >().template channel< C, Mask >();
+			return ( ChannelType & ) container< ContainerIndex >().template channel< C, Mask, true >();
 		}
 		
 		template< class ChannelType, ChannelMask Mask = Mask_All >
@@ -237,6 +237,15 @@ class CompoundChannelContainer : public Gander::Image::Detail::CompoundChannelCo
 				case( 4 ) : return channel< ChannelDefault( 4 ), Mask, ChannelType >(); break;
 				case( 5 ) : return channel< ChannelDefault( 5 ), Mask, ChannelType >(); break;
 				case( 6 ) : return channel< ChannelDefault( 6 ), Mask, ChannelType >(); break;
+				case( 7 ) : return channel< ChannelDefault( 7 ), Mask, ChannelType >(); break;
+				case( 8 ) : return channel< ChannelDefault( 8 ), Mask, ChannelType >(); break;
+				case( 9 ) : return channel< ChannelDefault( 9 ), Mask, ChannelType >(); break;
+				case( 10 ) : return channel< ChannelDefault( 10 ), Mask, ChannelType >(); break;
+				case( 11 ) : return channel< ChannelDefault( 11 ), Mask, ChannelType >(); break;
+				case( 12 ) : return channel< ChannelDefault( 12 ), Mask, ChannelType >(); break;
+				case( 13 ) : return channel< ChannelDefault( 13 ), Mask, ChannelType >(); break;
+				case( 14 ) : return channel< ChannelDefault( 14 ), Mask, ChannelType >(); break;
+				case( 15 ) : return channel< ChannelDefault( 15 ), Mask, ChannelType >(); break;
 				default : GANDER_ASSERT( 0, "Channel does not exist in the ChannelContainer." ); break;
 			}
 		}
@@ -253,6 +262,15 @@ class CompoundChannelContainer : public Gander::Image::Detail::CompoundChannelCo
 				case( 4 ) : return channelAtIndex< 4, Mask, ChannelType >(); break;
 				case( 5 ) : return channelAtIndex< 5, Mask, ChannelType >(); break;
 				case( 6 ) : return channelAtIndex< 6, Mask, ChannelType >(); break;
+				case( 7 ) : return channelAtIndex< 7, Mask, ChannelType >(); break;
+				case( 8 ) : return channelAtIndex< 8, Mask, ChannelType >(); break;
+				case( 9 ) : return channelAtIndex< 9, Mask, ChannelType >(); break;
+				case( 10 ) : return channelAtIndex< 10, Mask, ChannelType >(); break;
+				case( 11 ) : return channelAtIndex< 11, Mask, ChannelType >(); break;
+				case( 12 ) : return channelAtIndex< 12, Mask, ChannelType >(); break;
+				case( 13 ) : return channelAtIndex< 13, Mask, ChannelType >(); break;
+				case( 14 ) : return channelAtIndex< 14, Mask, ChannelType >(); break;
+				case( 15 ) : return channelAtIndex< 15, Mask, ChannelType >(); break;
 				default : GANDER_ASSERT( 0, "Index is out of bounds." ); break;
 			};
 		}
@@ -301,10 +319,10 @@ struct Layout
 			IsDynamic = false,
 		};
 		
-		template< EnumType Index, ChannelMask Mask = Mask_All >
+		template< EnumType Index, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline int maskedChannelIndex() const
 		{
-			return static_cast< Derived const * >( this )->template _maskedChannelIndex< Index, Mask >();
+			return static_cast< Derived const * >( this )->template _maskedChannelIndex< Index, Mask, DisableStaticAsserts >();
 		}
 
 		inline ChannelSet channels() const
@@ -341,10 +359,10 @@ struct Layout
 			return static_cast< Derived const * >( this )->_contains( channels );
 		}
 				
-		template< EnumType Channel, EnumType Mask = Mask_All >
+		template< EnumType Channel, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline unsigned int indexOfChannel() const
 		{
-			return static_cast< Derived const * >( this )->template _indexOfChannel< Channel, Mask >();
+			return static_cast< Derived const * >( this )->template _indexOfChannel< Channel, Mask, DisableStaticAsserts >();
 		}
 
 		template< EnumType C = Chan_None >
@@ -444,7 +462,7 @@ struct Layout
 		}
 		
 		/// Returns the index of a channel in the layout when masked.
-		template< EnumType Index, ChannelMask Mask = Mask_All >
+		template< EnumType Index, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline int _maskedChannelIndex() const
 		{
 			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
@@ -452,7 +470,7 @@ struct Layout
 		}
 	
 		/// Returns the index of a channel within the layout.	
-		template< EnumType Channel, EnumType Mask = Mask_All >
+		template< EnumType Channel, EnumType Mask = Mask_All, bool >
 		inline unsigned int _indexOfChannel() const
 		{
 			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );

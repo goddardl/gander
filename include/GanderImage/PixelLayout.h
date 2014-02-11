@@ -228,13 +228,13 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 		/// The most useful type that this struct declares is ChannelType. ChannelType is the type used to represent the
 		/// channel within the image. ChannelTraits also reveals the LayoutType that the channel was declared within
 		/// along with useful enum values such the Channel's ChannelBrothers.
-		template< ChannelDefault C = Chan_None >
+		template< ChannelDefault C = Chan_None, bool DisableStaticAsserts = false  >
 		struct ChannelTraits  
 		{
 			public :
 	
-				typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::StorageType StorageType;
-				typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::LayoutType LayoutType;
+				typedef typename LayoutTraits< ChannelToLayoutIndex< C >::Value, DisableStaticAsserts >::StorageType StorageType;
+				typedef typename LayoutTraits< ChannelToLayoutIndex< C >::Value, DisableStaticAsserts >::LayoutType LayoutType;
 				
 				enum
 				{
@@ -261,13 +261,13 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 			private :
 			
 				// Assert that the layout actually contains the requested channel.
-				GANDER_IMAGE_STATIC_ASSERT( ( ( ( LayoutType::ChannelMask & ChannelToMask<C>::Value ) != 0 ) || ( C == Chan_None ) ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+				GANDER_IMAGE_STATIC_ASSERT( ( ( ( LayoutType::ChannelMask & ChannelToMask<C>::Value ) != 0 ) || ( C == Chan_None ) || ( DisableStaticAsserts ) ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
 
 				int8u m_step;
 		};
 		
-		template< int ChannelIndex, EnumType Mask = Mask_All  >
-		struct ChannelTraitsAtIndex : public LayoutTraits< ChannelIndexHelper< ChannelIndex, Mask >::Value >
+		template< int ChannelIndex, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
+		struct ChannelTraitsAtIndex : public LayoutTraits< ChannelIndexHelper< ChannelIndex, Mask >::Value, DisableStaticAsserts >
 		{
 			private :
 
