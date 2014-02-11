@@ -129,6 +129,75 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 		{
 			return ChannelSet( Gander::Image::ChannelMask( BrothersLayout<T,B>::ChannelMask ) ).contains( channels );
 		}
+		
+		/// Returns the index of a channel within the layout.	
+		template< EnumType Channel, EnumType Mask = Mask_All >
+		inline unsigned int _indexOfChannel() const
+		{
+			enum
+			{
+				BadIndex = 5,
+				
+				Mask1 = ChannelToMask< BrotherTraits<B>::FirstBrotherInBrothers >::Value,
+				Mask2 = ChannelToMask< BrotherTraits<B>::SecondBrotherInBrothers >::Value,
+				Mask3 = ChannelToMask< BrotherTraits<B>::ThirdBrotherInBrothers >::Value,
+				Mask4 = ChannelToMask< BrotherTraits<B>::FourthBrotherInBrothers >::Value,
+
+				Contains1 = ( Mask1 & Mask ) != 0,
+				Contains2 = ( Mask2 & Mask ) != 0,
+				Contains3 = ( Mask3 & Mask ) != 0,
+				Contains4 = ( Mask4 & Mask ) != 0,
+
+				Value = Channel == BrotherTraits<B>::FirstBrotherInBrothers && Contains1 ? 0 :
+						Channel == BrotherTraits<B>::SecondBrotherInBrothers && Contains2 ? 1 :
+						Channel == BrotherTraits<B>::ThirdBrotherInBrothers && Contains3 ? 2 :
+						Channel == BrotherTraits<B>::FourthBrotherInBrothers && Contains4 ? 3 : BadIndex,
+			};
+			
+			GANDER_IMAGE_STATIC_ASSERT( Value != BadIndex, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+						
+			return Value;
+		}
+		
+		/// Returns the index of a channel in the layout when masked.
+		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All >
+		inline int _maskedChannelIndex() const
+		{
+			enum
+			{
+				Mask1 = ChannelToMask< BrotherTraits<B>::FirstBrotherInBrothers >::Value,
+				Mask2 = ChannelToMask< BrotherTraits<B>::SecondBrotherInBrothers >::Value,
+				Mask3 = ChannelToMask< BrotherTraits<B>::ThirdBrotherInBrothers >::Value,
+				Mask4 = ChannelToMask< BrotherTraits<B>::FourthBrotherInBrothers >::Value,
+
+				Contains1 = ( Mask1 & Mask ) != 0,
+				Contains2 = ( Mask2 & Mask ) != 0,
+				Contains3 = ( Mask3 & Mask ) != 0,
+				Contains4 = ( Mask4 & Mask ) != 0,
+				
+				BadIndex = 5,
+
+				Value =
+					Index == 0 ?
+						Contains1 == true ? 0 :
+						Contains2 == true ? 1 :
+						Contains3 == true ? 2 :
+						Contains4 == true ? 3 : BadIndex :
+					Index == 1 ?
+						Contains2 == true && Contains1 == true ? 1 :
+						Contains3 == true && ( Contains1 + Contains2 == 1 ) ? 2 :
+						Contains4 == true && ( Contains1 + Contains2 + Contains3 == 1 ) ? 3 : BadIndex :
+					Index == 2 ?
+						Contains3 == true && ( Contains1 + Contains2 == 2 ) ? 2 :
+						Contains4 == true && ( Contains1 + Contains2 + Contains3 == 2 ) ? 3 : BadIndex :
+					Index == 3 ?
+						Contains4 == true && ( Contains1 + Contains2 + Contains3 == 3 ) ? 3 : BadIndex : BadIndex
+			};
+			
+			GANDER_IMAGE_STATIC_ASSERT( Value != BadIndex, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+
+			return Value;
+		}
 };
 
 }; // namespace Image

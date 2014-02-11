@@ -63,6 +63,8 @@ struct ChannelContainer
 {
 	public :
 		
+		typedef typename Layout::StorageType StorageType;
+
 		ChannelContainer()
 		{
 			GANDER_IMAGE_STATIC_ASSERT( !Layout::IsDynamic, CLASS_CONTAINS_A_DYNAMIC_LAYOUT_PLEASE_USE_THE_CONSTRUCTOR_THAT_INITIALIZES_IT );
@@ -77,26 +79,27 @@ struct ChannelContainer
 		{
 			return m_layout;
 		}
-		
-		template< class ChannelType, ChannelMask Mask = Mask_All >
-		inline ChannelType &channelAtIndex( unsigned int index )
+	
+		template< EnumType Index, ChannelMask Mask = Mask_All >
+		inline StorageType &channelAtIndex()
 		{
-			Implement this
+			return m_data[ m_layout.template maskedChannelIndex< Index, Mask >() ];
 		}
 
-		template< class ChannelType, ChannelMask Mask, EnumType Channel >
-		inline ChannelType &channel()
+		template< Channel C, ChannelMask Mask = Mask_All >
+		inline StorageType &channel()
 		{
-			if( m_layout.template containsChannel< Channel >() )
+			if( m_layout.template containsChannel< C >() )
 			{
-				return the channel here.
-
-				return m_data[0];
+				return m_data[ m_layout.template indexOfChannel< C, Mask >() ];
 			}
 			else
 			{
 				GANDER_ASSERT( 0, "Channel does not exist in the ChannelContainer." );
-				return 0;
+
+				// The compiler never reaches here but we need to return a valid value to prevent any warnings.
+				static StorageType unusedValue = StorageType(0);
+				return unusedValue;
 			}
 		}
 
@@ -148,6 +151,12 @@ struct Layout
 			NumberOfLayouts = 1,
 			IsDynamic = false,
 		};
+		
+		template< EnumType Index, ChannelMask Mask = Mask_All >
+		inline int maskedChannelIndex() const
+		{
+			return static_cast< Derived const * >( this )->template _maskedChannelIndex< Index, Mask >();
+		}
 
 		inline ChannelSet channels() const
 		{
@@ -182,18 +191,17 @@ struct Layout
 		{
 			return static_cast< Derived const * >( this )->_contains( channels );
 		}
+				
+		template< EnumType Channel, EnumType Mask = Mask_All >
+		inline unsigned int indexOfChannel() const
+		{
+			return static_cast< Derived const * >( this )->template _indexOfChannel< Channel, Mask >();
+		}
 
 		template< EnumType C = Chan_None >
 		inline bool containsChannel( Gander::Image::Channel c = Chan_None ) const
 		{
-			if( C == Chan_None )
-			{
-				return static_cast< Derived const * >( this )->_contains( ChannelSet( c ) );
-			}
-			else
-			{
-				return ( ChannelToMask< C >::Value & Derived::ChannelMask ) != 0;
-			}
+			return static_cast< Derived const * >( this )->template _containsChannel< C >( c );
 		}
 
 		template< EnumType LayoutIndex >
@@ -243,13 +251,29 @@ struct Layout
 			return 0; // We never get here.
 		}
 
-		/// Returns whether the layout represents the given channel.
+		/// Returns whether the layout represents the given set of channels.
 		inline bool _contains( ChannelSet channels ) const
 		{
 			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 			return 0; // We never get here.
 		}
-			
+		
+		/// Returns whether the layout contains the given channel. This method can be passed either a template argument or a function argument.
+		/// If the template argument is different to Chan_None then the template argument should be used. If it is equal to Chan_None, the 
+		/// function argument should be used.
+		template< EnumType C = Chan_None >
+		inline bool _containsChannel( Gander::Image::Channel c = Chan_None ) const
+		{
+			if( C == Chan_None )
+			{
+				return static_cast< Derived const * >( this )->_contains( ChannelSet( c ) );
+			}
+			else
+			{
+				return ( ChannelToMask< C >::Value & Derived::ChannelMask ) != 0;
+			}
+		}
+
 		/// Adds the channel to the Layout and logs all pertenant information.
 		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
@@ -266,7 +290,22 @@ struct Layout
 				std::is_same< typename L::StorageType, typename Derived::StorageType >::value
 		   );
 		}
-
+		
+		/// Returns the index of a channel in the layout when masked.
+		template< EnumType Index, ChannelMask Mask = Mask_All >
+		inline int _maskedChannelIndex() const
+		{
+			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
+			return 0;
+		}
+	
+		/// Returns the index of a channel within the layout.	
+		template< EnumType Channel, EnumType Mask = Mask_All >
+		inline unsigned int _indexOfChannel() const
+		{
+			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
+			return 0;
+		}
 };
 
 }; // namespace Image

@@ -173,6 +173,62 @@ struct BrothersLayoutTest
 		BOOST_CHECK_EQUAL( int(Layout2::ChannelMask), int( Mask_RGBA ) );
 		BOOST_CHECK_EQUAL( int(Layout3::ChannelMask), int( Mask_UV ) );
 	}
+	
+	void testMaskedChannelIndex()
+	{
+		{
+		BrothersLayout< float, Brothers_UV > layout;
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, Mask_UV >() ), 0 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, Mask_UV >() ), 1 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, Mask_U >() ), 0 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, Mask_V >() ), 1 );
+		}
+
+		{
+		BrothersLayout< float, Brothers_BGRA > layout;
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, Mask_Red >() ), 2 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, Mask_Green >() ), 1 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, Mask_Blue >() ), 0 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, Mask_Alpha >() ), 3 );
+		
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, ChannelMask( CombineMasks< Mask_Red, Mask_Green >::Value ) >() ), 1 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, ChannelMask( CombineMasks< Mask_Red, Mask_Green >::Value ) >() ), 2 );
+		
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, ChannelMask( CombineMasks< Mask_Blue, Mask_Green >::Value ) >() ), 0 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, ChannelMask( CombineMasks< Mask_Blue, Mask_Green >::Value ) >() ), 1 );
+		
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green >::Value ) >() ), 1 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green >::Value ) >() ), 3 );
+		
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, ChannelMask( CombineMasks< Mask_Alpha, Mask_Blue >::Value ) >() ), 0 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, ChannelMask( CombineMasks< Mask_Alpha, Mask_Blue >::Value ) >() ), 3 );
+		
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, ChannelMask( CombineMasks< Mask_Alpha, Mask_Red >::Value ) >() ), 2 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, ChannelMask( CombineMasks< Mask_Alpha, Mask_Red >::Value ) >() ), 3 );
+		
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green, Mask_Red >::Value ) >() ), 1 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green, Mask_Red >::Value ) >() ), 2 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 2, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green, Mask_Red >::Value ) >() ), 3 );
+		
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green, Mask_Blue >::Value ) >() ), 0 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green, Mask_Blue >::Value ) >() ), 1 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 2, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green, Mask_Blue >::Value ) >() ), 3 );
+		
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, ChannelMask( CombineMasks< Mask_Red, Mask_Green, Mask_Blue >::Value ) >() ), 0 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, ChannelMask( CombineMasks< Mask_Red, Mask_Green, Mask_Blue >::Value ) >() ), 1 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 2, ChannelMask( CombineMasks< Mask_Red, Mask_Green, Mask_Blue >::Value ) >() ), 2 );
+		
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, ChannelMask( CombineMasks< Mask_Red, Mask_Alpha, Mask_Blue >::Value ) >() ), 0 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, ChannelMask( CombineMasks< Mask_Red, Mask_Alpha, Mask_Blue >::Value ) >() ), 2 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 2, ChannelMask( CombineMasks< Mask_Red, Mask_Alpha, Mask_Blue >::Value ) >() ), 3 );
+		
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 0, Mask_RGBA >() ), 0 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 1, Mask_RGBA >() ), 1 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 2, Mask_RGBA >() ), 2 );
+		BOOST_CHECK_EQUAL( int( layout.maskedChannelIndex< 3, Mask_RGBA >() ), 3 );
+		}
+
+	}
 };
 
 struct BrothersLayoutTestSuite : public boost::unit_test::test_suite
@@ -183,6 +239,7 @@ struct BrothersLayoutTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &BrothersLayoutTest::testChannelTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &BrothersLayoutTest::testCommonLayoutAttributes, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &BrothersLayoutTest::testCommonLayoutInterface, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &BrothersLayoutTest::testMaskedChannelIndex, instance ) );
 	}
 };
 

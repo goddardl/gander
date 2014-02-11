@@ -134,6 +134,14 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 		{
 			return ( ChannelSet( S ).contains( channels ) );
 		}
+		
+		/// Returns the index of a channel in the layout when masked.
+		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All >
+		inline int _maskedChannelIndex() const
+		{
+			GANDER_IMAGE_STATIC_ASSERT( ( Mask & ChannelMask ) != 0, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			return 0;
+		}
 };
 
 }; // namespace Image

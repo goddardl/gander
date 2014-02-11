@@ -174,6 +174,31 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 		{
 			return m_channels.contains( channels );
 		}
+		
+		/// Returns whether the layout contains the given channel. This method can be passed either a template argument or a function argument.
+		/// If the template argument is different to Chan_None then the template argument should be used. If it is equal to Chan_None, the 
+		/// function argument should be used.
+		template< EnumType C = Chan_None >
+		inline bool _containsChannel( Gander::Image::Channel c = Chan_None ) const
+		{
+			if( C == Chan_None )
+			{
+				return m_channels.contains( ChannelSet( c ) );
+			}
+			else
+			{
+				return m_channels.contains( ChannelSet( C ) );
+			}
+		}
+		
+		/// Returns the index of a channel in the layout when masked.
+		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All >
+		inline int _maskedChannelIndex() const
+		{
+			ChannelSet i = m_channels.intersection( Mask );
+			GANDER_ASSERT( Index < i.size(), "Index is out of bounds when accessing a channel in a masked set." );
+			return m_channels.index( i[ Index ] );
+		}
 
 		/// The channels that this format represents.
 		ChannelSet m_channels;

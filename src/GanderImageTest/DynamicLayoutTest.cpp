@@ -115,6 +115,29 @@ struct DynamicLayoutTest
 		BOOST_CHECK_THROW( l.step( Chan_Z ), std::runtime_error );
 	}
 
+	void testMaskedChannelIndex()
+	{
+		DynamicLayout< float > l;
+		l.addChannels( Mask_Red | Mask_Green, Brothers_BGR );
+		l.addChannels( Mask_Alpha );
+		l.addChannels( Mask_UV, Brothers_VU );
+		BOOST_CHECK_EQUAL( l.maskedChannelIndex<0>(), 0 );
+		BOOST_CHECK_EQUAL( l.maskedChannelIndex<1>(), 1 );
+		BOOST_CHECK_EQUAL( l.maskedChannelIndex<2>(), 2 );
+		BOOST_CHECK_EQUAL( l.maskedChannelIndex<3>(), 3 );
+		BOOST_CHECK_EQUAL( l.maskedChannelIndex<4>(), 4 );
+
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<0, ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >() ), 1 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<1, ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >() ), 3 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<2, ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >() ), 4 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<0, ChannelMask( CombineMasks< Mask_UV, Mask_Red >::Value ) >() ), 0 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<1, Mask_UV>() ), 4 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<0, Mask_UV>() ), 3 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<1, Mask_UV>() ), 4 );
+		BOOST_CHECK_THROW( int( l.maskedChannelIndex<3, ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >() ), std::runtime_error );
+		
+	}
+	
 	void testAddChannelWhichIsNotABrother()
 	{
 		typedef DynamicLayout< float > Layout;
@@ -137,6 +160,7 @@ struct DynamicLayoutTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &DynamicLayoutTest::testChannels, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &DynamicLayoutTest::testCommonLayoutInterface, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &DynamicLayoutTest::testAddChannelWhichIsNotABrother, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &DynamicLayoutTest::testMaskedChannelIndex, instance ) );
 	}
 };
 
