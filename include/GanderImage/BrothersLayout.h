@@ -82,10 +82,24 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 			typedef Type LayoutType;
 			typedef T StorageType;
 
+			enum
+			{
+				LayoutIndex = 0,
+			};
+
 			ChannelTraits( const LayoutType &l, Channel channel = Chan_None ) :
 				Detail::ChannelTraitsInterface< LayoutType >( l, channel )
 			{
 			}
+		};
+		
+		template< int Index, EnumType Mask = Mask_All  >
+		struct ChannelTraitsAtIndex : public BaseType::template LayoutTraits< 0 >
+		{
+			enum
+			{	
+				ChannelIndexInLayout = Index,
+			};
 		};
 
 	private :

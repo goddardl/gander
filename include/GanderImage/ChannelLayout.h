@@ -76,18 +76,34 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 
 		typedef ChannelLayout< T, S > Type;
 		typedef T StorageType;
-		typedef typename Gander::template Tuple< StorageType, NumberOfChannels, false > ChannelContainer;
-		typedef typename Gander::template Tuple< StorageType *, NumberOfChannels, false > PtrToChannelContainer;
 
 		template< ChannelDefault C = Chan_None >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
 		{
 			typedef Type LayoutType;
 			typedef T StorageType;
+			
+			enum
+			{
+				LayoutIndex = 0,
+			};
+			
 			ChannelTraits( const LayoutType &l, Channel channel = Chan_None ) :
 				Detail::ChannelTraitsInterface< LayoutType >( l, channel )
 			{
 			}
+		};
+		
+		template< int Index, EnumType Mask = Mask_All  >
+		struct ChannelTraitsAtIndex : public BaseType::template LayoutTraits< 0 >
+		{
+			GANDER_IMAGE_STATIC_ASSERT( ( Mask & BaseType::template LayoutTraits< 0 >::LayoutType::ChannelMask ) != 0, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			GANDER_STATIC_ASSERT( Index == 0, VALUE_IS_OUT_OF_BOUNDS );
+			
+			enum
+			{	
+				ChannelIndexInLayout = Index,
+			};
 		};
 
 	private :
@@ -138,6 +154,14 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 		/// Returns the index of a channel in the layout when masked.
 		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All >
 		inline int _maskedChannelIndex() const
+		{
+			GANDER_IMAGE_STATIC_ASSERT( ( Mask & ChannelMask ) != 0, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			return 0;
+		}
+		
+		/// Returns the index of a channel within the layout.	
+		template< EnumType Channel, EnumType Mask = Mask_All >
+		inline unsigned int _indexOfChannel() const
 		{
 			GANDER_IMAGE_STATIC_ASSERT( ( Mask & ChannelMask ) != 0, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
 			return 0;

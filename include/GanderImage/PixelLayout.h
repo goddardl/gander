@@ -109,17 +109,17 @@ struct ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, ChannelIndex, C
 };
 
 /// The body of the ChannelIndexHelper class.
-template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType Index, EnumType M, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
-struct ChannelIndexHelper : public ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, Index, M, T1, T2, T3, T4, T5, T6, T7, None >
+template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType M, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
+struct ChannelIndexHelper : public ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, ChannelIndex, M, T1, T2, T3, T4, T5, T6, T7, None >
 {
-	typedef ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, Index, M, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
+	typedef ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, ChannelIndex, M, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
 	enum
 	{
 		NumberOfChannels = BaseType::NumberOfChannels + T0::NumberOfChannels,
 		NumberOfMaskedChannelsInT0 = Gander::template EnumHelper< T0::ChannelMask & M >::NumberOfSetBits,
 		NumberOfMaskedChannels = BaseType::NumberOfMaskedChannels + NumberOfMaskedChannelsInT0,
 		LayoutNumber = BaseType::LayoutNumber + 1,
-		InverseIndex = BaseType::CompleteNumberOfMaskedChannels - Index,
+		InverseIndex = BaseType::CompleteNumberOfMaskedChannels - ChannelIndex,
 		Value = InverseIndex <= NumberOfMaskedChannels && InverseIndex > BaseType::NumberOfMaskedChannels && NumberOfMaskedChannelsInT0 > 0 ? NumberOfLayouts - LayoutNumber : BaseType::Value,
 		ChannelIndexInLayout = InverseIndex <= NumberOfMaskedChannels && InverseIndex > BaseType::NumberOfMaskedChannels && NumberOfMaskedChannelsInT0 > 0 ?
 			NumberOfMaskedChannels - InverseIndex : BaseType::ChannelIndexInLayout,
@@ -131,7 +131,7 @@ struct ChannelIndexHelper : public ChannelIndexHelper< NumberOfLayouts, Complete
 /// one of the Types as 'Type'.
 /// For example :
 /// TypeSwitch< T, 3 >::Type // Choose Type3 of class T.
-template< class T, EnumType Index > struct TypeSwitch{ GANDER_STATIC_ASSERT( ( Index <= 7 ) && ( Index >= 0 ), VALUE_IS_OUT_OUT_BOUNDS ); };
+template< class T, EnumType TemplateIndex > struct TypeSwitch{ typedef typename T::Type0 Type; };
 template< class T > struct TypeSwitch<T, 0> { typedef typename T::Type0 Type; };
 template< class T > struct TypeSwitch<T, 1> { typedef typename T::Type1 Type; };
 template< class T > struct TypeSwitch<T, 2> { typedef typename T::Type2 Type; };
@@ -150,13 +150,19 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 {
 	public :
 	
-		template< EnumType LayoutIndex >
+		template< EnumType LayoutIndexValue, bool DisableStaticAsserts = false >
 		struct LayoutTraits
 		{
 			GANDER_IMAGE_STATIC_ASSERT(
-				EnumType( Derived::NumberOfLayouts ) > LayoutIndex,
+				EnumType( Derived::NumberOfLayouts ) > LayoutIndexValue || DisableStaticAsserts,
 				THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST
 			);
+
+			enum
+			{
+				LayoutIndex = LayoutIndexValue,
+			};
+
 			typedef typename Detail::TypeSwitch< Derived, LayoutIndex >::Type LayoutType;
 			typedef typename LayoutType::StorageType StorageType;
 		};
@@ -229,6 +235,11 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 	
 				typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::StorageType StorageType;
 				typedef typename LayoutTraits< ChannelToLayoutIndex<C>::Value >::LayoutType LayoutType;
+				
+				enum
+				{
+					LayoutIndex = ChannelToLayoutIndex< C >::Value
+				};
 
 				ChannelTraits( const Derived &l, Channel channel = Chan_None ) 
 				{
@@ -255,9 +266,20 @@ struct PixelLayoutRecurseBase : public Layout< Derived >
 				int8u m_step;
 		};
 		
-		template< int Index, EnumType Mask = Mask_All  >
-		struct ChannelTraitsAtIndex : public LayoutTraits< ChannelIndexHelper< Index, Mask >::Value >
+		template< int ChannelIndex, EnumType Mask = Mask_All  >
+		struct ChannelTraitsAtIndex : public LayoutTraits< ChannelIndexHelper< ChannelIndex, Mask >::Value >
 		{
+			private :
+
+				typedef ChannelIndexHelper< ChannelIndex, Mask > BaseType;
+
+			public :
+
+				enum
+				{
+					LayoutIndex = BaseType::Value,
+					ChannelIndexInLayout = BaseType::ChannelIndexInLayout,
+				};
 		};
 
 		template< class L > friend class Pixel;

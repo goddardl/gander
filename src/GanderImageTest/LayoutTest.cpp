@@ -35,6 +35,8 @@
 #include <cstdlib>
 
 #include "GanderImage/Layout.h"
+#include "GanderImage/PixelLayout.h"
+#include "GanderImage/ChannelLayout.h"
 #include "GanderImage/BrothersLayout.h"
 
 #include "GanderImageTest/LayoutTest.h"
@@ -82,6 +84,52 @@ struct LayoutTest
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 0, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green >::Value ) >() ), 2. );
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 1, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green >::Value ) >() ), 4. );
 	}
+	
+	void testCompoundChannelContainer()
+	{
+		typedef Gander::Image::PixelLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< int, Chan_Z >, ChannelLayout< int, Chan_V > > L1;
+		Gander::Image::Detail::CompoundChannelContainer< L1 > cc;
+
+		cc.container<0>().channel< Chan_Red >() = 1.;
+		cc.container<0>().channel< Chan_Green >() = 2.;
+		cc.container<0>().channel< Chan_Blue >() = 3.;
+		cc.container<0>().channel< Chan_Alpha >() = 4.;
+		cc.container<1>().channel< Chan_Z >() = 5;
+		cc.container<2>().channel< Chan_V >() = 6;
+		
+		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Red >() ), 1. );
+		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Green >() ), 2. );
+		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Blue >() ), 3. );
+		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Alpha >() ), 4. );
+		BOOST_CHECK_EQUAL( ( cc.container<1>().channel< Chan_Z >() ), 5 );
+		BOOST_CHECK_EQUAL( ( cc.container<2>().channel< Chan_V >() ), 6 );
+		
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 0 >() ), 3. );
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 1 >() ), 2. );
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 2 >() ), 1. );
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 3 >() ), 4. );
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 4 >() ), 5 );
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 5 >() ), 6 );
+		
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 0, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 2. );
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 1, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 4. );
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 2, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 6 );
+		
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 0 ) ), 2. );
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 1 ) ), 4. );
+		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< int, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 2 ) ), 6 );
+		BOOST_CHECK_THROW( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 2 ) ), std::runtime_error );
+	/*	
+		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Green, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 2. );
+		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Alpha, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 4. );
+		BOOST_CHECK_EQUAL( ( cc.channel< Chan_V, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 6 );
+		
+		BOOST_CHECK_EQUAL( ( cc.channel< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_Green ) ), 2. );
+		BOOST_CHECK_EQUAL( ( cc.channel< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_Alpha ) ), 4. );
+		BOOST_CHECK_EQUAL( ( cc.channel< int, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_V ) ), 6 );
+		*/
+		
+	}
 };
 
 struct LayoutTestSuite : public boost::unit_test::test_suite
@@ -90,6 +138,7 @@ struct LayoutTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<LayoutTest> instance( new LayoutTest() );
 		add( BOOST_CLASS_TEST_CASE( &LayoutTest::testChannelContainer, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &LayoutTest::testCompoundChannelContainer, instance ) );
 	}
 };
 

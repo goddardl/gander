@@ -64,6 +64,7 @@ struct ChannelContainer
 	public :
 		
 		typedef typename Layout::StorageType StorageType;
+		typedef Layout LayoutType;
 
 		ChannelContainer()
 		{
@@ -86,7 +87,7 @@ struct ChannelContainer
 			return m_data[ m_layout.template maskedChannelIndex< Index, Mask >() ];
 		}
 
-		template< Channel C, ChannelMask Mask = Mask_All >
+		template< ChannelDefault C, ChannelMask Mask = Mask_All >
 		inline StorageType &channel()
 		{
 			if( m_layout.template containsChannel< C >() )
@@ -110,6 +111,154 @@ struct ChannelContainer
 		ChannelContainerType m_data;
 	
 		Layout m_layout;
+
+};
+
+template< class CompoundLayout >
+struct CompoundChannelContainerBase
+{
+	public :
+		
+		template< ChannelDefault C >
+		struct ChannelTraits : public CompoundLayout::template ChannelTraits< C >
+		{
+			ChannelTraits( CompoundLayout layout, Channel channel ) :
+				CompoundLayout::template ChannelTraits< C >( layout, channel )
+			{
+			}
+		};
+		
+		template< EnumType LayoutIndex >
+		struct LayoutTraits : public CompoundLayout::template LayoutTraits< LayoutIndex >
+		{};
+
+};
+
+template< class CompoundLayout, EnumType N >
+struct CompoundChannelContainerRecurse;
+
+template< class CompoundLayout >
+struct CompoundChannelContainerRecurse< CompoundLayout, 0 > : public CompoundChannelContainerBase< CompoundLayout >
+{
+	public :
+
+		typedef CompoundChannelContainerBase< CompoundLayout > BaseType;
+	
+	protected :
+		
+		template< class ReturnType, EnumType Index >
+		inline ReturnType &container()
+		{
+			GANDER_ASSERT( Index >= 0 || Index < CompoundLayout::NumberOfLayouts, "Index is out of bounds." );
+			static ReturnType r; // We never get here but we still need to return something to appease the compiler.
+			return r;
+		};
+};
+
+template< class CompoundLayout, EnumType N >
+struct CompoundChannelContainerRecurse : public CompoundChannelContainerRecurse< CompoundLayout, N - 1 >
+{
+	public :
+
+		enum { LayoutIndex = CompoundLayout::NumberOfLayouts - N };
+		typedef CompoundChannelContainerRecurse< CompoundLayout, N - 1  > BaseType;
+		typedef typename CompoundLayout::template LayoutTraits< LayoutIndex >::LayoutType LayoutType;
+		typedef typename LayoutType::StorageType StorageType;
+		typedef ChannelContainer< LayoutType > ContainerType;
+
+	protected :
+		
+		template< class ReturnType, EnumType Index >
+		inline ReturnType &container()
+		{
+			if( Index == LayoutIndex )
+			{
+				return ( ReturnType & ) m_container;
+			}
+			else
+			{
+				return BaseType::template container< ReturnType, Index >();
+			}
+		};
+
+	private :
+
+		ContainerType m_container;
+
+};
+
+template< class CompoundLayout >
+class CompoundChannelContainer : public Gander::Image::Detail::CompoundChannelContainerRecurse< CompoundLayout, CompoundLayout::NumberOfLayouts >
+{
+	public :
+		
+		template< EnumType Index >
+		inline ChannelContainer< typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType > &container()
+		{
+			return BaseType::template container< ChannelContainer< typename CompoundLayout::template LayoutTraits< Index >::LayoutType >, Index >();
+		};
+
+		template< EnumType Index, ChannelMask Mask = Mask_All, class ChannelType = typename CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::StorageType >
+		inline ChannelType &channelAtIndex()
+		{
+			enum
+			{
+				ContainerIndex = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::LayoutIndex,
+				ChannelIndexInLayout = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::ChannelIndexInLayout,
+			};
+			
+			GANDER_ASSERT( ( std::is_same< ChannelType, typename CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::StorageType >::value ), "Incorrect return type specified." );
+		
+			return ( ChannelType & ) container< ContainerIndex >().template channelAtIndex< ChannelIndexInLayout, Mask >();
+		}
+		
+		template< ChannelDefault C, ChannelMask Mask = Mask_All, class ChannelType = typename CompoundLayout::template ChannelTraits< C >::StorageType >
+		inline ChannelType &channel()
+		{
+			enum
+			{
+				ContainerIndex = CompoundLayout::template ChannelTraits< C >::LayoutIndex,
+			};
+			
+			GANDER_ASSERT( ( std::is_same< ChannelType, typename CompoundLayout::template ChannelTraits< C >::StorageType >::value ), "Incorrect return type specified." );
+			
+			return ( ChannelType & ) container< ContainerIndex >().template channel< C, Mask >();
+		}
+		
+		template< class ChannelType, ChannelMask Mask = Mask_All >
+		inline ChannelType &channel( Channel c )
+		{
+			switch( c )
+			{
+				case( 0 ) : return channel< ChannelDefault( 0 ), Mask, ChannelType >(); break;
+				case( 1 ) : return channel< ChannelDefault( 1 ), Mask, ChannelType >(); break;
+				case( 2 ) : return channel< ChannelDefault( 2 ), Mask, ChannelType >(); break;
+				case( 3 ) : return channel< ChannelDefault( 3 ), Mask, ChannelType >(); break;
+				case( 4 ) : return channel< ChannelDefault( 4 ), Mask, ChannelType >(); break;
+				case( 5 ) : return channel< ChannelDefault( 5 ), Mask, ChannelType >(); break;
+				case( 6 ) : return channel< ChannelDefault( 6 ), Mask, ChannelType >(); break;
+				default : GANDER_ASSERT( 0, "Channel does not exist in the ChannelContainer." ); break;
+			}
+		}
+		
+		template< class ChannelType, ChannelMask Mask = Mask_All >
+		inline ChannelType &channelAtIndex( unsigned int index )
+		{
+			switch( index )
+			{
+				case( 0 ) : return channelAtIndex< 0, Mask, ChannelType >(); break;
+				case( 1 ) : return channelAtIndex< 1, Mask, ChannelType >(); break;
+				case( 2 ) : return channelAtIndex< 2, Mask, ChannelType >(); break;
+				case( 3 ) : return channelAtIndex< 3, Mask, ChannelType >(); break;
+				case( 4 ) : return channelAtIndex< 4, Mask, ChannelType >(); break;
+				case( 5 ) : return channelAtIndex< 5, Mask, ChannelType >(); break;
+				case( 6 ) : return channelAtIndex< 6, Mask, ChannelType >(); break;
+				default : GANDER_ASSERT( 0, "Index is out of bounds." ); break;
+			};
+		}
+	private :
+
+		typedef typename Gander::Image::Detail::CompoundChannelContainerRecurse< CompoundLayout, CompoundLayout::NumberOfLayouts > BaseType;
 
 };
 
@@ -204,14 +353,17 @@ struct Layout
 			return static_cast< Derived const * >( this )->template _containsChannel< C >( c );
 		}
 
-		template< EnumType LayoutIndex >
+		template< EnumType Index >
 		struct LayoutTraits
 		{
-			GANDER_IMAGE_STATIC_ASSERT( LayoutIndex == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
+			GANDER_IMAGE_STATIC_ASSERT( Index == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
 			typedef Derived LayoutType;
 			typedef typename LayoutType::StorageType StorageType;
-			typedef typename LayoutType::ChannelContainer ChannelContainer;
-			typedef typename LayoutType::PtrToChannelContainer PtrToChannelContainer;
+		
+			enum
+			{
+				LayoutIndex = Index,
+			};
 		};
 
 		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }

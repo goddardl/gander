@@ -68,6 +68,7 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 			IsDynamic = true,
 		};
 
+		typedef Layout< DynamicLayout< T > > BaseType;
 		typedef DynamicLayout<T> Type;
 		typedef T StorageType;
 		typedef typename Gander::template Tuple< StorageType, NumberOfChannels, true > ChannelContainer;
@@ -79,10 +80,24 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 			typedef Type LayoutType;
 			typedef T StorageType;
 
+			enum
+			{
+				LayoutIndex = 0,
+			};
+
 			ChannelTraits( const LayoutType &l, Channel channel = Chan_None ) :
 				Detail::ChannelTraitsInterface< LayoutType >( l, channel )
 			{
 			}
+		};
+		
+		template< int Index, EnumType Mask = Mask_All  >
+		struct ChannelTraitsAtIndex : public BaseType::template LayoutTraits< 0 >
+		{
+			enum
+			{	
+				ChannelIndexInLayout = Index,
+			};
 		};
 	
 	private :
