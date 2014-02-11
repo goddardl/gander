@@ -198,6 +198,15 @@ struct EnumHelper
 				( M & ( 1 << 30 ) ) != 0 ? 30 :
 				( M & ( 1 << 31 ) ) != 0 ? 31 : 0,
 		};
+		
+		template< EnumType Min, EnumType Max >
+		struct Clamp
+		{
+			enum
+			{
+				Value = M > Max ? Max : M < Min ? Min : M, 
+			};
+		};
 };
 
 /// This helpful little struct will allow you to take an enum which we can interpret as an array of elements that are 'Width' bits wide.
