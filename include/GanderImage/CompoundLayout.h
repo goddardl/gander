@@ -149,7 +149,9 @@ template < class Derived >
 struct CompoundLayoutRecurseBase : public Layout< Derived >
 {
 	public :
-	
+
+		typedef float StorageType;
+			
 		template< EnumType LayoutIndexValue, bool DisableStaticAsserts = false >
 		struct LayoutTraits
 		{

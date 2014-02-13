@@ -38,6 +38,9 @@
 #include "GanderImage/CompoundLayout.h"
 #include "GanderImage/ChannelLayout.h"
 #include "GanderImage/BrothersLayout.h"
+#include "GanderImage/DynamicLayout.h"
+#include "GanderImage/LayoutContainer.h"
+#include "GanderImage/CompoundLayoutContainer.h"
 
 #include "GanderImageTest/LayoutTest.h"
 
@@ -58,9 +61,9 @@ namespace ImageTest
 
 struct LayoutTest
 {
-	void testChannelContainer()
+	void testLayoutContainer()
 	{
-		Gander::Image::Detail::ChannelContainer< BrothersLayout< float, Brothers_BGRA > > c;
+		Gander::Image::Detail::LayoutContainer< BrothersLayout< float, Brothers_BGRA > > c;
 
 		BOOST_CHECK_EQUAL( c.layout().channels(), ChannelSet( Mask_RGBA ) );
 		c.channel< Chan_Red >() = 1.;
@@ -77,18 +80,45 @@ struct LayoutTest
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 1 >() ), 2. );
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 2 >() ), 1. );
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 3 >() ), 4. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< float >( 0 ) ), 3. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< float >( 1 ) ), 2. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< float >( 2 ) ), 1. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< float >( 3 ) ), 4. );
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 0, Mask_Red >() ), 1. );
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 0, Mask_Blue >() ), 3. );
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 0, Mask_Green >() ), 2. );
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 0, Mask_Alpha >() ), 4. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< float, Mask_Red >( 0 ) ), 1. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< float, Mask_Blue >( 0 ) ), 3. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< float, Mask_Green >( 0 ) ), 2. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< float, Mask_Alpha >( 0 ) ), 4. );
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 0, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green >::Value ) >() ), 2. );
 		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 1, ChannelMask( CombineMasks< Mask_Alpha, Mask_Green >::Value ) >() ), 4. );
 	}
 	
-	void testCompoundChannelContainer()
+	void testDynamicLayoutContainer()
+	{
+		Gander::Image::Detail::LayoutContainer< DynamicLayout< float > > c;
+		c.addChannels( Mask_Green | Mask_U );
+		
+		c.channel< Chan_U >() = 1.;
+		c.channel< Chan_Green >() = 2.;
+		
+		c.addChannels( Mask_Blue );
+		BOOST_CHECK_EQUAL( ChannelSet( c.layout().channels() ), ChannelSet( Mask_Green | Mask_U | Mask_Blue ) );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 0 >() ), 2. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 1 >() ), 0. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 2 >() ), 1. );
+		
+		BOOST_CHECK_EQUAL( float( c.channel< Chan_Green >() ), 2. );
+		BOOST_CHECK_EQUAL( float( c.channel< Chan_Blue >() ), 0. );
+		BOOST_CHECK_EQUAL( float( c.channel< Chan_U >() ), 1. );
+	}
+
+	void testCompoundLayoutContainer()
 	{
 		typedef Gander::Image::CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< int, Chan_Z >, ChannelLayout< int, Chan_V > > L1;
-		Gander::Image::Detail::CompoundChannelContainer< L1 > cc;
+		Gander::Image::Detail::CompoundLayoutContainer< L1 > cc;
 
 		cc.container<0>().channel< Chan_Red >() = 1.;
 		cc.container<0>().channel< Chan_Green >() = 2.;
@@ -136,8 +166,9 @@ struct LayoutTestSuite : public boost::unit_test::test_suite
 	LayoutTestSuite() : boost::unit_test::test_suite( "LayoutTestSuite" )
 	{
 		boost::shared_ptr<LayoutTest> instance( new LayoutTest() );
-		add( BOOST_CLASS_TEST_CASE( &LayoutTest::testChannelContainer, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LayoutTest::testCompoundChannelContainer, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &LayoutTest::testLayoutContainer, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &LayoutTest::testCompoundLayoutContainer, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &LayoutTest::testDynamicLayoutContainer, instance ) );
 	}
 };
 

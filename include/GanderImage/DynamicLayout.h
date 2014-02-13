@@ -205,6 +205,13 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 				return m_channels.contains( ChannelSet( Channel( C ) ) );
 			}
 		}
+	
+		/// Returns the index of the given channel.	
+		template< EnumType C, EnumType Mask = Mask_All, bool >
+		inline unsigned int _indexOfChannel() const
+		{
+			return m_channels.index( Channel( C ) );
+		}
 		
 		/// Returns the index of a channel in the layout when masked.
 		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
