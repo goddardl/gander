@@ -149,10 +149,10 @@ struct Layout
 			return static_cast< Derived const * >( this )->template _containsChannel< C >( c );
 		}
 
-		template< EnumType Index >
+		template< EnumType Index, bool DisableStaticAsserts = false >
 		struct LayoutTraits
 		{
-			GANDER_IMAGE_STATIC_ASSERT( Index == 0, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
+			GANDER_IMAGE_STATIC_ASSERT( Index == 0 || DisableStaticAsserts, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
 			typedef Derived LayoutType;
 			typedef typename LayoutType::StorageType StorageType;
 		
