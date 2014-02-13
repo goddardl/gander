@@ -85,6 +85,11 @@ struct Tuple< T, NumberOfElements, false >
 			return m_data+NumberOfElements;
 		};
 		
+		inline void resize( unsigned int size )
+		{
+			GANDER_STATIC_ASSERT_ERROR( THIS_METHOD_CANNOT_BE_CALLED_ON_A_STATIC_TUPLE );
+		}
+		
 		inline void clear()
 		{
 			memset( &m_data[0], 0, sizeof( StorageType ) * NumberOfElements );
@@ -138,6 +143,11 @@ struct Tuple< T, NumberOfElements, true >
 		{
 			return m_data.size();
 		};
+		
+		inline void resize( unsigned int size )
+		{
+			m_data.resize( size );
+		}
 		
 		inline void clear()
 		{
