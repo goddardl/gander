@@ -1,5 +1,4 @@
 Todo:
-3) Get the ChannelContainer working correctly with DynamicLayouts and PixelLayouts that contain a DynamicLayout.
-4) Rename the PixelLayout to CompoundLayout.
-5) Move the CompoundChannelContainer into it's own file.
-6) Remove the runtime channel traits as they just convolute things.
+1) Get the CompoundLayoutContainer working correctly with DynamicLayouts and PixelLayouts that contain a DynamicLayout.
+2) Move the CompoundLayoutContainer into it's own file.
+3) Remove the runtime channel traits as they just convolute things.
