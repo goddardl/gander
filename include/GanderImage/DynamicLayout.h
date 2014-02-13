@@ -202,7 +202,7 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 			}
 			else
 			{
-				return m_channels.contains( ChannelSet( C ) );
+				return m_channels.contains( ChannelSet( Channel( C ) ) );
 			}
 		}
 		
