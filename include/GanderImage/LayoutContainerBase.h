@@ -149,6 +149,7 @@ struct LayoutContainerBase
 		
 		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
+			GANDER_IMAGE_STATIC_ASSERT( Layout::IsDynamic, THE_LAYOUT_MUST_BE_DYNAMIC_IN_ORDER_TO_ADD_CHANNELS_TO_IT )
 			return static_cast< Derived * >( this )->template _addChannels( c, b );
 		}
 		
@@ -156,7 +157,7 @@ struct LayoutContainerBase
 		
 		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
-			GANDER_IMAGE_STATIC_ASSERT( Layout::IsDynamic, THE_LAYOUT_MUST_BE_DYNAMIC_IN_ORDER_TO_ADD_CHANNELS_TO_IT )
+			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 		}
 	
 		Layout m_layout;

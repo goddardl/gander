@@ -77,12 +77,16 @@ struct CompoundLayoutContainerRecurse< CompoundLayout, 0 > : public LayoutContai
 	protected :
 		
 		template< class ReturnType, EnumType Index >
-		inline ReturnType &container()
+		inline ReturnType &child()
 		{
 			GANDER_ASSERT( Index >= 0 || Index < CompoundLayout::NumberOfLayouts, "Index is out of bounds." );
 			static ReturnType r; // We never get here but we still need to return something to appease the compiler.
 			return r;
 		};
+		
+		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+		}
 };
 
 template< class CompoundLayout, EnumType N >
@@ -95,14 +99,26 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 	public :
 
 		enum { LayoutIndex = CompoundLayout::NumberOfLayouts - N };
-		typedef typename CompoundLayout::template LayoutTraits< LayoutIndex >::LayoutType LayoutType;
+		typedef LayoutContainer< typename CompoundLayout::template LayoutTraits< LayoutIndex >::LayoutType > ContainerType;
+		typedef typename ContainerType::LayoutType LayoutType;
 		typedef typename LayoutType::StorageType StorageType;
-		typedef LayoutContainer< LayoutType > ContainerType;
 
 	protected :
 		
+		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			if( !LayoutType::IsDynamic )
+			{
+				BaseType::_addChannels( c, b );
+			}
+			else
+			{
+				m_container.addChannels( c, b );
+			}
+		}
+		
 		template< class ReturnType, EnumType Index >
-		inline ReturnType &container()
+		inline ReturnType &child()
 		{
 			if( Index == LayoutIndex )
 			{
@@ -110,7 +126,7 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 			}
 			else
 			{
-				return BaseType::template container< ReturnType, Index >();
+				return BaseType::template child< ReturnType, Index >();
 			}
 		};
 
@@ -132,11 +148,12 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 	
 		using BaseType::channel;
 		using BaseType::channelAtIndex;
+		using BaseType::addChannels;
 		
 		template< EnumType Index >
-		inline LayoutContainer< typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType > &container()
+		inline LayoutContainer< typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType > &child()
 		{
-			return BaseType::template container< LayoutContainer< typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType >, Index >();
+			return BaseType::template child< LayoutContainer< typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType >, Index >();
 		};
 
 		template< EnumType Index, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false, class ChannelType = typename CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::StorageType >
@@ -144,7 +161,7 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 		{
 			enum
 			{
-				ContainerIndex = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutIndex,
+				ChildIndex = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutIndex,
 				ChannelIndexInLayout = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::ChannelIndexInLayout,
 			};
 			
@@ -153,7 +170,7 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 				"Incorrect return type specified."
 			);
 		
-			return ( ChannelType & ) container< ContainerIndex >().template channelAtIndex< ChannelIndexInLayout, Mask, DisableStaticAsserts >();
+			return ( ChannelType & ) child< ChildIndex >().template channelAtIndex< ChannelIndexInLayout, Mask, DisableStaticAsserts >();
 		}
 		
 		template< ChannelDefault C, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false, class ChannelType = typename CompoundLayout::template ChannelTraits< C, true >::StorageType >
@@ -161,14 +178,21 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 		{
 			enum
 			{
-				ContainerIndex = CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutIndex,
+				ChildIndex = CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutIndex,
 			};
 			
 			GANDER_ASSERT( ( std::is_same< ChannelType, typename CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::StorageType >::value ), "Incorrect return type specified." );
 			
-			return ( ChannelType & ) container< ContainerIndex >().template channel< C, Mask, DisableStaticAsserts >();
+			return ( ChannelType & ) child< ChildIndex >().template channel< C, Mask, DisableStaticAsserts >();
 		}
 	
+	protected :
+		
+		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			BaseType::_addChannels( c, b );
+		}
+
 	private :
 
 		template< class, class > friend class LayoutContainerBase;	

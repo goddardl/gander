@@ -152,6 +152,7 @@ struct CompoundLayoutTest
 			typedef TestLayout<3, Chan_U> Storage3;
 
 			typedef CompoundLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
+			BOOST_CHECK_EQUAL( int(Layout().numberOfChannels() ), 4 );
 			BOOST_CHECK_EQUAL( int(Layout::NumberOfLayouts), 4 );
 			BOOST_CHECK_EQUAL( int(Layout::ChannelToLayoutIndex<Chan_Red>::Value), 0 );
 			BOOST_CHECK_EQUAL( int(Layout::ChannelToLayoutIndex<Chan_Blue>::Value), 1 );
@@ -172,6 +173,9 @@ struct CompoundLayoutTest
 		
 		typedef CompoundLayout< Storage0, Storage1, Storage2 > Layout;
 		Layout l;
+		
+		BOOST_CHECK_EQUAL( l.channels(), ChannelSet( Mask_UV | Mask_RGB | Mask_Alpha ) );
+		BOOST_CHECK_EQUAL( int( l.numberOfChannels() ), 6 );
 		BOOST_CHECK_EQUAL( int( l.contains( Chan_Alpha ) ), true );
 		BOOST_CHECK_EQUAL( int( l.contains( Chan_Blue ) ), true );
 		BOOST_CHECK_EQUAL( int( l.contains( Chan_Red ) ), true );
@@ -191,7 +195,9 @@ struct CompoundLayoutTest
 		typedef CompoundLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
 		Layout l;
 		l.addChannels( Mask_UV, Brothers_VU );
+		BOOST_CHECK_EQUAL( l.channels(), ChannelSet( Mask_UV | Mask_RGB | Mask_Z | Mask_Alpha ) );
 		
+		BOOST_CHECK_EQUAL( int( l.numberOfChannels() ), 7 );
 		BOOST_CHECK_EQUAL( int( l.step<Chan_Alpha>() ), 1 );
 		BOOST_CHECK_EQUAL( int( l.step<Chan_Red>() ), 3 );
 		BOOST_CHECK_EQUAL( int( l.step<Chan_Green>() ), 3 );
@@ -216,19 +222,33 @@ struct CompoundLayoutTest
 		typedef ChannelLayout<float, Chan_Alpha> Storage1;
 		typedef ChannelLayout<float, Chan_Z> Storage2;
 		typedef BrothersLayout<float, Brothers_VU> Storage3;
+		typedef DynamicLayout<float> Storage4;
 			
-		typedef CompoundLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
-		BOOST_CHECK_EQUAL( int(Layout::NumberOfLayouts), 4 );
+		typedef CompoundLayout< Storage0, Storage1, Storage2, Storage3, Storage4 > Layout;
+		BOOST_CHECK_EQUAL( int(Layout::NumberOfLayouts), 5 );
 		BOOST_CHECK_EQUAL( int(Layout::NumberOfChannels), 7 );
 		BOOST_CHECK_EQUAL( int(Layout::ChannelMask), int( Mask_RGB | Mask_Alpha | Mask_Z | Mask_UV ) );
 
 		BOOST_CHECK_EQUAL( Layout().requiredChannels(), ChannelSet( Mask_Red | Mask_Alpha | Mask_Z | Mask_V ) );
-	}
-	
-	void testDynamicLayout()
-	{
-		typedef CompoundLayout< ChannelLayout< float, Chan_Red >, DynamicLayout< float > > Layout;
+		
+		BOOST_CHECK( ( Layout().child<0>() == Storage0() ) );
+		BOOST_CHECK( ( Layout().child<1>() == Storage1() ) );
+		BOOST_CHECK( ( Layout().child<2>() == Storage2() ) );
+		BOOST_CHECK( ( Layout().child<3>() == Storage3() ) );
+		BOOST_CHECK( ( Layout().child<4>() == Storage4() ) );
+
+		Storage4 dl;
+		dl.addChannels( Mask_Mask );
+		BOOST_CHECK_EQUAL( dl.requiredChannels(), ChannelSet( Mask_Mask) );
+		BOOST_CHECK_EQUAL( int( dl.numberOfChannels() ), 1 );
+
 		Layout l;
+		l.addChannels( Mask_Mask );
+		BOOST_CHECK_EQUAL( int( l.numberOfChannels() ), 8 );
+		BOOST_CHECK_EQUAL( l.requiredChannels(), ChannelSet( Mask_Red | Mask_Alpha | Mask_Z | Mask_V | Mask_Mask) );
+		
+		BOOST_CHECK_EQUAL( ( l.child<4>() == Storage4() ), 0 );
+		BOOST_CHECK_EQUAL( ( l.child<4>() == dl ), 1 );
 	}
 };
 
@@ -240,7 +260,6 @@ struct CompoundLayoutTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testLayoutTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testMaskedLayoutTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testChannelTraits, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testDynamicLayout, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testStep, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testContains, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testCommonLayoutAttributes, instance ) );

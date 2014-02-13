@@ -79,6 +79,10 @@
 namespace Gander
 {
 
+template< class T, class S, bool Condition > struct TypeSelector;
+template< class T, class S > struct TypeSelector< T, S, false > { typedef T Type; };
+template< class T, class S > struct TypeSelector< T, S, true > { typedef S Type; };
+
 typedef GANDER_INT8 int8;
 typedef GANDER_INT8U int8u;
 typedef GANDER_INT16 int16;

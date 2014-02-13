@@ -293,6 +293,10 @@ struct CompoundLayoutRecurseBase : public Layout< Derived >
 template < class Derived >
 struct CompoundLayoutRecurse< Derived, false, None, None, None, None, None, None, None, None > : public CompoundLayoutRecurseBase< Derived >
 {
+	private :
+
+		typedef CompoundLayoutRecurseBase< Derived > BaseType;
+
 	public :
 
 		enum
@@ -302,10 +306,31 @@ struct CompoundLayoutRecurse< Derived, false, None, None, None, None, None, None
 
 	protected :
 		
+		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
+		inline ReturnType &child()
+		{
+			GANDER_ASSERT( 0, "The requested layout does not exist at the given index" );
+
+			static typename BaseType::template LayoutTraits< Index, DisableStaticAsserts > l; // We never get here but we still have to return something to keep the compiler happy.
+			return ( ReturnType & ) l;
+		}
+		
 		/// Returns true is this layout contains the given channel.
 		inline bool _contains( ChannelSet channels ) const
 		{
 			return ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ).contains( channels );
+		}
+
+		/// Returns the channels represented by this layout.
+		inline ChannelSet _channels() const
+		{
+			return ChannelSet( static_cast<Gander::Image::ChannelMask>( Derived::ChannelMask ) );
+		}
+		
+		/// Returns the number of channels that this layout represents.
+		inline unsigned int _numberOfChannels() const
+		{
+			return static_cast<unsigned int>( Derived::NumberOfChannels );
 		}
 
 		template< ChannelDefault C = Chan_None >
@@ -320,9 +345,11 @@ struct CompoundLayoutRecurse< Derived, false, None, None, None, None, None, None
 template < class Derived, class T0 >
 struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, None, None > : public CompoundLayoutRecurseBase< Derived >
 {
-	public :
+	private :
 
 		typedef CompoundLayoutRecurseBase< Derived > BaseType;
+	
+	public :
 
 		enum
 		{
@@ -339,6 +366,21 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 		}
 
 	protected :	
+
+		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
+		inline ReturnType &child()
+		{
+			GANDER_IMAGE_STATIC_ASSERT(
+				( std::is_same< ReturnType, T0 >::value || DisableStaticAsserts ), THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST
+			);
+			return ( ReturnType & ) m_dynamicLayout;
+		}
+	
+		/// Returns the number of channels that this layout represents.
+		inline unsigned int _numberOfChannels() const
+		{
+			return static_cast<unsigned int>( Derived::NumberOfChannels ) + m_dynamicLayout.numberOfChannels();
+		}
 	
 		/// Adds the channel to the Layout and logs all pertenant information.
 		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
@@ -349,7 +391,12 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 		/// Returns true is this layout contains the given channel.
 		inline bool _contains( ChannelSet channels ) const
 		{
-			return ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ).contains( channels ) || m_dynamicLayout.channels().contains( channels );
+			return _channels().contains( channels );
+		}
+	
+		inline ChannelSet _channels() const
+		{
+			return ( ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ) + m_dynamicLayout.channels() );
 		}
 
 		template< ChannelDefault C = Chan_None >
@@ -396,6 +443,19 @@ struct CompoundLayoutRecurse : public CompoundLayoutRecurse< Derived, IS_DYNAMIC
 		// Assert that the any dynamic layouts are the last argument.			
 		GANDER_IMAGE_STATIC_ASSERT( !T0::IsDynamic, ONLY_ONE_DYNAMIC_LAYOUT_MUST_BE_SPECIFED_AS_THE_LAST_TEMPLATE_ARGUMENT );
 
+		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
+		inline ReturnType &child()
+		{
+			if( std::is_same< ReturnType, T0 >::value )
+			{
+				return ( ReturnType & ) m_layout;
+			}
+			else
+			{
+				return ( ReturnType & ) BaseType::template child< Index, DisableStaticAsserts, ReturnType >();
+			}
+		}
+
 		inline int8u _step( Channel channel ) const
 		{
 			if( m_layout.contains( channel ) )
@@ -430,7 +490,7 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 		T0::IsDynamic | T1::IsDynamic | T2::IsDynamic | T3::IsDynamic |T4::IsDynamic | T5::IsDynamic | T6::IsDynamic | T7::IsDynamic,
 		T0, T1, T2, T3, T4, T5, T6, T7
 	> BaseType;
-
+	
 	typedef CompoundLayout< T0, T1, T2, T3, T4, T6, T7 > Derived;
 
 	enum
@@ -440,50 +500,54 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 		ChannelMask = BaseType::ChannelMask,
 	};
 
+	public :
+
+		template< unsigned Index, bool DisableStaticAsserts = true >
+		inline typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType &child()
+		{
+			return BaseType::template child< Index, DisableStaticAsserts, typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >();
+		}
+
+	protected :
+
+		/// Returns the number of channels that this layout represents.
+		inline unsigned int _numberOfChannels() const
+		{
+			return BaseType::_numberOfChannels();
+		}
+
 	private :
 
-	friend class Layout< Derived >;	
+		friend class Layout< Derived >;	
 
-	/// Returns the channels represented by this layout.
-	inline ChannelSet _channels() const
-	{
-		return ChannelSet( static_cast<Gander::Image::ChannelMask>( Derived::ChannelMask ) );
-	}
-
-	/// Returns the number of channels that this layout represents.
-	inline unsigned int _numberOfChannels() const
-	{
-		return static_cast<unsigned int>( NumberOfChannels );
-	}
-
-	/// Returns a ChannelSet of the channels that pointers are required for in order
-	/// to access all of the channels in this layout.
-	inline ChannelSet _requiredChannels() const
-	{
-		return BaseType::_requiredChannels();
-	}
-
-	/// Returns the step value for a given channel.
-	template< ChannelDefault C = Chan_None >
-	inline int8u _step( Channel channel = Chan_None ) const
-	{
-		if( C != Chan_None )
+		/// Returns a ChannelSet of the channels that pointers are required for in order
+		/// to access all of the channels in this layout.
+		inline ChannelSet _requiredChannels() const
 		{
-			if( ( !Derived::IsDynamic ) || ( Gander::Image::template MaskContainsChannel< ChannelMask, C >::Value == true ) )
+			return BaseType::_requiredChannels();
+		}
+
+		/// Returns the step value for a given channel.
+		template< ChannelDefault C = Chan_None >
+		inline int8u _step( Channel channel = Chan_None ) const
+		{
+			if( C != Chan_None )
 			{
-				typedef typename BaseType::template ChannelTraits< C >::LayoutType LayoutType;
-				return LayoutType().template step<C>();
+				if( ( !Derived::IsDynamic ) || ( Gander::Image::template MaskContainsChannel< ChannelMask, C >::Value == true ) )
+				{
+					typedef typename BaseType::template ChannelTraits< C >::LayoutType LayoutType;
+					return LayoutType().template step<C>();
+				}
+				else
+				{
+					return BaseType::_step( C );
+				}
 			}
 			else
 			{
-				return BaseType::_step( C );
+				return BaseType::_step( channel );
 			}
 		}
-		else
-		{
-			return BaseType::_step( channel );
-		}
-	}
 };
 
 }; // namespace Image

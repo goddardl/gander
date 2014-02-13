@@ -61,24 +61,46 @@ namespace ImageTest
 
 struct CompoundLayoutContainerTest
 {
+	void testDynamicCompoundLayoutContainer()
+	{
+		Gander::Image::Detail::CompoundLayoutContainer< DynamicLayout< float > > c;
+		
+		c.addChannels( Mask_Green | Mask_U );
+		
+		c.channel< Chan_U >() = 1.;
+		c.channel< Chan_Green >() = 2.;
+		
+		c.addChannels( Mask_Blue );
+		
+		BOOST_CHECK_EQUAL( ChannelSet( c.layout().channels() ), ChannelSet( Mask_Green | Mask_U | Mask_Blue ) );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 0 >() ), 2. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 1 >() ), 0. );
+		BOOST_CHECK_EQUAL( float( c.channelAtIndex< 2 >() ), 1. );
+		
+		BOOST_CHECK_EQUAL( float( c.channel< Chan_Green >() ), 2. );
+		BOOST_CHECK_EQUAL( float( c.channel< Chan_Blue >() ), 0. );
+		BOOST_CHECK_EQUAL( float( c.channel< Chan_U >() ), 1. );
+		
+	}
+	
 	void testCompoundLayoutContainer()
 	{
 		typedef Gander::Image::CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< int, Chan_Z >, ChannelLayout< int, Chan_V > > L1;
 		Gander::Image::Detail::CompoundLayoutContainer< L1 > cc;
 
-		cc.container<0>().channel< Chan_Red >() = 1.;
-		cc.container<0>().channel< Chan_Green >() = 2.;
-		cc.container<0>().channel< Chan_Blue >() = 3.;
-		cc.container<0>().channel< Chan_Alpha >() = 4.;
-		cc.container<1>().channel< Chan_Z >() = 5;
-		cc.container<2>().channel< Chan_V >() = 6;
+		cc.child<0>().channel< Chan_Red >() = 1.;
+		cc.child<0>().channel< Chan_Green >() = 2.;
+		cc.child<0>().channel< Chan_Blue >() = 3.;
+		cc.child<0>().channel< Chan_Alpha >() = 4.;
+		cc.child<1>().channel< Chan_Z >() = 5;
+		cc.child<2>().channel< Chan_V >() = 6;
 		
-		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Red >() ), 1. );
-		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Green >() ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Blue >() ), 3. );
-		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Alpha >() ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.container<1>().channel< Chan_Z >() ), 5 );
-		BOOST_CHECK_EQUAL( ( cc.container<2>().channel< Chan_V >() ), 6 );
+		BOOST_CHECK_EQUAL( ( cc.child<0>().channel< Chan_Red >() ), 1. );
+		BOOST_CHECK_EQUAL( ( cc.child<0>().channel< Chan_Green >() ), 2. );
+		BOOST_CHECK_EQUAL( ( cc.child<0>().channel< Chan_Blue >() ), 3. );
+		BOOST_CHECK_EQUAL( ( cc.child<0>().channel< Chan_Alpha >() ), 4. );
+		BOOST_CHECK_EQUAL( ( cc.child<1>().channel< Chan_Z >() ), 5 );
+		BOOST_CHECK_EQUAL( ( cc.child<2>().channel< Chan_V >() ), 6 );
 		
 		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 0 >() ), 3. );
 		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 1 >() ), 2. );
@@ -113,6 +135,7 @@ struct CompoundLayoutContainerTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<CompoundLayoutContainerTest> instance( new CompoundLayoutContainerTest() );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutContainerTest::testCompoundLayoutContainer, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutContainerTest::testDynamicCompoundLayoutContainer, instance ) );
 	}
 };
 

@@ -73,6 +73,7 @@ struct LayoutContainer : public LayoutContainerBase< LayoutContainer< Layout >, 
 	
 		using BaseType::channel;
 		using BaseType::channelAtIndex;
+		using BaseType::addChannels;
 
 		LayoutContainer()
 		{
@@ -83,31 +84,6 @@ struct LayoutContainer : public LayoutContainerBase< LayoutContainer< Layout >, 
 		{
 		}
 				
-		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			//\todo: We should really use the layouts indexOfChannel() method here to
-			// correctly order the values in m_data. However, as only have one type of
-			// dynamic layout, this code will do for now... It just orders the
-			// data values to be the same as that of the ChannelSet. 
-			
-			// Get a set of the current channels and the unique new ones.
-			ChannelSet currentChannels( BaseType::m_layout.channels() );
-			ChannelSet newChannels( c - currentChannels );
-			
-			BaseType::m_layout.addChannels( c, b );
-
-			// Loop over the new channels and insert a new data element for each one
-			// at the same index that it is stored in the channel set.
-			ChannelSet::const_iterator it( newChannels.begin() );
-			ChannelSet::const_iterator end( newChannels.end() );
-			for( ; it != end; ++it )
-			{
-				currentChannels += *it;
-				int index = currentChannels.index( *it );
-				m_data.insert( m_data.begin() + index, typename Layout::StorageType( 0 ) );
-			}
-		}
-
 		template< EnumType Index, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false, class ChannelType = StorageType >
 		inline ChannelType &channelAtIndex()
 		{
@@ -132,6 +108,31 @@ struct LayoutContainer : public LayoutContainerBase< LayoutContainer< Layout >, 
 		}
 	
 	private :
+		
+		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			//\todo: We should really use the layouts indexOfChannel() method here to
+			// correctly order the values in m_data. However, as only have one type of
+			// dynamic layout, this code will do for now... It just orders the
+			// data values to be the same as that of the ChannelSet. 
+			
+			// Get a set of the current channels and the unique new ones.
+			ChannelSet currentChannels( BaseType::m_layout.channels() );
+			ChannelSet newChannels( c - currentChannels );
+			
+			BaseType::m_layout.addChannels( c, b );
+
+			// Loop over the new channels and insert a new data element for each one
+			// at the same index that it is stored in the channel set.
+			ChannelSet::const_iterator it( newChannels.begin() );
+			ChannelSet::const_iterator end( newChannels.end() );
+			for( ; it != end; ++it )
+			{
+				currentChannels += *it;
+				int index = currentChannels.index( *it );
+				m_data.insert( m_data.begin() + index, typename Layout::StorageType( 0 ) );
+			}
+		}
 		
 		typedef Gander::template Tuple< typename Layout::StorageType, Layout::NumberOfChannels, Layout::IsDynamic > LayoutContainerType;
 
