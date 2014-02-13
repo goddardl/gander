@@ -42,7 +42,7 @@
 #include "GanderImage/LayoutContainer.h"
 #include "GanderImage/CompoundLayoutContainer.h"
 
-#include "GanderImageTest/LayoutTest.h"
+#include "GanderImageTest/LayoutContainerTest.h"
 
 #include "boost/test/floating_point_comparison.hpp"
 #include "boost/test/test_tools.hpp"
@@ -59,7 +59,7 @@ namespace Gander
 namespace ImageTest
 {
 
-struct LayoutTest
+struct LayoutContainerTest
 {
 	void testLayoutContainer()
 	{
@@ -114,67 +114,21 @@ struct LayoutTest
 		BOOST_CHECK_EQUAL( float( c.channel< Chan_Blue >() ), 0. );
 		BOOST_CHECK_EQUAL( float( c.channel< Chan_U >() ), 1. );
 	}
+};
 
-	void testCompoundLayoutContainer()
+struct LayoutContainerTestSuite : public boost::unit_test::test_suite
+{
+	LayoutContainerTestSuite() : boost::unit_test::test_suite( "LayoutContainerTestSuite" )
 	{
-		typedef Gander::Image::CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< int, Chan_Z >, ChannelLayout< int, Chan_V > > L1;
-		Gander::Image::Detail::CompoundLayoutContainer< L1 > cc;
-
-		cc.container<0>().channel< Chan_Red >() = 1.;
-		cc.container<0>().channel< Chan_Green >() = 2.;
-		cc.container<0>().channel< Chan_Blue >() = 3.;
-		cc.container<0>().channel< Chan_Alpha >() = 4.;
-		cc.container<1>().channel< Chan_Z >() = 5;
-		cc.container<2>().channel< Chan_V >() = 6;
-		
-		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Red >() ), 1. );
-		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Green >() ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Blue >() ), 3. );
-		BOOST_CHECK_EQUAL( ( cc.container<0>().channel< Chan_Alpha >() ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.container<1>().channel< Chan_Z >() ), 5 );
-		BOOST_CHECK_EQUAL( ( cc.container<2>().channel< Chan_V >() ), 6 );
-		
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 0 >() ), 3. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 1 >() ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 2 >() ), 1. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 3 >() ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 4 >() ), 5 );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 5 >() ), 6 );
-		
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 0, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 1, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 2, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 6 );
-		
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 0 ) ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 1 ) ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< int, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 2 ) ), 6 );
-		BOOST_CHECK_THROW( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 2 ) ), std::runtime_error );
-		
-		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Green, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Alpha, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.channel< Chan_V, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >() ), 6 );
-		
-		BOOST_CHECK_EQUAL( ( cc.channel< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_Green ) ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.channel< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_Alpha ) ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.channel< int, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_V ) ), 6 );
-		BOOST_CHECK_THROW( ( cc.channel< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_V ) ), std::runtime_error );
+		boost::shared_ptr<LayoutContainerTest> instance( new LayoutContainerTest() );
+		add( BOOST_CLASS_TEST_CASE( &LayoutContainerTest::testLayoutContainer, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &LayoutContainerTest::testDynamicLayoutContainer, instance ) );
 	}
 };
 
-struct LayoutTestSuite : public boost::unit_test::test_suite
+void addLayoutContainerTest( boost::unit_test::test_suite *test )
 {
-	LayoutTestSuite() : boost::unit_test::test_suite( "LayoutTestSuite" )
-	{
-		boost::shared_ptr<LayoutTest> instance( new LayoutTest() );
-		add( BOOST_CLASS_TEST_CASE( &LayoutTest::testLayoutContainer, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LayoutTest::testCompoundLayoutContainer, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LayoutTest::testDynamicLayoutContainer, instance ) );
-	}
-};
-
-void addLayoutTest( boost::unit_test::test_suite *test )
-{
-	test->add( new LayoutTestSuite() );
+	test->add( new LayoutContainerTestSuite() );
 }
 
 } // namespace ImageTest

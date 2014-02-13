@@ -31,8 +31,8 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERIMAGETEST_LAYOUTTEST_H__
-#define __GANDERIMAGETEST_LAYOUTTEST_H__
+#ifndef __GANDERIMAGETEST_COMPOUNDLAYOUTCONTAINERTEST_H__
+#define __GANDERIMAGETEST_COMPOUNDLAYOUTCONTAINERTEST_H__
 
 #include <vector>
 
@@ -44,10 +44,10 @@ namespace Gander
 namespace ImageTest
 {
 
-void addLayoutTest( boost::unit_test::test_suite *test );
+void addCompoundLayoutContainerTest( boost::unit_test::test_suite *test );
 
 }; // namespace ImageTest
 
 }; // namespace Gander
 
-#endif // __GANDERIMAGETEST_LAYOUTTEST_H__
+#endif // __GANDERIMAGETEST_COMPOUNDLAYOUTCONTAINERTEST_H__
