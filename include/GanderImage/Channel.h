@@ -66,7 +66,7 @@ struct ChannelTraits
 
 	enum
 	{
-		NumberOfDefaultChannels = 9,     /// Should be set to the number of enum values in ChannelDefault. This includes Chan_None.
+		NumberOfDefaultChannels = 11,     /// Should be set to the number of enum values in ChannelDefault. This includes Chan_None.
 		SizeOfChannelLookupEnumType = 8, /// Should be set to sizeof( ChannelLookupEnumType )
 		RepresentableBitWidth = Gander::EnumHelper< NumberOfDefaultChannels >::MinimumRequiredBitWidth, /// Defines the number of bits required to represent all ChannelDefault values.
 		MaxNumberOfDefaultChannels = ( SizeOfChannelLookupEnumType * 8 ) / RepresentableBitWidth, /// Defines the maximum number of entries that can be expressed in ChannelDefault.
@@ -91,6 +91,8 @@ enum ChannelDefault
 	Chan_U     = 6,
 	Chan_V     = 7,
 	Chan_Mask  = 8,
+	Chan_Forward  = 9,
+	Chan_Backward  = 10,
 };
 
 /// Values used to mask bits within a channel set.
@@ -107,7 +109,10 @@ enum ChannelMask
 	Mask_Mask  = 1 << ( Chan_Mask - 1 ),
 	Mask_U     = 1 << ( Chan_U - 1 ),
 	Mask_V     = 1 << ( Chan_V - 1 ),
+	Mask_Forward = 1 << ( Chan_Forward - 1 ),
+	Mask_Backward = 1 << ( Chan_Backward - 1 ),
 	Mask_UV  = Mask_U | Mask_V,
+	Mask_Vectors  = Mask_Forward | Mask_Backward,
 	Mask_RGB  = Mask_Red | Mask_Green | Mask_Blue,
 	Mask_RGBA  = Mask_RGB | Mask_Alpha,
 	Mask_RG  = Mask_Red | Mask_Green,

@@ -57,7 +57,7 @@ struct ChannelTest
 	void testChannelTraits()
 	{
 		BOOST_CHECK_EQUAL( int( ChannelTraits::SizeOfChannelLookupEnumType ), int( sizeof( ChannelTraits::ChannelLookupEnumType ) ) );
-		BOOST_CHECK_EQUAL( int( ChannelTraits::NumberOfDefaultChannels ), 9 );
+		BOOST_CHECK_EQUAL( int( ChannelTraits::NumberOfDefaultChannels ), 11 );
 		BOOST_CHECK_EQUAL( int( ChannelTraits::RepresentableBitWidth ), 4 );
 		BOOST_CHECK_EQUAL( int( ChannelTraits::MaxNumberOfDefaultChannels ), 16 );
 		BOOST_CHECK( int( ChannelTraits::NumberOfDefaultChannels ) <= int( ChannelTraits::MaxNumberOfDefaultChannels ) );
@@ -253,10 +253,10 @@ struct ChannelTest
 		BOOST_CHECK_EQUAL( green, Chan_Green );
 		
 		Channel f( ChannelSet::flag("new") );
-		BOOST_CHECK_EQUAL( f, 9 );		
+		BOOST_CHECK_EQUAL( f, 11 );		
 		
 		Channel f2( ChannelSet::flag("new2") );
-		BOOST_CHECK_EQUAL( f2, 10 );
+		BOOST_CHECK_EQUAL( f2, 12 );
 		BOOST_CHECK_EQUAL( f, ChannelSet::findFlag("new") );
 		BOOST_CHECK_EQUAL( f2, ChannelSet::findFlag("new2") );
 		BOOST_CHECK_EQUAL( Chan_None, ChannelSet::findFlag("wrong") );

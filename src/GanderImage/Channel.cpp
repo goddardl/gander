@@ -49,6 +49,8 @@ const char* Gander::Image::ChannelSet::g_defaultFlags[ Gander::Image::ChannelTra
 	"u",
 	"v",
 	"mask",
+	"forward",
+	"backward",
 };
 
 template <>
