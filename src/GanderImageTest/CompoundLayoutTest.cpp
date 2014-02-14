@@ -262,13 +262,10 @@ struct CompoundLayoutTest
 		BOOST_CHECK_EQUAL( l2 == l, true );
 		BOOST_CHECK_EQUAL( l2 != l, false );
 		
-		l2.addChannels( Mask_Blue );
-		std::cerr << int( l2.channels() ) << std::endl;
-		BOOST_CHECK_EQUAL( l2.channels(), ChannelSet( Mask_Red | Mask_Alpha | Mask_Z | Mask_V | Mask_Mask | Mask_Blue ) );
+		l2.addChannels( Mask_Backward );
+		BOOST_CHECK_EQUAL( l2.channels(), ChannelSet( Mask_RGB | Mask_Alpha | Mask_Z | Mask_V | Mask_U | Mask_Mask | Mask_Backward ) );
 		BOOST_CHECK_EQUAL( l2 != l, true );
-		std::cerr << "......" << std::endl;
 		BOOST_CHECK_EQUAL( l2 == l, false );
-		std::cerr << "......" << std::endl;
 	}
 };
 

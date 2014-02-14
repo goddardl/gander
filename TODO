@@ -1,5 +1,4 @@
 Todo:
-0) Fix the equality operator on the CompoundLayout.
 1) In the LayoutContainerBaseInterface class, add a runtime method called child() that returns the child container at the given index.
 2) Use the above method in the channel() and channelAtIndex() calls so that they both don't need the large switch.
 3) Can the above calls be used on CompoundLayout too? Is it possible to make a CompoundContainer interface that can be common to both the CompoundLayout and the CompountLayoutContainer?

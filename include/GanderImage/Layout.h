@@ -218,7 +218,7 @@ struct Layout
 		template< EnumType C = Chan_None >
 		inline bool _containsChannel( Gander::Image::Channel c = Chan_None ) const
 		{
-			if( C == Chan_None )
+			if( C == Chan_None || Derived::IsDynamic )
 			{
 				return static_cast< Derived const * >( this )->_contains( ChannelSet( c ) );
 			}

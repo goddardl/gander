@@ -251,9 +251,11 @@ class Pixel : public Detail::PixelRecurse< L, L::NumberOfLayouts >
 				case( 3 ) : return BaseType::template channel< ChannelType, Mask, 3 >(); break;
 				case( 4 ) : return BaseType::template channel< ChannelType, Mask, 4 >(); break;
 				case( 5 ) : return BaseType::template channel< ChannelType, Mask, 5 >(); break;
-				case( 6 ) : return BaseType::template channel< ChannelType, Mask, 4 >(); break;
-				case( 7 ) : return BaseType::template channel< ChannelType, Mask, 5 >(); break;
-				case( 8 ) : return BaseType::template channel< ChannelType, Mask, 4 >(); break;
+				case( 6 ) : return BaseType::template channel< ChannelType, Mask, 6 >(); break;
+				case( 7 ) : return BaseType::template channel< ChannelType, Mask, 7 >(); break;
+				case( 8 ) : return BaseType::template channel< ChannelType, Mask, 8 >(); break;
+				case( 9 ) : return BaseType::template channel< ChannelType, Mask, 9 >(); break;
+				case( 10 ) : return BaseType::template channel< ChannelType, Mask, 10 >(); break;
 			};
 			
 			static ChannelType t( 0 );

@@ -204,6 +204,8 @@ struct PixelTest
 		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_Red >::LayoutType, Layout1 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_U >::LayoutType, Layout2 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_V >::LayoutType, Layout2 >::value ) );
+		
+		// Test that the layout for any unknown channel must be the dynamic layout.
 		BOOST_CHECK( int( std::is_same< Base4::ChannelTraits< Chan_Z >::LayoutType, Layout3 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 0 >::LayoutType, Layout1 >::value ) );
 		BOOST_CHECK( int( std::is_same< Base4::LayoutTraits< 1 >::LayoutType, Layout2 >::value ) );

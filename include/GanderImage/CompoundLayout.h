@@ -89,7 +89,7 @@ struct ChannelToLayoutIndex : public ChannelToLayoutIndex< C, NumberOfLayouts, T
 	enum
 	{
 		Count = T0::NumberOfChannels > 0 ? BaseType::Count + 1 : BaseType::Count,
-		Value = ( ( ChannelToMask<C>::Value & T0::ChannelMask ) != 0 ) ? NumberOfLayouts - Count - 1 : BaseType::Value
+		Value = ( ( ChannelToMask<C>::Value & T0::ChannelMask ) != 0 || T0::IsDynamic ) ? NumberOfLayouts - Count - 1 : BaseType::Value
 	};
 };
 
@@ -262,8 +262,11 @@ struct CompoundLayoutRecurseBase : public Layout< Derived >
 
 			private :
 			
-				// Assert that the layout actually contains the requested channel.
-				GANDER_IMAGE_STATIC_ASSERT( ( ( ( LayoutType::ChannelMask & ChannelToMask<C>::Value ) != 0 ) || ( C == Chan_None ) || ( DisableStaticAsserts ) ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+				// Assert that the layout actually contains the requested channel or if the Layout is dynamic.
+				GANDER_IMAGE_STATIC_ASSERT(
+					( ( ( LayoutType::ChannelMask & ChannelToMask<C>::Value ) != 0 ) || Derived::IsDynamic || ( C == Chan_None ) || ( DisableStaticAsserts ) ),
+					CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT
+				);
 
 				int8u m_step;
 		};
@@ -318,7 +321,7 @@ struct CompoundLayoutRecurse< Derived, false, None, None, None, None, None, None
 		/// Returns true is this layout contains the given channel.
 		inline bool _contains( ChannelSet channels ) const
 		{
-			return ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ).contains( channels );
+			return _channels().contains( channels );
 		}
 
 		/// Returns the channels represented by this layout.
@@ -396,7 +399,6 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 	
 		inline ChannelSet _channels() const
 		{
-			std::cerr << "dynamic channels : " << ChannelSet( ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ) + m_dynamicLayout.channels() ) << std::endl;
 			return ( ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ) + m_dynamicLayout.channels() );
 		}
 
@@ -434,7 +436,7 @@ struct CompoundLayoutRecurse : public CompoundLayoutRecurse< Derived, IS_DYNAMIC
 		// Assert that the template arguments have been supplied with the Pixels representing channels ordered
 		// from left to right in order of the channels of the lowest value first.
 		GANDER_IMAGE_STATIC_ASSERT(
-			( ( EnumType( T0::ChannelMask ) < EnumType( T1::ChannelMask ) ) || ( std::is_same< T1, Detail::None >::value == true ) ),
+			( ( EnumType( T0::ChannelMask ) < EnumType( T1::ChannelMask ) ) || ( std::is_same< T1, Detail::None >::value == true ) || T1::IsDynamic ),
 			TEMPLATE_ARGUMENTS_TO_IMAGELAYOUT_MUST_BE_SUPPLIED_IN_ORDER_OF_CHANNEL_VALUE
 		);
 

@@ -64,7 +64,7 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 		enum
 		{
 			NumberOfChannels = DYNAMIC_NUMBER_OF_CHANNELS,
-			ChannelMask = Mask_All,
+			ChannelMask = Mask_None,
 			IsDynamic = true,
 		};
 
