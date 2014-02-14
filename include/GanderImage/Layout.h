@@ -161,6 +161,12 @@ struct Layout
 				LayoutIndex = Index,
 			};
 		};
+		
+		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = Derived >
+		inline ReturnType &child()
+		{
+			return *( static_cast< Derived * >( this ) );
+		}
 
 		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
 		template< class L > inline bool operator != ( L const &rhs ) const { return !static_cast< Derived const * >( this )->equalTo( rhs ); }

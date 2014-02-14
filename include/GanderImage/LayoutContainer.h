@@ -60,11 +60,11 @@ namespace Detail
 {
 
 template< class Layout >
-struct LayoutContainer : public LayoutContainerBase< LayoutContainer< Layout >, Layout >
+struct LayoutContainer : public LayoutContainerBaseInterface< LayoutContainer< Layout >, Layout >
 {
 	private :
 		
-		typedef LayoutContainerBase< LayoutContainer< Layout >, Layout > BaseType;
+		typedef LayoutContainerBaseInterface< LayoutContainer< Layout >, Layout > BaseType;
 
 	public :
 	
@@ -79,7 +79,7 @@ struct LayoutContainer : public LayoutContainerBase< LayoutContainer< Layout >, 
 		{
 		}
 
-		LayoutContainer( const Layout &layout ) :
+		LayoutContainer( Layout &layout ) :
 			BaseType( layout )
 		{
 		}
@@ -87,15 +87,15 @@ struct LayoutContainer : public LayoutContainerBase< LayoutContainer< Layout >, 
 		template< EnumType Index, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false, class ChannelType = StorageType >
 		inline ChannelType &channelAtIndex()
 		{
-			return m_data[ BaseType::m_layout.template maskedChannelIndex< Index, Mask, DisableStaticAsserts >() ];
+			return m_data[ BaseType::layout().template maskedChannelIndex< Index, Mask, DisableStaticAsserts >() ];
 		}
 
 		template< ChannelDefault C, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false, class ChannelType = StorageType >
 		inline ChannelType &channel()
 		{
-			if( BaseType::m_layout.template containsChannel< C >() )
+			if( BaseType::layout().template containsChannel< C >() )
 			{
-				return m_data[ BaseType::m_layout.template indexOfChannel< C, Mask, DisableStaticAsserts >() ];
+				return m_data[ BaseType::layout().template indexOfChannel< C, Mask, DisableStaticAsserts >() ];
 			}
 			else
 			{
@@ -117,10 +117,10 @@ struct LayoutContainer : public LayoutContainerBase< LayoutContainer< Layout >, 
 			// data values to be the same as that of the ChannelSet. 
 			
 			// Get a set of the current channels and the unique new ones.
-			ChannelSet currentChannels( BaseType::m_layout.channels() );
+			ChannelSet currentChannels( BaseType::layout().channels() );
 			ChannelSet newChannels( c - currentChannels );
 			
-			BaseType::m_layout.addChannels( c, b );
+			BaseType::layout().addChannels( c, b );
 
 			// Loop over the new channels and insert a new data element for each one
 			// at the same index that it is stored in the channel set.
@@ -138,7 +138,7 @@ struct LayoutContainer : public LayoutContainerBase< LayoutContainer< Layout >, 
 
 		LayoutContainerType m_data;
 		
-		template< class, class > friend class LayoutContainerBase;	
+		template< class, class > friend class LayoutContainerBaseInterface;	
 };
 
 }; // namespace Detail

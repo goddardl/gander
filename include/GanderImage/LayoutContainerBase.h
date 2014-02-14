@@ -58,9 +58,64 @@ namespace Image
 namespace Detail
 {
 
-template< class Derived, class Layout >
+template< class Derived, class Layout, bool IsDynamic >
 struct LayoutContainerBase
 {
+	protected :
+		
+		typedef Layout LayoutType;
+
+		LayoutContainerBase() {}
+		LayoutContainerBase( LayoutType &layout ) {}
+		
+		LayoutType &layout()
+		{
+			static Layout layout;
+			return layout;
+		}
+};
+
+template< class Derived, class Layout >
+struct LayoutContainerBase< Derived, Layout, true >
+{
+	protected :
+		
+		typedef Layout LayoutType;
+
+		inline LayoutContainerBase() :
+			m_layout( dynamicLayoutError() )
+		{
+		}
+
+		inline LayoutContainerBase( LayoutType &layout ) :
+			m_layout( layout )
+		{
+		}
+		
+		inline LayoutType &layout()
+		{
+			return m_layout;
+		}
+
+	private :
+		
+		inline LayoutType &dynamicLayoutError()
+		{
+			static LayoutType layout;
+			return layout;
+		}
+
+		LayoutType &m_layout;
+
+};
+
+template< class Derived, class Layout >
+struct LayoutContainerBaseInterface : public LayoutContainerBase< Derived, Layout, Layout::IsDynamic >
+{
+	private :
+		
+		typedef LayoutContainerBase< Derived, Layout, Layout::IsDynamic > BaseType;
+
 	public :
 		
 		typedef typename Layout::StorageType StorageType;
@@ -83,12 +138,13 @@ struct LayoutContainerBase
 		struct ChannelTraitsAtIndex : public Layout::template ChannelTraits< ChannelIndex, Mask, DisableStaticAsserts >
 		{};
 
-		LayoutContainerBase()
+		LayoutContainerBaseInterface()
 		{
+			GANDER_IMAGE_STATIC_ASSERT( !Layout::IsDynamic, CLASS_CONTAINS_A_DYNAMIC_LAYOUT_PLEASE_USE_THE_CONSTRUCTOR_THAT_INITIALIZES_IT );
 		}
 
-		LayoutContainerBase( const Layout &layout ) :
-			m_layout( layout )
+		LayoutContainerBaseInterface( Layout &layout ) :
+			BaseType( layout )
 		{
 		}
 		
@@ -142,9 +198,9 @@ struct LayoutContainerBase
 			};
 		}
 
-		inline const Layout &layout() const
+		inline Layout &layout()
 		{
-			return m_layout;
+			return BaseType::layout();
 		}
 		
 		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
@@ -160,7 +216,6 @@ struct LayoutContainerBase
 			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 		}
 	
-		Layout m_layout;
 };
 
 }; // namespace Detail

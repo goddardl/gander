@@ -1,4 +1,13 @@
 Todo:
-1) Get the CompoundLayoutContainer working correctly with DynamicLayouts and PixelLayouts that contain a DynamicLayout.
-2) Move the CompoundLayoutContainer into it's own file.
-3) Remove the runtime channel traits as they just convolute things.
+0) Fix the equality operator on the CompoundLayout.
+1) In the LayoutContainerBaseInterface class, add a runtime method called child() that returns the child container at the given index.
+2) Use the above method in the channel() and channelAtIndex() calls so that they both don't need the large switch.
+3) Can the above calls be used on CompoundLayout too? Is it possible to make a CompoundContainer interface that can be common to both the CompoundLayout and the CompountLayoutContainer?
+1) Combine the LayoutContainer into the CompoundLayoutContainer and merge the test cases. It should hold just one layout and use the child<> method to access the desired layout that it needs.
+This will require implementing either a child() method on the layout base class that just returns an instance of the layout.
+2) Implement the layout() method on the CompoundLayoutContainer so that it just returns the layout instance.
+3) Rename the CompoundLayoutContainer to LayoutContainer.
+4) Add an isCompound and an isDynamic method to the layout baseclass that just checks the Derived::NumberOfLayouts and Derived::IsDynamic enums on the derived classes.
+2) Get the CompoundLayoutContainer working correctly with DynamicLayouts and PixelLayouts that contain a DynamicLayout.
+3) Move the CompoundLayoutContainer into it's own file.
+4) Remove the runtime channel traits as they just convolute things.

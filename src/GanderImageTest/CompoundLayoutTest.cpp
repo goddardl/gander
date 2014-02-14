@@ -230,7 +230,7 @@ struct CompoundLayoutTest
 		BOOST_CHECK_EQUAL( int(Layout::ChannelMask), int( Mask_RGB | Mask_Alpha | Mask_Z | Mask_UV ) );
 
 		BOOST_CHECK_EQUAL( Layout().requiredChannels(), ChannelSet( Mask_Red | Mask_Alpha | Mask_Z | Mask_V ) );
-		
+				
 		BOOST_CHECK( ( Layout().child<0>() == Storage0() ) );
 		BOOST_CHECK( ( Layout().child<1>() == Storage1() ) );
 		BOOST_CHECK( ( Layout().child<2>() == Storage2() ) );
@@ -249,6 +249,26 @@ struct CompoundLayoutTest
 		
 		BOOST_CHECK_EQUAL( ( l.child<4>() == Storage4() ), 0 );
 		BOOST_CHECK_EQUAL( ( l.child<4>() == dl ), 1 );
+
+		BOOST_CHECK_EQUAL( Layout() == Layout(), true );
+		BOOST_CHECK_EQUAL( Layout() == Storage0(), false );
+		BOOST_CHECK_EQUAL( Layout() == Storage2(), false );
+		BOOST_CHECK_EQUAL( Layout() != Storage2(), true );
+		BOOST_CHECK_EQUAL( Layout() != Layout(), false );
+		BOOST_CHECK_EQUAL( Layout() != l, true );
+
+		Layout l2;
+		l2.addChannels( Mask_Mask );
+		BOOST_CHECK_EQUAL( l2 == l, true );
+		BOOST_CHECK_EQUAL( l2 != l, false );
+		
+		l2.addChannels( Mask_Blue );
+		std::cerr << int( l2.channels() ) << std::endl;
+		BOOST_CHECK_EQUAL( l2.channels(), ChannelSet( Mask_Red | Mask_Alpha | Mask_Z | Mask_V | Mask_Mask | Mask_Blue ) );
+		BOOST_CHECK_EQUAL( l2 != l, true );
+		std::cerr << "......" << std::endl;
+		BOOST_CHECK_EQUAL( l2 == l, false );
+		std::cerr << "......" << std::endl;
 	}
 };
 

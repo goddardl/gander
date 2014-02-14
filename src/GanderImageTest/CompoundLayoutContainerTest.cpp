@@ -63,7 +63,8 @@ struct CompoundLayoutContainerTest
 {
 	void testDynamicCompoundLayoutContainer()
 	{
-		Gander::Image::Detail::CompoundLayoutContainer< DynamicLayout< float > > c;
+		DynamicLayout< float > dynamicLayout;
+		Gander::Image::Detail::CompoundLayoutContainer< DynamicLayout< float > > c( dynamicLayout );
 		
 		c.addChannels( Mask_Green | Mask_U );
 		

@@ -98,7 +98,8 @@ struct LayoutContainerTest
 	
 	void testDynamicLayoutContainer()
 	{
-		Gander::Image::Detail::LayoutContainer< DynamicLayout< float > > c;
+		DynamicLayout< float > dynamicLayout;
+		Gander::Image::Detail::LayoutContainer< DynamicLayout< float > > c( dynamicLayout );
 		c.addChannels( Mask_Green | Mask_U );
 		
 		c.channel< Chan_U >() = 1.;

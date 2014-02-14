@@ -51,7 +51,6 @@
 
 #include "GanderImage/LayoutContainerBase.h"
 
-
 namespace Gander
 {
 
@@ -68,20 +67,32 @@ template< class CompoundLayout >
 struct CompoundLayoutContainer;
 
 template< class CompoundLayout >
-struct CompoundLayoutContainerRecurse< CompoundLayout, 0 > : public LayoutContainerBase< CompoundLayoutContainer< CompoundLayout >, CompoundLayout >
+struct CompoundLayoutContainerRecurse< CompoundLayout, 0 > : public LayoutContainerBaseInterface< CompoundLayoutContainer< CompoundLayout >, CompoundLayout >
 {
 	private :
 
-		typedef LayoutContainerBase< CompoundLayoutContainerRecurse< CompoundLayout, 0 >, CompoundLayout > BaseType;
+		typedef LayoutContainerBaseInterface< CompoundLayoutContainer< CompoundLayout >, CompoundLayout > BaseType;
 	
 	protected :
+
+		inline CompoundLayoutContainerRecurse( CompoundLayout &layout ) :
+			BaseType( layout )
+		{
+		}
+		
+		inline CompoundLayoutContainerRecurse()
+		{
+		}
 		
 		template< class ReturnType, EnumType Index >
 		inline ReturnType &child()
 		{
 			GANDER_ASSERT( Index >= 0 || Index < CompoundLayout::NumberOfLayouts, "Index is out of bounds." );
-			static ReturnType r; // We never get here but we still need to return something to appease the compiler.
-			return r;
+
+			// We never get here but we still need to return something to appease the compiler. So...
+			static typename ReturnType::LayoutType layout; // Create an instance of a layout.
+			static ReturnType r( layout ); // Initialize the container with it.
+			return r; // Return it.
 		};
 		
 		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
@@ -104,6 +115,16 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 		typedef typename LayoutType::StorageType StorageType;
 
 	protected :
+	
+		inline CompoundLayoutContainerRecurse( CompoundLayout &layout ) :
+			BaseType( layout ),
+			m_container( layout.child< LayoutIndex >() )
+		{
+		}
+		
+		inline CompoundLayoutContainerRecurse()
+		{
+		}
 		
 		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
@@ -134,7 +155,7 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 
 		ContainerType m_container;
 		
-		template< class, class > friend class LayoutContainerBase;	
+		template< class, class > friend class LayoutContainerBaseInterface;	
 };
 
 template< class CompoundLayout >
@@ -149,6 +170,15 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 		using BaseType::channel;
 		using BaseType::channelAtIndex;
 		using BaseType::addChannels;
+	
+		inline CompoundLayoutContainer( CompoundLayout &layout ) :
+			BaseType( layout )
+		{
+		}
+		
+		inline CompoundLayoutContainer()
+		{
+		}
 		
 		template< EnumType Index >
 		inline LayoutContainer< typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType > &child()
@@ -195,7 +225,7 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 
 	private :
 
-		template< class, class > friend class LayoutContainerBase;	
+		template< class, class > friend class LayoutContainerBaseInterface;	
 };
 
 }; // namespace Detail

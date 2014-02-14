@@ -396,6 +396,7 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 	
 		inline ChannelSet _channels() const
 		{
+			std::cerr << "dynamic channels : " << ChannelSet( ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ) + m_dynamicLayout.channels() ) << std::endl;
 			return ( ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ) + m_dynamicLayout.channels() );
 		}
 
