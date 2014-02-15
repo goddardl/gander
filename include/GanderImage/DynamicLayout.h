@@ -63,16 +63,14 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 
 		enum
 		{
-			NumberOfChannels = DYNAMIC_NUMBER_OF_CHANNELS,
-			ChannelMask = Mask_None,
 			IsDynamic = true,
 		};
 
 		typedef Layout< DynamicLayout< T > > BaseType;
 		typedef DynamicLayout<T> Type;
 		typedef T StorageType;
-		typedef typename Gander::template Tuple< StorageType, NumberOfChannels, true > ChannelContainer;
-		typedef typename Gander::template Tuple< StorageType *, NumberOfChannels, true > PtrToChannelContainer;
+		typedef typename Gander::template Tuple< StorageType, BaseType::NumberOfChannels, true > ChannelContainer;
+		typedef typename Gander::template Tuple< StorageType *, BaseType::NumberOfChannels, true > PtrToChannelContainer;
 		
 		template< ChannelDefault C = Chan_None, bool DisableStaticAsserts = false >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
@@ -100,6 +98,29 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 			};
 		};
 	
+		//! @name Methods required by the base class.
+		/// These methods are required by the base class as this layout is dynamic.
+		//@{
+		/// Returns the channels represented by this layout.
+		inline ChannelSet channels() const
+		{
+			return m_channels;
+		}
+
+		/// Returns the number of channels that this layout represents.
+		inline unsigned int numberOfChannels() const
+		{
+			return m_channels.size();
+		}
+
+		/// Returns the number of channel pointers that this layout requires
+		/// in order to access all of the channels that this layout represents.
+		inline unsigned int numberOfChannelPointers() const
+		{
+			return m_channels.size();
+		}
+		//@}
+
 	private :
 
 		/// Adds the channel to the Layout and logs all pertenant information.
@@ -147,19 +168,7 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 		}
 
 		friend class Layout< DynamicLayout< T > >;
-
-		/// Returns the channels represented by this layout.
-		inline ChannelSet _channels() const
-		{
-			return m_channels;
-		}
-
-		/// Returns the number of channels that this layout represents.
-		inline unsigned int _numberOfChannels() const
-		{
-			return m_channels.size();
-		}
-
+		
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
 		inline ChannelSet _requiredChannels() const
@@ -184,28 +193,6 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 			GANDER_ASSERT( 0, "No valid channel specified." )
 		}
 
-		/// Returns true is this layout contains the given channels.
-		inline bool _contains( ChannelSet channels ) const
-		{
-			return m_channels.contains( channels );
-		}
-		
-		/// Returns whether the layout contains the given channel. This method can be passed either a template argument or a function argument.
-		/// If the template argument is different to Chan_None then the template argument should be used. If it is equal to Chan_None, the 
-		/// function argument should be used.
-		template< EnumType C = Chan_None >
-		inline bool _containsChannel( Gander::Image::Channel c = Chan_None ) const
-		{
-			if( C == Chan_None )
-			{
-				return m_channels.contains( ChannelSet( c ) );
-			}
-			else
-			{
-				return m_channels.contains( ChannelSet( Channel( C ) ) );
-			}
-		}
-	
 		/// Returns the index of the given channel.	
 		template< EnumType C, EnumType Mask = Mask_All, bool >
 		inline unsigned int _indexOfChannel() const

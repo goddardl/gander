@@ -40,6 +40,7 @@
 #include "boost/format.hpp"
 
 #include "Gander/Common.h"
+#include "Gander/Assert.h"
 #include "Gander/Interfaces.h"
 #include "Gander/StaticAssert.h"
 
@@ -66,6 +67,15 @@ struct Tuple< T, NumberOfElements, false >
 		/// iterator Type Declarations 	
 		typedef const StorageType * const_iterator;
 		typedef StorageType * iterator;
+		
+		/// The constructor only checks that the runtime size of the array matches that of the compile time.
+		Tuple( unsigned int numberOfElements = NumberOfElements )
+		{
+			GANDER_ASSERT(
+				numberOfElements == NumberOfElements,
+				"A static tuple cannot be resized at runtime. Please use a dynamic tuple."
+			);
+		}
 	
 		inline ReferenceType operator[] ( unsigned int i ) { return m_data[i]; };
 		inline const ReferenceType operator[] ( unsigned int i ) const { return m_data[i]; };
@@ -134,6 +144,10 @@ struct Tuple< T, NumberOfElements, true >
 		/// Default constructor	
 		Tuple() :
 			m_data( NumberOfElements )
+		{}
+		
+		Tuple( unsigned int numberOfElements ) :
+			m_data( numberOfElements )
 		{}
 
 		inline ReferenceType operator[] ( unsigned int i ) { return m_data[i]; };

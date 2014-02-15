@@ -73,6 +73,13 @@ struct static_assertion<true>
 		THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST,
 		// You can only add channels to a DynamicLayout.
 		THE_LAYOUT_MUST_BE_DYNAMIC_IN_ORDER_TO_ADD_CHANNELS_TO_IT,
+		// The derived layout declare all required Enum values.
+		THE_DERIVED_LAYOUT_HASNT_DECLARED_ALL_REQUIRED_ENUM_VALUES,
+		// The derived layout is dynamic but has also declared some enum values such as NumberOfChannels
+		// and NumberOfPointers which are reserved for use by layouts that are static.
+		THE_DERIVED_LAYOUT_IS_DYNAMIC_AND_THEREFORE_MUST_NOT_DECLARE_ENUM_VALUES_THAT_ARE_TO_BE_USED_BY_STATIC_LAYOUTS_ONLY,
+		// The derived class has not implemented a function that is required by the base class.
+		DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS,
 	};
 };
 

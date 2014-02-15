@@ -88,7 +88,7 @@ struct ChannelToLayoutIndex : public ChannelToLayoutIndex< C, NumberOfLayouts, T
 	typedef ChannelToLayoutIndex< C, NumberOfLayouts, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
 	enum
 	{
-		Count = T0::NumberOfChannels > 0 ? BaseType::Count + 1 : BaseType::Count,
+		Count = T0::NumberOfChannels > 0 || T0::IsDynamic ? BaseType::Count + 1 : BaseType::Count,
 		Value = ( ( ChannelToMask<C>::Value & T0::ChannelMask ) != 0 || T0::IsDynamic ) ? NumberOfLayouts - Count - 1 : BaseType::Value
 	};
 };
@@ -175,6 +175,7 @@ struct CompoundLayoutRecurseBase : public Layout< Derived >
 		{
 			NumberOfLayouts = 0,
 			NumberOfChannels = 0,
+			NumberOfChannelPointers = 0,
 			ChannelMask = 0,
 		};
 	
@@ -318,18 +319,6 @@ struct CompoundLayoutRecurse< Derived, false, None, None, None, None, None, None
 			return ( ReturnType & ) l;
 		}
 		
-		/// Returns true is this layout contains the given channel.
-		inline bool _contains( ChannelSet channels ) const
-		{
-			return _channels().contains( channels );
-		}
-
-		/// Returns the channels represented by this layout.
-		inline ChannelSet _channels() const
-		{
-			return ChannelSet( static_cast<Gander::Image::ChannelMask>( Derived::ChannelMask ) );
-		}
-		
 		/// Returns the number of channels that this layout represents.
 		inline unsigned int _numberOfChannels() const
 		{
@@ -367,6 +356,27 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 		{
 			return m_dynamicLayout.requiredChannels() + BaseType::requiredChannels();
 		}
+	
+		//! @name Methods required by the base class.
+		/// These methods are required by the base class as this layout is dynamic.
+		//@{
+		/// Returns the channels represented by this layout.
+		inline ChannelSet channels() const
+		{
+			return ( ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ) + m_dynamicLayout.channels() );
+		}
+		/// Returns the number of channels that this layout represents.
+		inline unsigned int numberOfChannels() const
+		{
+			return static_cast<unsigned int>( Derived::NumberOfChannels ) + m_dynamicLayout.numberOfChannels();
+		}
+		/// Returns the number of channel pointers that this layout requires
+		/// in order to access all of the channels that this layout represents.
+		inline unsigned int numberOfChannelPointers() const
+		{
+			return static_cast<unsigned int>( Derived::NumberOfChannelPointers ) + m_dynamicLayout.numberOfChannelPointers();
+		}
+		//@}
 
 	protected :	
 
@@ -379,29 +389,12 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 			return ( ReturnType & ) m_dynamicLayout;
 		}
 	
-		/// Returns the number of channels that this layout represents.
-		inline unsigned int _numberOfChannels() const
-		{
-			return static_cast<unsigned int>( Derived::NumberOfChannels ) + m_dynamicLayout.numberOfChannels();
-		}
-	
 		/// Adds the channel to the Layout and logs all pertenant information.
 		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
 			m_dynamicLayout.addChannels( c, b );
 		}
 		
-		/// Returns true is this layout contains the given channel.
-		inline bool _contains( ChannelSet channels ) const
-		{
-			return _channels().contains( channels );
-		}
-	
-		inline ChannelSet _channels() const
-		{
-			return ( ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ) + m_dynamicLayout.channels() );
-		}
-
 		template< ChannelDefault C = Chan_None >
 		inline int8u _step( Channel channel = Chan_None ) const
 		{
@@ -428,9 +421,12 @@ struct CompoundLayoutRecurse : public CompoundLayoutRecurse< Derived, IS_DYNAMIC
 
 		enum
 		{
+			IsDynamic = BaseType::IsDynamic,
 			NumberOfLayouts = BaseType::NumberOfLayouts + 1,
 			NumberOfChannels = BaseType::NumberOfChannels + T0::NumberOfChannels,
 			ChannelMask = BaseType::ChannelMask + T0::ChannelMask,
+			NumberOfChannelPointers = BaseType::NumberOfChannelPointers + T0::NumberOfChannelPointers,
+			IsCompound = NumberOfLayouts > 1,
 		};
 
 		// Assert that the template arguments have been supplied with the Pixels representing channels ordered
@@ -498,9 +494,11 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 
 	enum
 	{
+		NumberOfChannelPointers = BaseType::NumberOfChannelPointers,
 		NumberOfLayouts = BaseType::NumberOfLayouts,
 		NumberOfChannels = BaseType::NumberOfChannels,
 		ChannelMask = BaseType::ChannelMask,
+		IsDynamic = BaseType::IsDynamic
 	};
 
 	public :
@@ -509,14 +507,6 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 		inline typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType &child()
 		{
 			return BaseType::template child< Index, DisableStaticAsserts, typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >();
-		}
-
-	protected :
-
-		/// Returns the number of channels that this layout represents.
-		inline unsigned int _numberOfChannels() const
-		{
-			return BaseType::_numberOfChannels();
 		}
 
 	private :
@@ -538,7 +528,7 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 			{
 				if( ( !Derived::IsDynamic ) || ( Gander::Image::template MaskContainsChannel< ChannelMask, C >::Value == true ) )
 				{
-					typedef typename BaseType::template ChannelTraits< C >::LayoutType LayoutType;
+					typedef typename BaseType::template ChannelTraits< C, false >::LayoutType LayoutType;
 					return LayoutType().template step<C>();
 				}
 				else

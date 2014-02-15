@@ -72,6 +72,7 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 		{
 			NumberOfChannels = 1,
 			ChannelMask = ChannelToMask<S>::Value,
+			NumberOfChannelPointers = 1,
 		};
 
 		typedef ChannelLayout< T, S > Type;
@@ -106,22 +107,12 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 			};
 		};
 
+		using BaseType::contains;
+
 	private :
 
 		friend class Layout< ChannelLayout< T, S > >;	
 
-		/// Returns the channels represented by this layout.
-		inline ChannelSet _channels() const
-		{
-			return ChannelSet( static_cast<Gander::Image::ChannelMask>( Type::ChannelMask ) );
-		}
-		
-		/// Returns the number of channels that this layout represents.
-		inline unsigned int _numberOfChannels() const
-		{
-			return static_cast<unsigned int>( NumberOfChannels );
-		}
-		
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
 		inline ChannelSet _requiredChannels() const
@@ -135,20 +126,14 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 		{
 			if( C != Chan_None )
 			{
-				GANDER_ASSERT( _contains( C ), "Channel is not represented by this layout." )
+				GANDER_ASSERT( contains( C ), "Channel is not represented by this layout." )
 			}
 			else
 			{
-				GANDER_ASSERT( _contains( channel ), "Channel is not represented by this layout." )
+				GANDER_ASSERT( contains( channel ), "Channel is not represented by this layout." )
 			}
 			
 			return 1;
-		}
-		
-		/// Returns whether the layout represents the given channel.
-		inline bool _contains( ChannelSet channels ) const
-		{
-			return ( ChannelSet( S ).contains( channels ) );
 		}
 		
 		/// Returns the index of a channel in the layout when masked.

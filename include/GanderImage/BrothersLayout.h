@@ -69,6 +69,7 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 		{
 			NumberOfChannels = BrotherTraits<B>::NumberOfBrothers,
 			ChannelMask = BrotherTraits<B>::BrothersMask,
+			NumberOfChannelPointers = 1,
 		};
 		
 		typedef BrothersLayout< T, B > Type;
@@ -102,19 +103,11 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 			};
 		};
 
+		using BaseType::contains;
+
 	private :
 
 		friend class Layout< BrothersLayout< T, B > >;	
-
-		inline ChannelSet _channels() const
-		{
-			return ChannelSet( static_cast<Gander::Image::ChannelMask>( BrothersLayout<T,B>::ChannelMask ) );
-		}
-
-		inline unsigned int _numberOfChannels() const
-		{
-			return static_cast<unsigned int>( NumberOfChannels );
-		}
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
@@ -129,19 +122,13 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 		{
 			if( C != Chan_None )
 			{
-				GANDER_ASSERT( _contains( C ), "Channel is not represented by this layout." )
+				GANDER_ASSERT( contains( C ), "Channel is not represented by this layout." )
 			}
 			else
 			{
-				GANDER_ASSERT( _contains( channel ), "Channel is not represented by this layout." )
+				GANDER_ASSERT( contains( channel ), "Channel is not represented by this layout." )
 			}
 			return BrotherTraits<B>::NumberOfBrothers;
-		}
-		
-		/// Returns whether the layout represents the given channel.
-		inline bool _contains( ChannelSet channels ) const
-		{
-			return ChannelSet( Gander::Image::ChannelMask( BrothersLayout<T,B>::ChannelMask ) ).contains( channels );
 		}
 		
 		/// Returns the index of a channel within the layout.	

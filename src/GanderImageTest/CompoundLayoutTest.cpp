@@ -56,6 +56,7 @@ template< EnumType ID, ChannelDefault S > struct TestLayout
 	{
 		IsDynamic = false,
 		NumberOfChannels = 1,
+		NumberOfChannelPointers = 1,
 		ChannelMask = ChannelToMask<S>::Value,
 		Id = ID,
 	};

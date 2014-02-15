@@ -80,7 +80,8 @@ struct LayoutContainer : public LayoutContainerBaseInterface< LayoutContainer< L
 		}
 
 		LayoutContainer( Layout &layout ) :
-			BaseType( layout )
+			BaseType( layout ),
+			m_data( layout.numberOfChannels() )
 		{
 		}
 				
