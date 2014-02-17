@@ -110,109 +110,68 @@ struct Layout
 			IsDynamic = false,
 		};
 
-		Layout()
-		{
-			GANDER_IMAGE_STATIC_ASSERT(
-				( 
-					( Derived::IsDynamic && ( Derived::NumberOfChannels == 0 ) && ( Derived::NumberOfChannelPointers == 0 ) && ( EnumType( Derived::ChannelMask ) == EnumType( Mask_None ) ) )
-					|| ( !Derived::IsDynamic ) || ( Derived::IsCompound )
-				),
-				THE_DERIVED_LAYOUT_IS_DYNAMIC_AND_THEREFORE_MUST_NOT_DECLARE_ENUM_VALUES_THAT_ARE_TO_BE_USED_BY_STATIC_LAYOUTS_ONLY
-			);
-
-			GANDER_IMAGE_STATIC_ASSERT(
-				(
-					( ( !Derived::IsDynamic ) && ( Derived::NumberOfChannels != 0 ) && ( Derived::NumberOfChannelPointers != 0 ) && ( EnumType( Derived::ChannelMask ) != EnumType( Mask_None ) ) )
-					|| Derived::IsDynamic
-				),
-				THE_DERIVED_LAYOUT_HASNT_DECLARED_ALL_REQUIRED_ENUM_VALUES
-			);
-		}
+		Layout();
 		
 		//! @name Methods that need overloading by dynamic derived classes.
 		/// All of theses methods need to be declared in the derived class if it is dynamic ( and therefore has set the enum value IsDynamic ).
 		/// These methods do not need to be implemented if the derived class is static. 
 		//@{
-		inline unsigned int numberOfChannels() const
-		{
-			GANDER_IMAGE_STATIC_ASSERT( ( !Derived::IsDynamic ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-			return Derived::NumberOfChannels;
-		}
-
-		inline unsigned int numberOfChannelPointers() const
-		{
-			GANDER_IMAGE_STATIC_ASSERT( ( !Derived::IsDynamic ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-			return Derived::NumberOfChannelPointers;
-		}
-
-		inline ChannelSet channels() const
-		{
-			GANDER_IMAGE_STATIC_ASSERT( ( !Derived::IsDynamic ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-			return ChannelSet( static_cast<Gander::Image::ChannelMask>( Derived::ChannelMask ) );
-		}
+		inline unsigned int numberOfChannels() const;
+		inline unsigned int numberOfChannelPointers() const;
+		inline ChannelSet channels() const;
 		//@}
 
+		//! @name Dynamic methods.
+		/// All of these methods should be implemented by any derived class that defines the IsDynamic flag.
+		/// These methods provide an interface to the layout that allow the structure of the channels to be
+		/// modified.
+		//@{
+		/// Adds a set of channels to the layout. Whether the channels are brothers can also optionally be defined.
+		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None );
+		//@}
+		
+		//! @name Compound methods.
+		/// All of these methods should be implemented by any derived class that defines the IsCompound flag.
+		/// These methods allow the internal layouts, held by the derived compound layout, to be queried and
+		/// accessed.
+		//@{
+		/// This method should return a reference to the layout at the supplied index. The type of the child
+		/// layout is supplied so that it can be used for static verification or with c-style cast. The default
+		/// implementation which is used by derived classes that are not compound just returns an instance of
+		/// this layout.
+		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = Derived >
+		inline ReturnType &child();
+		//@}
+		
 		/// Returns whether the layout represents the given set of channels.
-		inline bool contains( ChannelSet channels ) const
-		{
-			return static_cast< Derived const * >( this )->channels().contains( channels );
-		}
+		inline bool contains( ChannelSet channels ) const;
 		
 		/// Returns whether the layout contains the given channel. This method can be passed either a template argument or a function argument.
 		/// If the template argument is different to Chan_None then the template argument should be used. If it is equal to Chan_None, the 
 		/// function argument should be used.
 		template< EnumType C = Chan_None >
-		inline bool containsChannel( Gander::Image::Channel c = Chan_None ) const
-		{
-			if( C == Chan_None || Derived::IsDynamic )
-			{
-				return static_cast< Derived const * >( this )->contains( ChannelSet( c ) );
-			}
-			else
-			{
-				return ( ChannelToMask< C >::Value & Derived::ChannelMask ) != 0;
-			}
-		}
+		inline bool containsChannel( Gander::Image::Channel c = Chan_None ) const;
 		
-		inline bool isCompound() const
-		{
-			return Derived::IsCompound;
-		}
+		/// Returns true if the Layout contains other layouts.
+		inline bool isCompound() const;
 
-		inline bool isDynamic() const
-		{
-			return Derived::IsDynamic;
-		}
+		/// Returns true if the Layout supports the Dynamic methods that allow the number of channels and their structure to be manipulated.
+		inline bool isDynamic() const;
 
-		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline int maskedChannelIndex() const
-		{
-			return static_cast< Derived const * >( this )->template _maskedChannelIndex< Index, Mask, DisableStaticAsserts >();
-		}
-
-		inline ChannelSet requiredChannels() const
-		{
-			return static_cast< Derived const * >( this )->_requiredChannels();
-		}
-		
-		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			static_cast< Derived * >( this )->_addChannels( c, b );
-		}
-		
 		/// Returns the step value for a given channel.
 		template< ChannelDefault C = Chan_None >
-		inline int8u step( Channel channel = Chan_None ) const
-		{
-			GANDER_ASSERT( ( C == Chan_None || channel == Chan_None || channel == C ), "Specify either a compile-time argument or a runtime parameter but not both." );
-			return static_cast< Derived const * >( this )->_step<C>( channel );
-		}
+		inline int8u step( Channel channel = Chan_None ) const;
 
 		template< EnumType Channel, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline unsigned int indexOfChannel() const
-		{
-			return static_cast< Derived const * >( this )->template _indexOfChannel< Channel, Mask, DisableStaticAsserts >();
-		}
+		inline unsigned int indexOfChannel() const;
+		
+		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
+		inline int maskedChannelIndex() const;
+
+		inline ChannelSet requiredChannels() const;
+		
+		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
+		template< class L > inline bool operator != ( L const &rhs ) const { return !static_cast< Derived const * >( this )->equalTo( rhs ); }
 
 		template< EnumType Index, bool DisableStaticAsserts = false >
 		struct LayoutTraits
@@ -227,70 +186,39 @@ struct Layout
 			};
 		};
 		
-		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = Derived >
-		inline ReturnType &child()
-		{
-			return *( static_cast< Derived * >( this ) );
-		}
-
-		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
-		template< class L > inline bool operator != ( L const &rhs ) const { return !static_cast< Derived const * >( this )->equalTo( rhs ); }
-
 	private :	
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
-		inline ChannelSet _requiredChannels() const
-		{
-			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-			return 0; // We never get here.
-		}
+		inline ChannelSet _requiredChannels() const;
 
 		/// Returns the step value for a given channel.
 		template< ChannelDefault C = Chan_None >
-		inline int8u _step( Channel channel = Chan_None ) const
-		{
-			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-			return 0; // We never get here.
-		}
+		inline int8u _step( Channel channel = Chan_None ) const;
 
 		/// Adds the channel to the Layout and logs all pertenant information.
-		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			GANDER_IMAGE_STATIC_ASSERT( Derived::IsDynamic, THE_LAYOUT_MUST_BE_DYNAMIC_IN_ORDER_TO_ADD_CHANNELS_TO_IT )
-		}
+		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None );
 
-		/// A function for comapring two Layouts. The overloaded equality operators call this method on the Derived class,
+		/// A function for comparing two Layouts. The overloaded equality operators call this method on the Derived class,
 		/// allowing the Derived class to overload this function.
 		template< class L >
-		inline bool equalTo( const L &rhs ) const
-		{
-			return (
-				rhs.channels() == static_cast< Derived const * >( this )->channels() &&
-				std::is_same< typename L::StorageType, typename Derived::StorageType >::value
-		   );
-		}
+		inline bool equalTo( const L &rhs ) const;
 		
 		/// Returns the index of a channel in the layout when masked.
 		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline int _maskedChannelIndex() const
-		{
-			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-			return 0;
-		}
+		inline int _maskedChannelIndex() const;
 	
 		/// Returns the index of a channel within the layout.	
 		template< EnumType Channel, EnumType Mask = Mask_All, bool >
-		inline unsigned int _indexOfChannel() const
-		{
-			GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-			return 0;
-		}
+		inline unsigned int _indexOfChannel() const;
 
 };
 
 }; // namespace Image
 
 }; // namespace Gander
+
+// The implementation of the Layout class.
+#include "Layout.inl"
 
 #endif
