@@ -60,11 +60,8 @@ namespace Image
 {
 
 template< class T, ChannelDefault S >
-struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S > >
+struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 {
-	private :
-
-		typedef StaticLayoutBase< ChannelLayout< T, S > > BaseType;
 
 	public :
 
@@ -74,15 +71,23 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S > >
 			ChannelMask = ChannelToMask<S>::Value,
 			NumberOfChannelPointers = 1,
 		};
-
+		
 		typedef ChannelLayout< T, S > Type;
-		typedef T StorageType;
+		typedef Type LayoutType;
+		typedef StaticLayoutBase< ChannelLayout< T, S >, T > BaseType;
+		typedef typename BaseType::StorageType ChannelType;
+		typedef typename BaseType::StorageType StorageType;
+		typedef typename BaseType::PointerType PointerType;
+		typedef typename BaseType::ReferenceType ReferenceType;
 
 		template< ChannelDefault C = Chan_None >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
 		{
 			typedef Type LayoutType;
-			typedef T StorageType;
+			typedef T ChannelType;
+			typedef typename LayoutType::StorageType StorageType;
+			typedef typename LayoutType::PointerType PointerType;
+			typedef typename LayoutType::ReferenceType ReferenceType;
 			
 			enum
 			{
@@ -125,7 +130,20 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S > >
 
 	private :
 
+		friend class StaticLayoutBase< ChannelLayout< T, S >, T >;	
 		friend class LayoutBase< ChannelLayout< T, S > >;	
+		
+		template< ChannelDefault C, class ContainerType >
+		inline ReferenceType _channel( ContainerType &container )
+		{
+			return 2.;
+		}
+
+		template< EnumType Index, class ContainerType, EnumType Mask = Mask_All >
+		inline ReferenceType _channel( ContainerType &container )
+		{
+			return 1.;
+		}
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.

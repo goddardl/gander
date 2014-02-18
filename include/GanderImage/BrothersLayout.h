@@ -57,23 +57,26 @@ namespace Image
 {
 
 template< class T, ChannelBrothers B >
-struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B > >
+struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 {
-	private :
-
-		typedef StaticLayoutBase< BrothersLayout< T, B > > BaseType;
 
 	public :
-	
+
+		typedef BrothersLayout< T, B > Type;
+		typedef Type LayoutType;
+		typedef StaticLayoutBase< BrothersLayout< T, B >, T > BaseType;
+		typedef typename BaseType::StorageType ChannelType;
+		typedef typename BaseType::StorageType StorageType;
+		typedef typename BaseType::PointerType PointerType;
+		typedef typename BaseType::ReferenceType ReferenceType;
+
 		enum
 		{
 			NumberOfChannels = BrotherTraits<B>::NumberOfBrothers,
 			ChannelMask = BrotherTraits<B>::BrothersMask,
 			NumberOfChannelPointers = 1,
 		};
-		
-		typedef BrothersLayout< T, B > Type;
-		typedef T StorageType;
+
 		typedef typename Gander::template Tuple< StorageType, NumberOfChannels, false > ChannelContainer;
 		typedef typename Gander::template Tuple< StorageType *, NumberOfChannels, false > PtrToChannelContainer;
 
@@ -81,7 +84,10 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B > >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
 		{
 			typedef Type LayoutType;
-			typedef T StorageType;
+			typedef T ChannelType;
+			typedef typename LayoutType::StorageType StorageType;
+			typedef typename LayoutType::PointerType PointerType;
+			typedef typename LayoutType::ReferenceType ReferenceType;
 
 			enum
 			{
@@ -107,7 +113,21 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B > >
 
 	private :
 
+		friend class StaticLayoutBase< BrothersLayout< T, B >, T >;	
 		friend class LayoutBase< BrothersLayout< T, B > >;	
+		
+		template< ChannelDefault C, class ContainerType >
+		inline ReferenceType _channel( ContainerType &container )
+		{
+			return 2.;
+		}
+
+		template< EnumType Index, class ContainerType, EnumType Mask = Mask_All >
+		inline ReferenceType _channel( ContainerType &container )
+		{
+			return 1.;
+		}
+
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.

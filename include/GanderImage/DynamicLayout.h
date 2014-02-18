@@ -57,13 +57,18 @@ namespace Image
 {
 
 template< class T >
-struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T > > 
+struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T > 
 {
 	public :
 
-		typedef DynamicLayoutBase< DynamicLayout< T > > BaseType;
 		typedef DynamicLayout<T> Type;
-		typedef T StorageType;
+		typedef Type LayoutType;
+		typedef DynamicLayoutBase< DynamicLayout< T >, T > BaseType;
+		typedef typename BaseType::StorageType ChannelType;
+		typedef typename BaseType::StorageType StorageType;
+		typedef typename BaseType::PointerType PointerType;
+		typedef typename BaseType::ReferenceType ReferenceType;
+		
 		typedef typename Gander::template Tuple< StorageType, BaseType::NumberOfChannels, true > ChannelContainer;
 		typedef typename Gander::template Tuple< StorageType *, BaseType::NumberOfChannels, true > PtrToChannelContainer;
 		
@@ -71,7 +76,10 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T > >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
 		{
 			typedef Type LayoutType;
-			typedef T StorageType;
+			typedef T ChannelType;
+			typedef typename LayoutType::StorageType StorageType;
+			typedef typename LayoutType::PointerType PointerType;
+			typedef typename LayoutType::ReferenceType ReferenceType;
 
 			enum
 			{
@@ -162,6 +170,7 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T > >
 	
 	private :
 
+		friend class DynamicLayoutBase< DynamicLayout< T >, T >;
 		friend class LayoutBase< DynamicLayout< T > >;
 		
 		/// Returns a ChannelSet of the channels that pointers are required for in order

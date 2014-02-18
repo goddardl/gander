@@ -103,7 +103,7 @@ struct LayoutBase
 		};
 
 	public :
-			
+		
 		enum
 		{
 			NumberOfLayouts = 1,
@@ -144,7 +144,7 @@ struct LayoutBase
 		//@}
 		
 		//! @name Channel pointer interface.
-		/// These methods are used when accessing channel data using a set of pointers by the ChannelAccessor class.
+		/// These methods are used when accessing channel data using a set of pointers by the ReferenceType class.
 		/// At it's most simplest, a set of channels can be accessed using one pointer to each of them. However,
 		/// if the channels are interleaved together then we only need to store a pointer to the first one and an
 		/// offset to the others from it. The purpose of these methods, which a derived class should implement,
@@ -193,6 +193,7 @@ struct LayoutBase
 			GANDER_IMAGE_STATIC_ASSERT( Index == 0 || DisableStaticAsserts, THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST );
 			typedef Derived LayoutType;
 			typedef typename LayoutType::StorageType StorageType;
+			typedef typename LayoutType::ReferenceType ReferenceType;
 		
 			enum
 			{
@@ -272,10 +273,16 @@ struct LayoutBase
 
 };
 
-template< class Derived >
+template< class Derived, class DataType >
 struct DynamicLayoutBase : public LayoutBase< Derived >
 {
 	public :
+		
+		typedef LayoutBase< Derived > BaseType;
+		typedef typename Gander::template TypeTraits< DataType >::Type ChannelType;
+		typedef typename Gander::template TypeTraits< DataType >::StorageType StorageType;
+		typedef typename Gander::template TypeTraits< DataType >::PointerType PointerType;
+		typedef typename Gander::template TypeTraits< DataType >::ReferenceType ReferenceType;
 		
 		enum
 		{
@@ -283,15 +290,51 @@ struct DynamicLayoutBase : public LayoutBase< Derived >
 		};
 };
 
-template< class Derived >
+template< class Derived, class DataType >
 struct StaticLayoutBase : public LayoutBase< Derived >
 {
 	public :
+		
+		typedef LayoutBase< Derived > BaseType;
+		typedef typename Gander::template TypeTraits< DataType >::Type ChannelType;
+		typedef typename Gander::template TypeTraits< DataType >::StorageType StorageType;
+		typedef typename Gander::template TypeTraits< DataType >::PointerType PointerType;
+		typedef typename Gander::template TypeTraits< DataType >::ReferenceType ReferenceType;
 
 		enum
 		{
 			IsDynamic = false,
 		};
+
+		template< ChannelDefault C, class ContainerType >
+		inline ReferenceType channel( ContainerType &container )
+		{
+			return ReferenceType(0);
+		//	return static_cast< Derived * >( this )->template _channel< C, ContainerType >( container );
+		}
+
+		template< EnumType Index, class ContainerType, EnumType Mask = Mask_All >
+		inline ReferenceType channel( ContainerType &container )
+		{
+			return ReferenceType(0);
+			//return static_cast< Derived * >( this )->template _channel< Derived::template MaskedChannelIndex< Index, Mask >::Value, ContainerType, Mask >( container );
+		}
+
+		template< EnumType Index, EnumType Mask = Mask_All >
+		struct MaskedChannelIndex
+		{
+			GANDER_IMAGE_STATIC_ASSERT( ( Index != -1 ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_TRAITS_STRUCTS_REQUIRED_BY_THE_BASE_CLASS );
+			
+			// Derived classes of StaticLayoutBase need to implement this struct and provide the following:
+			//
+			// - An enum that maps the index ( the 'Index' template argument ) of a channel in set of channels
+			// ( defined by the 'Mask' template argument ) into the index of the same channel in the layout. 
+			// enum
+			// {
+			//		Value = Index,
+			// };
+		};
+
 };
 
 }; // namespace Image
