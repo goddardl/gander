@@ -68,9 +68,8 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 		typedef typename BaseType::StorageType StorageType;
 		typedef typename BaseType::PointerType PointerType;
 		typedef typename BaseType::ReferenceType ReferenceType;
-		
-		typedef typename Gander::template Tuple< StorageType, BaseType::NumberOfChannels, true > ChannelContainer;
-		typedef typename Gander::template Tuple< StorageType *, BaseType::NumberOfChannels, true > PtrToChannelContainer;
+		typedef Gander::template Tuple< StorageType, BaseType::NumberOfChannels, true > ChannelContainerType;
+		typedef Gander::template Tuple< PointerType, BaseType::NumberOfChannelPointers, true > ChannelPointerContainerType;
 		
 		template< ChannelDefault C = Chan_None, bool DisableStaticAsserts = false >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
@@ -80,6 +79,8 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 			typedef typename LayoutType::StorageType StorageType;
 			typedef typename LayoutType::PointerType PointerType;
 			typedef typename LayoutType::ReferenceType ReferenceType;
+			typedef typename LayoutType::ChannelContainerType ChannelContainerType;
+			typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
 
 			enum
 			{
@@ -123,6 +124,11 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 			return m_channels.size();
 		}
 		//@}
+	
+		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer )
+		{
+			container[ channels().index( channel ) ] = pointer;
+		}
 
 		/// Adds the channel to the Layout and logs all pertenant information.
 		void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )

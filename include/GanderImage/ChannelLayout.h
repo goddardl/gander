@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -79,6 +79,8 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		typedef typename BaseType::StorageType StorageType;
 		typedef typename BaseType::PointerType PointerType;
 		typedef typename BaseType::ReferenceType ReferenceType;
+		typedef Gander::template Tuple< StorageType, NumberOfChannels, false > ChannelContainerType;
+		typedef Gander::template Tuple< PointerType, NumberOfChannelPointers, false > ChannelPointerContainerType;
 
 		template< ChannelDefault C = Chan_None >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
@@ -88,6 +90,8 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 			typedef typename LayoutType::StorageType StorageType;
 			typedef typename LayoutType::PointerType PointerType;
 			typedef typename LayoutType::ReferenceType ReferenceType;
+			typedef typename LayoutType::ChannelContainerType ChannelContainerType;
+			typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
 			
 			enum
 			{
@@ -143,6 +147,45 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		inline ReferenceType _channel( ContainerType &container )
 		{
 			return 1.;
+		}
+		
+		template< EnumType Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
+		struct MaskedChannelIndex
+		{
+			GANDER_IMAGE_STATIC_ASSERT( ( ( Mask != Mask_None ) || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			enum
+			{
+				Value = 0,
+			};
+		};
+		
+		template< ChannelDefault C >
+		inline ReferenceType _channel( ChannelContainerType &container )
+		{
+			return container[0];
+		}
+		
+		template< ChannelDefault C >
+		inline ReferenceType _channel( ChannelPointerContainerType &container )
+		{
+			return *container[0];
+		}
+
+		template< EnumType Index >
+		inline ReferenceType _channelAtIndex( ChannelContainerType &container )
+		{
+			return container[0];
+		}
+		
+		template< EnumType Index >
+		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container )
+		{
+			return *container[0];
+		}
+
+		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer )
+		{
+			container[0] = pointer;
 		}
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order

@@ -1,4 +1,54 @@
 Todo:
+1) 
+
+Match the DynamicLayoutBase implementation to the StaticLayoutBase implementation.
+Add tests for the channel() and channelAtIndex() methods for the CompoundChannelLayout, ChannelLayout and DynamicLayout.
+
+Implement in the DynamicLayoutBase :
+Template< class ContainerType >
+ChannelAccessor channel( Channel channel, ContainerType &container )
+{
+	return static_cast< Derived * >( this )->template channel< ContainerType >( channel, container );
+}
+
+Template< class ContainerType, EnumType Mask = Mask_All >
+ChannelAccessor channel( int index, ContainerType &container )
+{
+	return static_cast< Derived * >( this )->template channel< ChannelType >( maskedChannelIndex< Mask >( index ), container );
+}
+
+Move the maskedChannelIndex method from the layout to the DynmaicLayoutBase.
+
+Make the layout classes derive from the correct bases.
+
+Add the following methods to the StaticLayoutBase:
+ChannelAccessor channel( Channel channel, ContainerType &container )
+ChannelAccessor channel( int index, ContainerType &container )
+
+Implement the following methods on the dynamicLayoutBase class as virtual functions. They should be implemented on the derived classes to expand the given container and add the channels to m_channels :
+void addChannels( ChannelContainer, ChanneSet c, ChannelBrothers b )
+void addChannels( ChannelPointerContainer, ChanneSet c, ChannelBrothers b )
+
+Remove the runtime channel traits.
+
+Implement the PixelBase< Layout, class ContainerType > class which just takes a layout and instantiates it and the container type. It then exposes layout.channel( Channel ) and layout.channel( index ).
+typedef the following:
+PixelBase< Layout, Layout::ChannelContainer > Pixel;
+PixelBase< Layout, Layout::ChannelPointerContainer > PixelAccessor;
+
+Implement the MaskLayout class which simply takes a Pixel type as a template argument and holds a reference to it. It then just implements the channel() methods but also passes a mask to their template
+argument.
+
+The pixel accessor class should 
+
+Implemented by the derived layouts:
+
+template< Index >
+ChannelAccessor channel( ChannelContainer & )
+
+template< Index >
+ChannelAccessor channel( ChannelPointerContainer & )
+
 3) Tidy up the CompoundLayoutContainerBase and add comments to it.
 4) Add a static isCompound and an isDynamic method to the layout baseclass that just checks the Derived::NumberOfLayouts and Derived::IsDynamic enums on the derived classes.
 2) Get the CompoundLayoutContainer working correctly with DynamicLayouts and PixelLayouts that contain a DynamicLayout.

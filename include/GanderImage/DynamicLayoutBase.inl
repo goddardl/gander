@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,24 +31,6 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERIMAGE_DYNAMICLAYOUTBASE__
-#define __GANDERIMAGE_DYNAMICLAYOUTBASE__
-
-#include <type_traits>
-#include <iostream>
-#include <stdexcept>
-
-#include "boost/format.hpp"
-
-#include "Gander/Assert.h"
-#include "Gander/Common.h"
-#include "Gander/Tuple.h"
-
-#include "Gander/StaticAssert.h"
-#include "GanderImage/StaticAssert.h"
-#include "GanderImage/LayoutBase.h"
-#include "GanderImage/Channel.h"
-#include "GanderImage/ChannelBrothers.h"
 
 namespace Gander
 {
@@ -57,30 +39,13 @@ namespace Image
 {
 
 template< class Derived, class DataType >
-struct DynamicLayoutBase : public LayoutBase< Derived >
+template< class ContainerType >
+inline void DynamicLayoutBase< Derived, DataType >::setChannelPointer( ContainerType &container, Channel channel, PointerType pointer )
 {
-	public :
-		
-		typedef LayoutBase< Derived > BaseType;
-		typedef typename Gander::template TypeTraits< DataType >::Type ChannelType;
-		typedef typename Gander::template TypeTraits< DataType >::StorageType StorageType;
-		typedef typename Gander::template TypeTraits< DataType >::PointerType PointerType;
-		typedef typename Gander::template TypeTraits< DataType >::ReferenceType ReferenceType;
-		
-		enum
-		{
-			IsDynamic = true,
-		};
-		
-		template< class ContainerType >
-		inline void setChannelPointer( ContainerType &container, Channel channel, PointerType pointer );
-};
+	return static_cast< Derived * >( this )->_setChannelPointer( container, channel, pointer );
+}
 
 }; // namespace Image
 
 }; // namespace Gander
 
-// The implementation of the StaticLayoutBase class.
-#include "DynamicLayoutBase.inl"
-
-#endif

@@ -52,7 +52,15 @@ enum\
 	OffsetsShiftedByChannelValue = ( ( BrotherOrder1 | ( BrotherOrder2 << 2 ) | ( BrotherOrder3 << 4 ) | ( BrotherOrder4 << 6 ) ) << ( ( BrotherOfLowestValue - 1 ) << 1 ) ),\
 	ChannelBrothers = BROTHERS_ENUM,\
 };\
-static BrotherTraitsRegistry::BrotherTraitsRegistration< BROTHERS_ENUM > g_brothersRegistration;
+template< EnumType C >\
+struct IndexOfChannelInBrothers \
+{\
+	enum\
+	{\
+		Value = ( C == FirstBrotherInBrothers ) ? 0 : ( C == SecondBrotherInBrothers ) ? 1 : ( C == ThirdBrotherInBrothers ) ? 2 : ( C == FourthBrotherInBrothers ) ? 3 : 0,\
+	};\
+};\
+static BrotherTraitsRegistry::BrotherTraitsRegistration< BROTHERS_ENUM > g_brothersRegistration;\
 
 #define DECLARE_BROTHER_TRAITS( BROTHERS_ENUM )\
 Gander::Image::BrotherTraitsRegistry::BrotherTraitsRegistration< BROTHERS_ENUM > Gander::Image::BrotherTraits< BROTHERS_ENUM >::g_brothersRegistration;

@@ -183,7 +183,7 @@ struct LayoutBase
 		inline int maskedChannelIndex() const;
 		
 		inline ChannelSet requiredChannels() const;
-		
+
 		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
 		template< class L > inline bool operator != ( L const &rhs ) const { return !static_cast< Derived const * >( this )->equalTo( rhs ); }
 

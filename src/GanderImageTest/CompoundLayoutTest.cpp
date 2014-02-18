@@ -51,7 +51,6 @@ using namespace boost::unit_test;
 
 template< EnumType ID, ChannelDefault S > struct TestLayout
 {
-	typedef float StorageType;
 	enum
 	{
 		IsDynamic = false,
@@ -60,12 +59,22 @@ template< EnumType ID, ChannelDefault S > struct TestLayout
 		ChannelMask = ChannelToMask<S>::Value,
 		Id = ID,
 	};
+	
+	typedef typename Gander::template TypeTraits< float >::Type ChannelType;
+	typedef typename Gander::template TypeTraits< float >::StorageType StorageType;
+	typedef typename Gander::template TypeTraits< float >::PointerType PointerType;
+	typedef typename Gander::template TypeTraits< float >::ReferenceType ReferenceType;
+	typedef Gander::template Tuple< StorageType, NumberOfChannels, false > ChannelContainerType;
+	typedef Gander::template Tuple< PointerType, NumberOfChannelPointers, false > ChannelPointerContainerType;
 		
 	template< ChannelDefault >
 	struct ChannelTraits
 	{
 		typedef TestLayout< ID, S > LayoutType;
 		typedef typename LayoutType::StorageType StorageType;
+		typedef typename LayoutType::ChannelType ChannelType;
+		typedef typename LayoutType::PointerType PointerType;
+		typedef typename LayoutType::ReferenceType ReferenceType;
 	};
 };
 

@@ -166,7 +166,12 @@ struct CompoundLayoutRecurseBase : public LayoutBase< Derived >
 			};
 
 			typedef typename Detail::TypeSwitch< Derived, LayoutIndex >::Type LayoutType;
+			typedef typename LayoutType::ChannelType ChannelType;
 			typedef typename LayoutType::StorageType StorageType;
+			typedef typename LayoutType::PointerType PointerType;
+			typedef typename LayoutType::ReferenceType ReferenceType;
+			typedef typename LayoutType::ChannelContainerType ChannelContainerType;
+			typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
 		};
 
 	protected :
@@ -236,8 +241,13 @@ struct CompoundLayoutRecurseBase : public LayoutBase< Derived >
 		{
 			public :
 	
-				typedef typename LayoutTraits< ChannelToLayoutIndex< C >::Value, DisableStaticAsserts >::StorageType StorageType;
 				typedef typename LayoutTraits< ChannelToLayoutIndex< C >::Value, DisableStaticAsserts >::LayoutType LayoutType;
+				typedef typename LayoutType::ChannelType ChannelType;
+				typedef typename LayoutType::StorageType StorageType;
+				typedef typename LayoutType::PointerType PointerType;
+				typedef typename LayoutType::ReferenceType ReferenceType;
+				typedef typename LayoutType::ChannelContainerType ChannelContainerType;
+				typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
 				
 				enum
 				{
