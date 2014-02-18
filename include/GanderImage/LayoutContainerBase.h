@@ -153,7 +153,6 @@ struct LayoutContainerBaseInterface : public LayoutContainerBase< Derived, Layou
 		{
 			switch( c )
 			{
-				case( 0 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 0 ), Mask, true, ChannelType >(); break;
 				case( 1 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 1 ), Mask, true, ChannelType >(); break;
 				case( 2 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 2 ), Mask, true, ChannelType >(); break;
 				case( 3 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 3 ), Mask, true, ChannelType >(); break;
@@ -164,11 +163,6 @@ struct LayoutContainerBaseInterface : public LayoutContainerBase< Derived, Layou
 				case( 8 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 8 ), Mask, true, ChannelType >(); break;
 				case( 9 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 9 ), Mask, true, ChannelType >(); break;
 				case( 10 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 10 ), Mask, true, ChannelType >(); break;
-				case( 11 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 11 ), Mask, true, ChannelType >(); break;
-				case( 12 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 12 ), Mask, true, ChannelType >(); break;
-				case( 13 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 13 ), Mask, true, ChannelType >(); break;
-				case( 14 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 14 ), Mask, true, ChannelType >(); break;
-				case( 15 ) : return static_cast< Derived * >( this )->template channel< ChannelDefault( 15 ), Mask, true, ChannelType >(); break;
 				default : GANDER_ASSERT( 0, "Channel does not exist in the LayoutContainer." ); break;
 			}
 		}
