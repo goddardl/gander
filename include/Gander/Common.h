@@ -81,13 +81,13 @@ namespace Gander
 
 /// A struct which is used in several classes to pass a set of typedefs
 /// that define how to manipulate and access a particular type in memory.
-template< class Q, class R = Q&, class S = Q*, class T = Q >
+template< class Q  >
 struct TypeTraits
 {
 	typedef Q Type;				// The data type that is stored in memory.
-	typedef R StorageType;		// The data type that is used to store Type.
-	typedef S ReferenceType;	// The data type that is used to act as a reference to Type.
-	typedef T PointerType;		// The data type that is used to act as a pointer to Type.
+	typedef Q StorageType;		// The data type that is used to store Type.
+	typedef Q& ReferenceType;	// The data type that is used to act as a reference to Type.
+	typedef Q* PointerType;		// The data type that is used to act as a pointer to Type.
 };
 
 template< class T, class S, bool Condition > struct TypeSelector;
