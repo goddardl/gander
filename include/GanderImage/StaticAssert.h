@@ -80,6 +80,9 @@ struct static_assertion<true>
 		THE_DERIVED_LAYOUT_IS_DYNAMIC_AND_THEREFORE_MUST_NOT_DECLARE_ENUM_VALUES_THAT_ARE_TO_BE_USED_BY_STATIC_LAYOUTS_ONLY,
 		// The derived class has not implemented a function that is required by the base class.
 		DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS,
+		// The derived class has not implemented the ChannelTraitsAtIndex, LayoutTraits and ChannelTraits structs required by
+		// classes that derived from Layout.
+		DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_TRAITS_STRUCTS_REQUIRED_BY_THE_BASE_CLASS,
 	};
 };
 

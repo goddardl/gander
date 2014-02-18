@@ -46,7 +46,7 @@
 
 #include "Gander/StaticAssert.h"
 #include "GanderImage/StaticAssert.h"
-#include "GanderImage/Layout.h"
+#include "GanderImage/LayoutBase.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
@@ -57,16 +57,11 @@ namespace Image
 {
 
 template< class T >
-struct DynamicLayout : Layout< DynamicLayout< T > > 
+struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T > > 
 {
 	public :
 
-		enum
-		{
-			IsDynamic = true,
-		};
-
-		typedef Layout< DynamicLayout< T > > BaseType;
+		typedef DynamicLayoutBase< DynamicLayout< T > > BaseType;
 		typedef DynamicLayout<T> Type;
 		typedef T StorageType;
 		typedef typename Gander::template Tuple< StorageType, BaseType::NumberOfChannels, true > ChannelContainer;
@@ -121,10 +116,8 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 		}
 		//@}
 
-	private :
-
 		/// Adds the channel to the Layout and logs all pertenant information.
-		void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
 			if( b != Brothers_None && !BrotherTraits<>::channels( b ).contains( c ) )
 			{
@@ -166,8 +159,10 @@ struct DynamicLayout : Layout< DynamicLayout< T > >
 				m_steps.insert( m_steps.begin() + index, step );
 			}
 		}
+	
+	private :
 
-		friend class Layout< DynamicLayout< T > >;
+		friend class LayoutBase< DynamicLayout< T > >;
 		
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.

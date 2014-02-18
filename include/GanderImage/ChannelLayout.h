@@ -46,7 +46,7 @@
 #include "Gander/Tuple.h"
 
 #include "GanderImage/StaticAssert.h"
-#include "GanderImage/Layout.h"
+#include "GanderImage/LayoutBase.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
@@ -60,11 +60,11 @@ namespace Image
 {
 
 template< class T, ChannelDefault S >
-struct ChannelLayout : public Layout< ChannelLayout< T, S > >
+struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S > >
 {
 	private :
 
-		typedef Layout< ChannelLayout< T, S > > BaseType;
+		typedef StaticLayoutBase< ChannelLayout< T, S > > BaseType;
 
 	public :
 
@@ -106,12 +106,26 @@ struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 				ChannelIndexInLayout = Index,
 			};
 		};
+		
+		/// Returns the index to the base pointer for the given channel.
+		template< ChannelDefault C >
+		inline int _pointerIndex() const
+		{
+			return 0;
+		}
+
+		/// Returns the offset to be applied to the base pointer in order to access the given channel.
+		template< ChannelDefault C >
+		inline int _pointerOffset() const
+		{
+			return 0;
+		}
 
 		using BaseType::contains;
 
 	private :
 
-		friend class Layout< ChannelLayout< T, S > >;	
+		friend class LayoutBase< ChannelLayout< T, S > >;	
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.

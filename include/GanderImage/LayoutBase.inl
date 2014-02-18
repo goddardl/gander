@@ -39,7 +39,7 @@ namespace Image
 {
 
 template< class Derived >
-inline Layout<Derived>::Layout()
+inline LayoutBase<Derived>::LayoutBase()
 {
 	GANDER_IMAGE_STATIC_ASSERT(
 	( 
@@ -59,35 +59,35 @@ inline Layout<Derived>::Layout()
 }
 
 template< class Derived >
-inline unsigned int Layout<Derived>::numberOfChannels() const
+inline unsigned int LayoutBase<Derived>::numberOfChannels() const
 {
 	GANDER_IMAGE_STATIC_ASSERT( ( !Derived::IsDynamic ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 	return Derived::NumberOfChannels;
 }
 
 template< class Derived >
-inline unsigned int Layout<Derived>::numberOfChannelPointers() const
+inline unsigned int LayoutBase<Derived>::numberOfChannelPointers() const
 {
 	GANDER_IMAGE_STATIC_ASSERT( ( !Derived::IsDynamic ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 	return Derived::NumberOfChannelPointers;
 }
 
 template< class Derived >
-inline ChannelSet Layout<Derived>::channels() const
+inline ChannelSet LayoutBase<Derived>::channels() const
 {
 	GANDER_IMAGE_STATIC_ASSERT( ( !Derived::IsDynamic ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 	return ChannelSet( static_cast<Gander::Image::ChannelMask>( Derived::ChannelMask ) );
 }
 		
 template< class Derived >
-inline bool Layout<Derived>::contains( ChannelSet channels ) const
+inline bool LayoutBase<Derived>::contains( ChannelSet channels ) const
 {
 	return static_cast< Derived const * >( this )->channels().contains( channels );
 }
 
 template< class Derived >
 template< EnumType C >
-inline bool Layout<Derived>::containsChannel( Gander::Image::Channel c ) const
+inline bool LayoutBase<Derived>::containsChannel( Gander::Image::Channel c ) const
 {
 	if( C == Chan_None || Derived::IsDynamic )
 	{
@@ -100,39 +100,39 @@ inline bool Layout<Derived>::containsChannel( Gander::Image::Channel c ) const
 }
 		
 template< class Derived >
-inline bool Layout<Derived>::isCompound() const
+inline bool LayoutBase<Derived>::isCompound() const
 {
 	return Derived::IsCompound;
 }
 
 template< class Derived >
-inline bool Layout<Derived>::isDynamic() const
+inline bool LayoutBase<Derived>::isDynamic() const
 {
 	return Derived::IsDynamic;
 }
 
 template< class Derived >
 template< EnumType Index, Gander::Image::ChannelMask Mask, bool DisableStaticAsserts >
-inline int Layout<Derived>::maskedChannelIndex() const
+inline int LayoutBase<Derived>::maskedChannelIndex() const
 {
 	return static_cast< Derived const * >( this )->template _maskedChannelIndex< Index, Mask, DisableStaticAsserts >();
 }
 
 template< class Derived >
-inline ChannelSet Layout<Derived>::requiredChannels() const
+inline ChannelSet LayoutBase<Derived>::requiredChannels() const
 {
 	return static_cast< Derived const * >( this )->_requiredChannels();
 }
 		
 template< class Derived >
-inline void Layout<Derived>::addChannels( ChannelSet c, ChannelBrothers b )
+inline void LayoutBase<Derived>::addChannels( ChannelSet c, ChannelBrothers b )
 {
 	static_cast< Derived * >( this )->_addChannels( c, b );
 }
 		
 template< class Derived >
 template< ChannelDefault C >
-inline int8u Layout<Derived>::step( Channel channel ) const
+inline int8u LayoutBase<Derived>::step( Channel channel ) const
 {
 	GANDER_ASSERT( ( C == Chan_None || channel == Chan_None || channel == C ), "Specify either a compile-time argument or a runtime parameter but not both." );
 	return static_cast< Derived const * >( this )->_step<C>( channel );
@@ -140,21 +140,21 @@ inline int8u Layout<Derived>::step( Channel channel ) const
 
 template< class Derived >
 template< EnumType Channel, EnumType Mask, bool DisableStaticAsserts >
-inline unsigned int Layout<Derived>::indexOfChannel() const
+inline unsigned int LayoutBase<Derived>::indexOfChannel() const
 {
 	return static_cast< Derived const * >( this )->template _indexOfChannel< Channel, Mask, DisableStaticAsserts >();
 }
 
 template< class Derived >
 template< unsigned Index, bool DisableStaticAsserts, class ReturnType >
-inline ReturnType &Layout<Derived>::child()
+inline ReturnType &LayoutBase<Derived>::child()
 {
 	GANDER_IMAGE_STATIC_ASSERT( !Derived::IsCompound, DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS )
 	return *( static_cast< Derived * >( this ) );
 }
 		
 template< class Derived >
-inline ChannelSet Layout<Derived>::_requiredChannels() const
+inline ChannelSet LayoutBase<Derived>::_requiredChannels() const
 {
 	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 	return 0; // We never get here.
@@ -162,14 +162,14 @@ inline ChannelSet Layout<Derived>::_requiredChannels() const
 
 template< class Derived >
 template< ChannelDefault C >
-inline int8u Layout<Derived>::_step( Channel channel ) const
+inline int8u LayoutBase<Derived>::_step( Channel channel ) const
 {
 	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 	return 0; // We never get here.
 }
 
 template< class Derived >
-inline void Layout<Derived>::_addChannels( ChannelSet c, ChannelBrothers b )
+inline void LayoutBase<Derived>::_addChannels( ChannelSet c, ChannelBrothers b )
 {
 	GANDER_IMAGE_STATIC_ASSERT( !Derived::IsDynamic, DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS )
 	GANDER_IMAGE_STATIC_ASSERT( Derived::IsDynamic, THE_LAYOUT_MUST_BE_DYNAMIC_IN_ORDER_TO_ADD_CHANNELS_TO_IT )
@@ -177,7 +177,7 @@ inline void Layout<Derived>::_addChannels( ChannelSet c, ChannelBrothers b )
 
 template< class Derived >
 template< class L >
-inline bool Layout<Derived>::equalTo( const L &rhs ) const
+inline bool LayoutBase<Derived>::equalTo( const L &rhs ) const
 {
 	return (
 		rhs.channels() == static_cast< Derived const * >( this )->channels() &&
@@ -187,19 +187,50 @@ inline bool Layout<Derived>::equalTo( const L &rhs ) const
 		
 template< class Derived >
 template< EnumType Index, Gander::Image::ChannelMask Mask, bool DisableStaticAsserts >
-inline int Layout<Derived>::_maskedChannelIndex() const
+inline int LayoutBase<Derived>::_maskedChannelIndex() const
 {
 	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 	return 0;
 }
 	
-		/// Returns the index of a channel within the layout.	
 template< class Derived >
 template< EnumType Channel, EnumType Mask, bool >
-inline unsigned int Layout<Derived>::_indexOfChannel() const
+inline unsigned int LayoutBase<Derived>::_indexOfChannel() const
 {
 	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 	return 0;
+}
+		
+template< class Derived >
+template< EnumType Index >
+inline int LayoutBase<Derived>::_pointerIndex() const
+{
+	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
+	return 0;
+}
+
+template< class Derived >
+template< EnumType Index >
+inline int LayoutBase<Derived>::_pointerOffset() const
+{
+	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
+	return 0;
+}
+		
+template< class Derived >
+template< EnumType Index >
+inline int LayoutBase<Derived>::pointerIndex() const
+{
+	GANDER_ASSERT( ( Index < channels().size() ), "Index is out of bounds." )
+	return static_cast< Derived const * >( this )->template _pointerIndex< Index >();
+}
+
+template< class Derived >
+template< EnumType Index >
+inline int LayoutBase<Derived>::pointerOffset() const
+{
+	GANDER_ASSERT( ( Index < channels().size() ), "Index is out of bounds." )
+	return static_cast< Derived const * >( this )->template _pointerOffset< Index >();
 }
 
 }; // namespace Image

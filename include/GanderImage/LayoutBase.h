@@ -31,8 +31,8 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERIMAGE_LAYOUT__
-#define __GANDERIMAGE_LAYOUT__
+#ifndef __GANDERIMAGE_LAYOUTBASE__
+#define __GANDERIMAGE_LAYOUTBASE__
 
 #include <type_traits>
 #include <iostream>
@@ -82,7 +82,7 @@ struct ChannelTraitsInterface
 
 /// The base class for defining how a set of channels are grouped together and of what type they are.
 /// 
-/// The Layout class defines an interface for the derived classes, forcing them to implement both enum values and methods.
+/// The LayoutBase class defines an interface for the derived classes, forcing them to implement both enum values and methods.
 /// Layouts are a fundamental concept in Gander::Image. A Layout defines how a set of channels are laid out in memory along
 /// with their names, storage type and whether they are dynamic - and can have more channels added to them at runtime - or not.
 /// Derived classes are forced to implement a set of methods and enum values, defining a common interface that describes how
@@ -91,7 +91,7 @@ struct ChannelTraitsInterface
 /// If they are static, then they also need to define NumberOfChannels, ChannelMask and NumberOfChannelPointers.
 /// If the layout is Dynamic, then it needs to override the numberOfChannels, channels and numberOfChannelPointers methods.
 template< class Derived >
-struct Layout
+struct LayoutBase
 {
 		
 		enum
@@ -110,7 +110,7 @@ struct Layout
 			IsDynamic = false,
 		};
 
-		Layout();
+		LayoutBase();
 		
 		//! @name Methods that need overloading by dynamic derived classes.
 		/// All of theses methods need to be declared in the derived class if it is dynamic ( and therefore has set the enum value IsDynamic ).
@@ -143,6 +143,24 @@ struct Layout
 		inline ReturnType &child();
 		//@}
 		
+		//! @name Channel pointer interface.
+		/// These methods are used when accessing channel data using a set of pointers by the ChannelAccessor class.
+		/// At it's most simplest, a set of channels can be accessed using one pointer to each of them. However,
+		/// if the channels are interleaved together then we only need to store a pointer to the first one and an
+		/// offset to the others from it. The purpose of these methods, which a derived class should implement,
+		/// is to provide this information for a given channel index.
+		//@{
+		/// Returns the index to the base pointer for the given channel.
+		template< EnumType Index >
+		inline int pointerIndex() const;
+		/// Returns the offset to be applied to the base pointer in order to access the given channel.
+		template< EnumType Index >
+		inline int pointerOffset() const;
+		/// Returns the value to be added to a pointer to a channel in order to increment it to the next pixel location.
+		template< ChannelDefault C = Chan_None >
+		inline int8u step( Channel channel = Chan_None ) const;
+		//@}
+		
 		/// Returns whether the layout represents the given set of channels.
 		inline bool contains( ChannelSet channels ) const;
 		
@@ -158,16 +176,12 @@ struct Layout
 		/// Returns true if the Layout supports the Dynamic methods that allow the number of channels and their structure to be manipulated.
 		inline bool isDynamic() const;
 
-		/// Returns the step value for a given channel.
-		template< ChannelDefault C = Chan_None >
-		inline int8u step( Channel channel = Chan_None ) const;
-
 		template< EnumType Channel, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline unsigned int indexOfChannel() const;
 		
 		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline int maskedChannelIndex() const;
-
+		
 		inline ChannelSet requiredChannels() const;
 		
 		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
@@ -184,6 +198,42 @@ struct Layout
 			{
 				LayoutIndex = Index,
 			};
+		};
+		
+		template< ChannelDefault C = Chan_None >
+		struct ChannelTraits
+		{
+			GANDER_IMAGE_STATIC_ASSERT( ( C != Chan_None ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_TRAITS_STRUCTS_REQUIRED_BY_THE_BASE_CLASS );
+
+			// Derived classes of Layout need to implement this struct and provide the following:
+			//
+			// - A typedef of the Layout that contains the ChannelTraits struct.
+			// typedef Type LayoutType;
+			// 
+			// - A typedef that defines the type of the channels that the layout represents.
+			// typedef T StorageType;
+			// 
+			// - An enum that defines the index of the layout that the channel C belongs to. If the 
+			// layout is not a compound layout the this can be set to 0.	
+			// enum
+			// {
+			//		LayoutIndex = 0,
+			// };
+		};
+		
+		template< int Index = -1, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
+		struct ChannelTraitsAtIndex
+		{
+			GANDER_IMAGE_STATIC_ASSERT( ( Index != -1 ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_TRAITS_STRUCTS_REQUIRED_BY_THE_BASE_CLASS );
+			
+			// Derived classes of Layout need to implement this struct and provide the following:
+			//
+			// - An enum that maps the index ( the 'Index' template argument ) of a channel in set of channels
+			// ( defined by the 'Mask' template argument ) into the index of the same channel in the layout. 
+			// enum
+			// {
+			//		ChannelIndexInLayout = Index,
+			// };
 		};
 		
 	private :	
@@ -211,14 +261,44 @@ struct Layout
 		/// Returns the index of a channel within the layout.	
 		template< EnumType Channel, EnumType Mask = Mask_All, bool >
 		inline unsigned int _indexOfChannel() const;
+		
+		/// Returns the index to the base pointer for the given channel.
+		template< EnumType Index >
+		inline int _pointerIndex() const;
+		
+		/// Returns the offset to be applied to the base pointer in order to access the given channel.
+		template< EnumType Index >
+		inline int _pointerOffset() const;
 
+};
+
+template< class Derived >
+struct DynamicLayoutBase : public LayoutBase< Derived >
+{
+	public :
+		
+		enum
+		{
+			IsDynamic = true,
+		};
+};
+
+template< class Derived >
+struct StaticLayoutBase : public LayoutBase< Derived >
+{
+	public :
+
+		enum
+		{
+			IsDynamic = false,
+		};
 };
 
 }; // namespace Image
 
 }; // namespace Gander
 
-// The implementation of the Layout class.
-#include "Layout.inl"
+// The implementation of the LayoutBase class.
+#include "LayoutBase.inl"
 
 #endif

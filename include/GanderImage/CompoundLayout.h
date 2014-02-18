@@ -43,7 +43,7 @@
 #include "Gander/Assert.h"
 
 #include "GanderImage/StaticAssert.h"
-#include "GanderImage/Layout.h"
+#include "GanderImage/LayoutBase.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
@@ -146,7 +146,7 @@ template< class Derived, bool IS_DYNAMIC, class T0, class T1, class T2, class T3
 struct CompoundLayoutRecurse;
 
 template < class Derived >
-struct CompoundLayoutRecurseBase : public Layout< Derived >
+struct CompoundLayoutRecurseBase : public LayoutBase< Derived >
 {
 	public :
 
@@ -511,7 +511,7 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 
 	private :
 
-		friend class Layout< Derived >;	
+		friend class LayoutBase< Derived >;	
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.

@@ -34,7 +34,6 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "GanderImage/Layout.h"
 #include "GanderImage/CompoundLayout.h"
 #include "GanderImage/ChannelLayout.h"
 #include "GanderImage/BrothersLayout.h"

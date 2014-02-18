@@ -46,7 +46,7 @@
 
 #include "Gander/StaticAssert.h"
 #include "GanderImage/StaticAssert.h"
-#include "GanderImage/Layout.h"
+#include "GanderImage/LayoutBase.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
@@ -57,11 +57,11 @@ namespace Image
 {
 
 template< class T, ChannelBrothers B >
-struct BrothersLayout : public Layout< BrothersLayout< T, B > >
+struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B > >
 {
 	private :
 
-		typedef Layout< BrothersLayout< T, B > > BaseType;
+		typedef StaticLayoutBase< BrothersLayout< T, B > > BaseType;
 
 	public :
 	
@@ -107,7 +107,7 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 
 	private :
 
-		friend class Layout< BrothersLayout< T, B > >;	
+		friend class LayoutBase< BrothersLayout< T, B > >;	
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
@@ -158,6 +158,20 @@ struct BrothersLayout : public Layout< BrothersLayout< T, B > >
 			GANDER_IMAGE_STATIC_ASSERT( Value != BadIndex || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
 						
 			return Value;
+		}
+		
+		/// Returns the index to the base pointer for the given channel.
+		template< EnumType Index >
+		inline int _pointerIndex() const
+		{
+			return 0;
+		}
+
+		/// Returns the offset to be applied to the base pointer in order to access the given channel.
+		template< EnumType Index >
+		inline int _pointerOffset() const
+		{
+			return 0;
 		}
 		
 		/// Returns the index of a channel in the layout when masked.
