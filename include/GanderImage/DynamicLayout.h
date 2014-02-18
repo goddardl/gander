@@ -46,7 +46,7 @@
 
 #include "Gander/StaticAssert.h"
 #include "GanderImage/StaticAssert.h"
-#include "GanderImage/LayoutBase.h"
+#include "GanderImage/DynamicLayoutBase.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
