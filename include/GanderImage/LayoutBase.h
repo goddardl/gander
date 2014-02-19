@@ -78,6 +78,28 @@ struct ChannelTraitsInterface
 		int8u m_step;
 };
 
+/// This simple little struct is used to mask the default constructor on the container class
+/// and to assert that it is initialized with it's associated layout.
+template< class Layout, class Container >
+struct ChannelPointerContainerWrapper : public Container
+{
+	ChannelPointerContainerWrapper( const Layout &layout ) :
+		Container( layout.numberOfChannelPointers() )
+	{
+	}
+};
+
+/// This simple little struct is used to mask the default constructor on the container class
+/// and to assert that it is initialized with it's associated layout.
+template< class Layout, class Container >
+struct ChannelContainerWrapper : public Container
+{
+	ChannelContainerWrapper( const Layout &layout ) :
+		Container( layout.numberOfChannels() )
+	{
+	}
+};
+
 }; // namespace Detail
 
 /// The base class for defining how a set of channels are grouped together and of what type they are.
@@ -119,15 +141,6 @@ struct LayoutBase
 		inline unsigned int numberOfChannels() const;
 		inline unsigned int numberOfChannelPointers() const;
 		inline ChannelSet channels() const;
-		//@}
-
-		//! @name Dynamic methods.
-		/// All of these methods should be implemented by any derived class that defines the IsDynamic flag.
-		/// These methods provide an interface to the layout that allow the structure of the channels to be
-		/// modified.
-		//@{
-		/// Adds a set of channels to the layout. Whether the channels are brothers can also optionally be defined.
-		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None );
 		//@}
 		
 		//! @name Compound methods.
@@ -178,9 +191,6 @@ struct LayoutBase
 
 		template< EnumType Channel, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline unsigned int indexOfChannel() const;
-		
-		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline int maskedChannelIndex() const;
 		
 		inline ChannelSet requiredChannels() const;
 

@@ -76,8 +76,8 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		typedef typename BaseType::StorageType StorageType;
 		typedef typename BaseType::PointerType PointerType;
 		typedef typename BaseType::ReferenceType ReferenceType;
-		typedef Gander::template Tuple< StorageType, NumberOfChannels, false > ChannelContainerType;
-		typedef Gander::template Tuple< PointerType, NumberOfChannelPointers, false > ChannelPointerContainerType;
+		typedef Detail::ChannelContainerWrapper< Type, Gander::template Tuple< StorageType, NumberOfChannels, false > > ChannelContainerType;
+		typedef Detail::ChannelPointerContainerWrapper< Type, Gander::template Tuple< PointerType, NumberOfChannelPointers, false > > ChannelPointerContainerType;
 
 		template< ChannelDefault C = Chan_None >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >

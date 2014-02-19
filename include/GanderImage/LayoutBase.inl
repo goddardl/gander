@@ -112,22 +112,9 @@ inline bool LayoutBase< Derived >::isDynamic() const
 }
 
 template< class Derived >
-template< EnumType Index, Gander::Image::ChannelMask Mask, bool DisableStaticAsserts >
-inline int LayoutBase< Derived >::maskedChannelIndex() const
-{
-	return static_cast< Derived const * >( this )->template _maskedChannelIndex< Index, Mask, DisableStaticAsserts >();
-}
-
-template< class Derived >
 inline ChannelSet LayoutBase< Derived >::requiredChannels() const
 {
 	return static_cast< Derived const * >( this )->_requiredChannels();
-}
-		
-template< class Derived >
-inline void LayoutBase< Derived >::addChannels( ChannelSet c, ChannelBrothers b )
-{
-	static_cast< Derived * >( this )->_addChannels( c, b );
 }
 		
 template< class Derived >
@@ -169,13 +156,6 @@ inline int8u LayoutBase< Derived >::_step( Channel channel ) const
 }
 
 template< class Derived >
-inline void LayoutBase< Derived >::_addChannels( ChannelSet c, ChannelBrothers b )
-{
-	GANDER_IMAGE_STATIC_ASSERT( !Derived::IsDynamic, DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS )
-	GANDER_IMAGE_STATIC_ASSERT( Derived::IsDynamic, THE_LAYOUT_MUST_BE_DYNAMIC_IN_ORDER_TO_ADD_CHANNELS_TO_IT )
-}
-
-template< class Derived >
 template< class L >
 inline bool LayoutBase< Derived >::equalTo( const L &rhs ) const
 {
@@ -185,14 +165,6 @@ inline bool LayoutBase< Derived >::equalTo( const L &rhs ) const
    );
 }
 		
-template< class Derived >
-template< EnumType Index, Gander::Image::ChannelMask Mask, bool DisableStaticAsserts >
-inline int LayoutBase< Derived >::_maskedChannelIndex() const
-{
-	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-	return 0;
-}
-	
 template< class Derived >
 template< EnumType Channel, EnumType Mask, bool >
 inline unsigned int LayoutBase< Derived >::_indexOfChannel() const

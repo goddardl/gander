@@ -39,10 +39,38 @@ namespace Image
 {
 
 template< class Derived, class DataType >
+template< Gander::Image::ChannelMask Mask >
+inline unsigned int DynamicLayoutBase< Derived, DataType >::maskedChannelIndex( unsigned int index ) const
+{
+	return static_cast< Derived const * >( this )->template _maskedChannelIndex< Mask >( index );
+}
+
+template< class Derived, class DataType >
+template< Gander::Image::ChannelMask Mask >
+inline unsigned int DynamicLayoutBase< Derived, DataType >::_maskedChannelIndex( unsigned int index ) const
+{
+	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
+	return 0;
+}
+	
+template< class Derived, class DataType >
 template< class ContainerType >
 inline void DynamicLayoutBase< Derived, DataType >::setChannelPointer( ContainerType &container, Channel channel, PointerType pointer )
 {
 	return static_cast< Derived * >( this )->_setChannelPointer( container, channel, pointer );
+}
+		
+template< class Derived, class DataType >
+template< class ContainerType >
+void DynamicLayoutBase< Derived, DataType >::_addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b )
+{
+	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
+}
+		
+template< class Derived, class DataType >
+void DynamicLayoutBase< Derived, DataType >::_addChannels( ChannelSet c, ChannelBrothers b )
+{
+	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 }
 
 }; // namespace Image

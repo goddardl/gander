@@ -87,6 +87,7 @@ struct StaticLayoutBase : public LayoutBase< Derived >
 		template< class ContainerType >
 		inline ReferenceType channel( ContainerType &container, Channel c )
 		{
+			GANDER_ASSERT( static_cast< Derived * >( this )->channels().contains( c ), "Channel is not represented by this layout." );
 			switch( c )
 			{
 				case( 1 ) : return static_cast< Derived * >( this )->template _channel< ChannelDefault( 1 ) >( container );
@@ -111,6 +112,7 @@ struct StaticLayoutBase : public LayoutBase< Derived >
 		template< class ContainerType, EnumType Mask = Mask_All >
 		inline ReferenceType channelAtIndex( ContainerType &container, unsigned int index )
 		{
+			GANDER_ASSERT( index < static_cast< Derived * >( this )->channels().size(), "Channel is not represented by this layout." );
 			switch( index )
 			{
 				case( 0 ) : return static_cast< Derived * >( this )->template _channelAtIndex< Derived::template MaskedChannelIndex< 0, Mask, true >::Value >( container );

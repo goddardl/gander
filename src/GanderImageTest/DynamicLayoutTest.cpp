@@ -114,6 +114,24 @@ struct DynamicLayoutTest
 		BOOST_CHECK_THROW( l.step<Chan_Z>(), std::runtime_error );
 		BOOST_CHECK_THROW( l.step( Chan_Z ), std::runtime_error );
 	}
+	
+	void testContainerAccess() 
+	{
+		typedef DynamicLayout< float > Layout;
+		Layout layout;
+		layout.addChannels( Mask_Blue | Mask_Red, Brothers_BGR );
+
+		Layout::ChannelContainerType c( layout );
+		Layout::ChannelPointerContainerType cp( layout );
+		
+		BOOST_CHECK_EQUAL( cp.size(), layout.numberOfChannelPointers() );
+		BOOST_CHECK_EQUAL( c.size(), layout.numberOfChannels() );
+		BOOST_CHECK_EQUAL( layout.channels(), ChannelSet( Mask_Blue | Mask_Red ) );
+
+		todo:
+		Write the tests for the channel() and channelIndex() methods here. It should be really thorough
+		and test the indexing of masked channels and the insertion of more channels. 
+	}
 
 	void testMaskedChannelIndex()
 	{
@@ -121,20 +139,20 @@ struct DynamicLayoutTest
 		l.addChannels( Mask_Red | Mask_Green, Brothers_BGR );
 		l.addChannels( Mask_Alpha );
 		l.addChannels( Mask_UV, Brothers_VU );
-		BOOST_CHECK_EQUAL( l.maskedChannelIndex<0>(), 0 );
-		BOOST_CHECK_EQUAL( l.maskedChannelIndex<1>(), 1 );
-		BOOST_CHECK_EQUAL( l.maskedChannelIndex<2>(), 2 );
-		BOOST_CHECK_EQUAL( l.maskedChannelIndex<3>(), 3 );
-		BOOST_CHECK_EQUAL( l.maskedChannelIndex<4>(), 4 );
+		BOOST_CHECK_EQUAL( l.maskedChannelIndex( 0 ), 0 );
+		BOOST_CHECK_EQUAL( l.maskedChannelIndex( 1 ), 1 );
+		BOOST_CHECK_EQUAL( l.maskedChannelIndex( 2 ), 2 );
+		BOOST_CHECK_EQUAL( l.maskedChannelIndex( 3 ), 3 );
+		BOOST_CHECK_EQUAL( l.maskedChannelIndex( 4 ), 4 );
 
-		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<0, ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >() ), 1 );
-		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<1, ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >() ), 3 );
-		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<2, ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >() ), 4 );
-		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<0, ChannelMask( CombineMasks< Mask_UV, Mask_Red >::Value ) >() ), 0 );
-		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<1, Mask_UV>() ), 4 );
-		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<0, Mask_UV>() ), 3 );
-		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex<1, Mask_UV>() ), 4 );
-		BOOST_CHECK_THROW( int( l.maskedChannelIndex<3, ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >() ), std::runtime_error );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex< ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >( 0 ) ), 1 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex< ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >( 1 ) ), 3 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex< ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >( 2 ) ), 4 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex< ChannelMask( CombineMasks< Mask_UV, Mask_Red >::Value ) >( 0 ) ), 0 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex< Mask_UV>( 1 ) ), 4 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex< Mask_UV>( 0 ) ), 3 );
+		BOOST_CHECK_EQUAL( int( l.maskedChannelIndex< Mask_UV>( 1 ) ), 4 );
+		BOOST_CHECK_THROW( int( l.maskedChannelIndex< ChannelMask( CombineMasks< Mask_UV, Mask_Green >::Value ) >( 3 ) ), std::runtime_error );
 		
 	}
 	
@@ -161,6 +179,7 @@ struct DynamicLayoutTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &DynamicLayoutTest::testCommonLayoutInterface, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &DynamicLayoutTest::testAddChannelWhichIsNotABrother, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &DynamicLayoutTest::testMaskedChannelIndex, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &DynamicLayoutTest::testContainerAccess, instance ) );
 	}
 };
 

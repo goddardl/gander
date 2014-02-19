@@ -234,8 +234,11 @@ struct BrothersLayoutTest
 	{
 		typedef BrothersLayout< float, Brothers_BGRA > Layout;
 		Layout layout;
-		Layout::ChannelContainerType c;
-		Layout::ChannelPointerContainerType cp;
+		Layout::ChannelContainerType c( layout );
+		Layout::ChannelPointerContainerType cp( layout );
+		
+		BOOST_CHECK_EQUAL( cp.size(), layout.numberOfChannelPointers() );
+		BOOST_CHECK_EQUAL( c.size(), layout.numberOfChannels() );
 		
 		BOOST_CHECK_EQUAL( layout.channels(), ChannelSet( Mask_RGBA ) );
 		

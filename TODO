@@ -1,7 +1,5 @@
 Todo:
 1) 
-
-Match the DynamicLayoutBase implementation to the StaticLayoutBase implementation.
 Add tests for the channel() and channelAtIndex() methods for the CompoundChannelLayout, ChannelLayout and DynamicLayout.
 
 Implement in the DynamicLayoutBase :

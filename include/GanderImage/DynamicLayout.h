@@ -68,8 +68,8 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 		typedef typename BaseType::StorageType StorageType;
 		typedef typename BaseType::PointerType PointerType;
 		typedef typename BaseType::ReferenceType ReferenceType;
-		typedef Gander::template Tuple< StorageType, BaseType::NumberOfChannels, true > ChannelContainerType;
-		typedef Gander::template Tuple< PointerType, BaseType::NumberOfChannelPointers, true > ChannelPointerContainerType;
+		typedef Detail::ChannelContainerWrapper< Type, Gander::template Tuple< StorageType, BaseType::NumberOfChannels, true > > ChannelContainerType;
+		typedef Detail::ChannelPointerContainerWrapper< Type, Gander::template Tuple< PointerType, BaseType::NumberOfChannelPointers, true > > ChannelPointerContainerType;
 		
 		template< ChannelDefault C = Chan_None, bool DisableStaticAsserts = false >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
@@ -127,24 +127,63 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 	
 		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer )
 		{
+			GANDER_ASSERT(
+				( container.size() == _requiredChannels().size() ),
+				"Container has a different number of elements to the Layout's number of channels."
+			);
 			container[ channels().index( channel ) ] = pointer;
+		}
+		
+		/// Inserts a new channel into the container and also adds the channel to the Layout, logging all pertenant information.
+		template< class ContainerType >
+		void _addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			GANDER_ASSERT(
+				( container.size() == m_channels.size() ),
+				"Container has a different number of elements to the Layout's number of channels."
+			);
+			
+			GANDER_ASSERT(
+				( b == Brothers_None || BrotherTraits<>::channels( b ).contains( c ) ),
+				( boost::format( "DynamicLayout: Channels \"%s\" do not belong to the specified brothers." ) % c ).str()
+			);
+
+			GANDER_ASSERT(
+				( !m_allBrothers.contains( c ) ),
+				( boost::format( "DynamicLayout: Channels \"%s\" cannot be added as another set of ChannelBrothers represents it." ) % c ).str()
+			);
+
+			// Get a set of the current channels and the unique new ones.
+			ChannelSet currentChannels( BaseType::layout().channels() );
+			ChannelSet newChannels( c - currentChannels );
+			
+			_addChannels( c, b );
+
+			// Loop over the new channels and insert a new data element for each one
+			// at the same index that it is stored in the channel set.
+			ChannelSet::const_iterator it( newChannels.begin() );
+			ChannelSet::const_iterator end( newChannels.end() );
+			for( ; it != end; ++it )
+			{
+				currentChannels += *it;
+				int index = currentChannels.index( *it );
+				container.insert( container.begin() + index, typename ContainerType::StorageType( 0 ) );
+			}
 		}
 
 		/// Adds the channel to the Layout and logs all pertenant information.
-		void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
-			if( b != Brothers_None && !BrotherTraits<>::channels( b ).contains( c ) )
-			{
-				throw std::runtime_error( ( boost::format( "RunTimeChannelFormat: Channels \"%s\" do not belong to the specified brothers.") % c ).str() );
-			}
+			GANDER_ASSERT(
+				( b == Brothers_None || BrotherTraits<>::channels( b ).contains( c ) ),
+				( boost::format( "DynamicLayout: Channels \"%s\" do not belong to the specified brothers." ) % c ).str()
+			);
 
-			if( m_allBrothers.contains( c ) )
-			{
-				throw std::runtime_error(
-					( boost::format( "RunTimeChannelFormat: Channels \"%s\" cannot be added as another set of ChannelBrothers represents it.") % c ).str()
-					);
-			}
-
+			GANDER_ASSERT(
+				( !m_allBrothers.contains( c ) ),
+				( boost::format( "DynamicLayout: Channels \"%s\" cannot be added as another set of ChannelBrothers represents it." ) % c ).str()
+			);
+			
 			int8u step = 1;
 			if( b != Brothers_None )
 			{
@@ -159,10 +198,10 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 			ChannelSet newChannels( c - m_channels );
 			ChannelSet existingChannels( c - newChannels );
 
-			if( existingChannels.size() != 0 )
-			{
-				throw std::runtime_error( ( boost::format( "RunTimeChannelFormat: Cannot add channels \"%s\" as they already exist.") % existingChannels ).str() );
-			}
+			GANDER_ASSERT(
+				( existingChannels.size() == 0 ),
+				( boost::format( "DynamicLayout: DynamicLayout: Cannot add channels \"%s\" as they already exist." ) % existingChannels ).str()
+			);
 
 			ChannelSet::const_iterator it( newChannels.begin() );
 			ChannelSet::const_iterator end( newChannels.end() );
@@ -211,12 +250,32 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 		}
 		
 		/// Returns the index of a channel in the layout when masked.
-		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline int _maskedChannelIndex() const
+		template< Gander::Image::ChannelMask Mask = Mask_All >
+		inline unsigned int _maskedChannelIndex( unsigned int index ) const
 		{
 			ChannelSet i = m_channels.intersection( Mask );
-			GANDER_ASSERT( Index < i.size() || DisableStaticAsserts, "Index is out of bounds when accessing a channel in a masked set." );
-			return m_channels.index( i[ Index ] );
+			GANDER_ASSERT( index < i.size(), "Index is out of bounds when accessing a channel in a masked set." );
+			return m_channels.index( i[ index ] );
+		}
+
+		inline ReferenceType _channel( ChannelContainerType &container, Channel c )
+		{
+			return container[ m_channels.index( c ) ];
+		}
+		
+		inline ReferenceType _channel( ChannelPointerContainerType &container, Channel c )
+		{
+			return *container[ m_channels.index( c ) ];
+		}
+
+		inline ReferenceType _channelAtIndex( ChannelContainerType &container, unsigned int index )
+		{
+			return container[ index ];
+		}
+		
+		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container, unsigned int index )
+		{
+			return *container[ index ];
 		}
 
 		/// The channels that this format represents.

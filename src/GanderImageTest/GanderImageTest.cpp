@@ -52,8 +52,6 @@
 #include "GanderImageTest/BrothersLayoutTest.h"
 #include "GanderImageTest/DynamicLayoutTest.h"
 #include "GanderImageTest/PixelTest.h"
-#include "GanderImageTest/LayoutContainerTest.h"
-#include "GanderImageTest/CompoundLayoutContainerTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -77,8 +75,6 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addCompoundLayoutContainerTest(test);
 		addOpTest(test);
 		addPixelTest(test);
-		addLayoutContainerTest(test);
-		addCompoundLayoutContainerTest(test);
 	}
 	catch (std::exception &ex)
 	{

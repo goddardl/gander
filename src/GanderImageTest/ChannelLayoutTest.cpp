@@ -116,6 +116,35 @@ struct ChannelLayoutTest
 		BOOST_CHECK( int( std::is_same< Layout3::ChannelTraits<Chan_Red>::StorageType, short >::value ) );
 	}
 
+	void testContainerAccess() 
+	{
+		typedef ChannelLayout< float, Chan_Green > Layout;
+		Layout layout;
+		Layout::ChannelContainerType c( layout );
+		Layout::ChannelPointerContainerType cp( layout );
+		
+		BOOST_CHECK_EQUAL( cp.size(), layout.numberOfChannelPointers() );
+		BOOST_CHECK_EQUAL( c.size(), layout.numberOfChannels() );
+		
+		BOOST_CHECK_EQUAL( layout.channels(), ChannelSet( Mask_Green ) );
+		
+		layout.channel< Layout::ChannelContainerType >( c, Chan_Green ) = 2.;
+		
+		BOOST_CHECK_EQUAL( float( layout.channel< Layout::ChannelContainerType >( c, Chan_Green ) ), 2. );
+		BOOST_CHECK_THROW( layout.channel< Layout::ChannelContainerType >( c, Chan_Red ), std::runtime_error );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< Layout::ChannelContainerType >( c, 0 ) ), 2. );
+		BOOST_CHECK_THROW( layout.channelAtIndex< Layout::ChannelContainerType >( c, 1 ), std::runtime_error );
+	
+		float green = 3.;	
+		layout.setChannelPointer< Layout::ChannelPointerContainerType >( cp, Chan_Green, &green );
+		BOOST_CHECK_EQUAL( float( layout.channel< Layout::ChannelPointerContainerType >( cp, Chan_Green ) ), 3. );
+		BOOST_CHECK_THROW( layout.channel< Layout::ChannelPointerContainerType >( cp, Chan_Blue ), std::runtime_error );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 0 ) ), 3. );
+		BOOST_CHECK_THROW( layout.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 1 ), std::runtime_error );
+		layout.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 0 ) = 1.;
+		BOOST_CHECK_EQUAL( green, 1. );
+	}
+
 	void testCommonLayoutAttributes()
 	{
 		typedef ChannelLayout<float, Chan_Alpha> Layout1;
@@ -140,6 +169,7 @@ struct ChannelLayoutTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &ChannelLayoutTest::testChannelTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ChannelLayoutTest::testCommonLayoutAttributes, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ChannelLayoutTest::testCommonLayoutInterface, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &ChannelLayoutTest::testContainerAccess, instance ) );
 	}
 };
 

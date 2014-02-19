@@ -387,6 +387,12 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 			return static_cast<unsigned int>( Derived::NumberOfChannelPointers ) + m_dynamicLayout.numberOfChannelPointers();
 		}
 		//@}
+	
+		/// Adds the channel to the Layout and logs all pertenant information.
+		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			m_dynamicLayout.addChannels( c, b );
+		}
 
 	protected :	
 
@@ -397,12 +403,6 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 				( std::is_same< ReturnType, T0 >::value || DisableStaticAsserts ), THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST
 			);
 			return ( ReturnType & ) m_dynamicLayout;
-		}
-	
-		/// Adds the channel to the Layout and logs all pertenant information.
-		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			m_dynamicLayout.addChannels( c, b );
 		}
 		
 		template< ChannelDefault C = Chan_None >

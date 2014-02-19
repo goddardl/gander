@@ -71,9 +71,56 @@ struct DynamicLayoutBase : public LayoutBase< Derived >
 		{
 			IsDynamic = true,
 		};
+	
+		template< class ContainerType >
+		inline ReferenceType channel( ContainerType &container, Channel channel )
+		{
+			GANDER_ASSERT( static_cast< Derived * >( this )->channels().contains( channel ), "Channel is not represented by this layout." );
+			return static_cast< Derived * >( this )->_channel( container, channel );
+		}
+
+		template< class ContainerType, EnumType Mask = Mask_All >
+		inline ReferenceType channelAtIndex( ContainerType &container, unsigned int index )
+		{
+			GANDER_ASSERT( index < static_cast< Derived * >( this )->channels().size(), "Channel is not represented by this layout." );
+			return static_cast< Derived * >( this )->template _channelAtIndex( container, maskedChannelIndex< Mask >( index ) );
+		}
+		
+		template< Gander::Image::ChannelMask Mask = Mask_All >
+		inline unsigned int maskedChannelIndex( unsigned int index ) const;
 		
 		template< class ContainerType >
 		inline void setChannelPointer( ContainerType &container, Channel channel, PointerType pointer );
+		
+
+		//! @name Dynamic methods.
+		/// All of these methods should be implemented by any derived class.
+		/// These methods provide an interface to the layout that allow the structure of the channels to be modified.
+		//@{
+		/// Inserts a set of channels into the passed container and also adds them to the layout. Whether the channels are brothers can also optionally be defined.
+		template< class ContainerType >
+		void addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			return static_cast< Derived * >( this )->_addChannels( container, c, b );
+		}
+		/// Adds a set of channels to the layout. Whether the channels are brothers can also optionally be defined.
+		void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			return static_cast< Derived * >( this )->_addChannels( c, b );
+		}
+		//@}
+		
+	protected :	
+		
+		/// Returns the index of a channel in the layout when masked.
+		template< Gander::Image::ChannelMask Mask = Mask_All >
+		inline unsigned int _maskedChannelIndex( unsigned int index ) const;
+		
+		template< class ContainerType >
+		void _addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b = Brothers_None );
+		
+		void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None );
+		
 };
 
 }; // namespace Image

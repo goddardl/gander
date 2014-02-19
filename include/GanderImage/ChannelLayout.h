@@ -79,8 +79,8 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		typedef typename BaseType::StorageType StorageType;
 		typedef typename BaseType::PointerType PointerType;
 		typedef typename BaseType::ReferenceType ReferenceType;
-		typedef Gander::template Tuple< StorageType, NumberOfChannels, false > ChannelContainerType;
-		typedef Gander::template Tuple< PointerType, NumberOfChannelPointers, false > ChannelPointerContainerType;
+		typedef Detail::ChannelContainerWrapper< Type, Gander::template Tuple< StorageType, NumberOfChannels, false > > ChannelContainerType;
+		typedef Detail::ChannelPointerContainerWrapper< Type, Gander::template Tuple< PointerType, NumberOfChannelPointers, false > > ChannelPointerContainerType;
 
 		template< ChannelDefault C = Chan_None >
 		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
@@ -136,18 +136,6 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 
 		friend class StaticLayoutBase< ChannelLayout< T, S >, T >;	
 		friend class LayoutBase< ChannelLayout< T, S > >;	
-		
-		template< ChannelDefault C, class ContainerType >
-		inline ReferenceType _channel( ContainerType &container )
-		{
-			return 2.;
-		}
-
-		template< EnumType Index, class ContainerType, EnumType Mask = Mask_All >
-		inline ReferenceType _channel( ContainerType &container )
-		{
-			return 1.;
-		}
 		
 		template< EnumType Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
 		struct MaskedChannelIndex
