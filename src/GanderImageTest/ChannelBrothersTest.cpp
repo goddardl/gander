@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -73,7 +73,7 @@ struct ChannelBrothersTest
 
 	void testBrotherTraitsSpecialization()
 	{
-		/// Check that we can decalare a specialization of the ChannelBrothers class.
+		/// Check that we can declare a specialization of the ChannelBrothers class.
 		/// If there was no specialization, a compilation error would occur.
 	
 		{
