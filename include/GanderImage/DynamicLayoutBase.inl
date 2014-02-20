@@ -75,7 +75,7 @@ inline unsigned int DynamicLayoutBase< Derived, DataType >::maskedChannelIndex( 
 
 template< class Derived, class DataType >
 template< class ContainerType, EnumType Mask >
-inline typename Gander::template TypeTraits< DataType >::ReferenceType DynamicLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container, unsigned int index )
+inline typename DynamicLayoutBase< Derived, DataType >::ReferenceType DynamicLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container, unsigned int index )
 {
 	GANDER_ASSERT(
 			( container.size() == static_cast< Derived * >( this )->channels().size() ),
@@ -88,7 +88,7 @@ inline typename Gander::template TypeTraits< DataType >::ReferenceType DynamicLa
 
 template< class Derived, class DataType >
 template< class ContainerType >
-inline typename Gander::template TypeTraits< DataType >::ReferenceType DynamicLayoutBase< Derived, DataType >::channel( ContainerType &container, Channel channel )
+inline typename DynamicLayoutBase< Derived, DataType >::ReferenceType DynamicLayoutBase< Derived, DataType >::channel( ContainerType &container, Channel channel )
 {
 	GANDER_ASSERT(
 			( container.size() == static_cast< Derived * >( this )->channels().size() ),

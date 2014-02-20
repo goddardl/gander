@@ -47,21 +47,21 @@ inline void StaticLayoutBase< Derived, DataType >::setChannelPointer( ContainerT
 
 template< class Derived, class DataType >
 template< class ContainerType, ChannelDefault C >
-inline typename Gander::template TypeTraits< DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channel( ContainerType &container )
+inline typename StaticLayoutBase< Derived, DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channel( ContainerType &container )
 {
 	return static_cast< Derived * >( this )->template _channel< C >( container );
 }
 		
 template< class Derived, class DataType >
 template< class ContainerType, EnumType Index, EnumType Mask >
-inline typename Gander::template TypeTraits< DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container )
+inline typename StaticLayoutBase< Derived, DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container )
 {
 	return static_cast< Derived * >( this )->template _channelAtIndex< Derived::template MaskedChannelIndex< Index, Mask >::Value >( container );
 }
 
 template< class Derived, class DataType >
 template< class ContainerType >
-inline typename Gander::template TypeTraits< DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channel( ContainerType &container, Channel c )
+inline typename StaticLayoutBase< Derived, DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channel( ContainerType &container, Channel c )
 {
 	GANDER_ASSERT( static_cast< Derived * >( this )->channels().contains( c ), "Channel is not represented by this layout." );
 	switch( c )
@@ -87,7 +87,7 @@ inline typename Gander::template TypeTraits< DataType >::ReferenceType StaticLay
 
 template< class Derived, class DataType >
 template< class ContainerType, EnumType Mask >
-inline typename Gander::template TypeTraits< DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container, unsigned int index )
+inline typename StaticLayoutBase< Derived, DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container, unsigned int index )
 {
 	GANDER_ASSERT( index < static_cast< Derived * >( this )->channels().size(), "Channel is not represented by this layout." );
 	switch( index )
