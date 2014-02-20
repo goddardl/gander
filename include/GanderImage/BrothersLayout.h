@@ -148,7 +148,7 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		template< ChannelDefault C >
 		inline ReferenceType _channel( ChannelContainerType &container )
 		{
-			return container[ BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value ];
+			return container[ BrotherTraits<B>::template BrotherIndexToChannelIndex< BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value >::Value ];
 		}
 		
 		template< EnumType Index >
@@ -160,7 +160,7 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		template< EnumType Index >
 		inline ReferenceType _channelAtIndex( ChannelContainerType &container )
 		{
-			return container[ BrotherTraits<B>::template BrotherIndexToChannelIndex< Index >::Value ];
+			return container[ Index ];
 		}
 		
 		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer )
