@@ -66,6 +66,53 @@ void DynamicLayoutBase< Derived, DataType >::_addChannels( ChannelSet c, Channel
 	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 }
 
+template< class Derived, class DataType >
+template< Gander::Image::ChannelMask Mask >
+inline unsigned int DynamicLayoutBase< Derived, DataType >::maskedChannelIndex( unsigned int index ) const
+{
+	return static_cast< Derived const * >( this )->template _maskedChannelIndex< Mask >( index );
+}
+
+template< class Derived, class DataType >
+template< class ContainerType, EnumType Mask >
+inline typename Gander::template TypeTraits< DataType >::ReferenceType DynamicLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container, unsigned int index )
+{
+	GANDER_ASSERT(
+			( container.size() == static_cast< Derived * >( this )->channels().size() ),
+			"Container has a different number of elements to the Layout's number of channels."
+			);
+
+	GANDER_ASSERT( index < static_cast< Derived * >( this )->channels().size(), "Channel is not represented by this layout." );
+	return static_cast< Derived * >( this )->_channelAtIndex( container, maskedChannelIndex< ChannelMask( Mask ) >( index ) );
+}
+
+template< class Derived, class DataType >
+template< class ContainerType >
+inline typename Gander::template TypeTraits< DataType >::ReferenceType DynamicLayoutBase< Derived, DataType >::channel( ContainerType &container, Channel channel )
+{
+	GANDER_ASSERT(
+			( container.size() == static_cast< Derived * >( this )->channels().size() ),
+			"Container has a different number of elements to the Layout's number of channels."
+			);
+
+	GANDER_ASSERT( static_cast< Derived * >( this )->channels().contains( channel ), "Channel is not represented by this layout." );
+	return static_cast< Derived * >( this )->_channel( container, channel );
+}
+
+
+template< class Derived, class DataType >
+template< class ContainerType >
+void DynamicLayoutBase< Derived, DataType >::addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b )
+{
+	return static_cast< Derived * >( this )->_addChannels( container, c, b );
+}
+
+template< class Derived, class DataType >
+void DynamicLayoutBase< Derived, DataType >::addChannels( ChannelSet c, ChannelBrothers b )
+{
+	return static_cast< Derived * >( this )->_addChannels( c, b );
+}
+
 }; // namespace Image
 
 }; // namespace Gander

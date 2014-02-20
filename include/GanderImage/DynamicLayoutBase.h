@@ -73,54 +73,26 @@ struct DynamicLayoutBase : public LayoutBase< Derived >
 		};
 	
 		template< class ContainerType >
-		inline ReferenceType channel( ContainerType &container, Channel channel )
-		{
-			GANDER_ASSERT(
-				( container.size() == static_cast< Derived * >( this )->channels().size() ),
-				"Container has a different number of elements to the Layout's number of channels."
-			);
-			
-			GANDER_ASSERT( static_cast< Derived * >( this )->channels().contains( channel ), "Channel is not represented by this layout." );
-			return static_cast< Derived * >( this )->_channel( container, channel );
-		}
+		inline ReferenceType channel( ContainerType &container, Channel channel );
 		
 		template< Gander::Image::ChannelMask Mask = Mask_All >
-		inline unsigned int maskedChannelIndex( unsigned int index ) const
-		{
-			return static_cast< Derived const * >( this )->template _maskedChannelIndex< Mask >( index );
-		}
-
+		inline unsigned int maskedChannelIndex( unsigned int index ) const;
+		
 		template< class ContainerType, EnumType Mask = Mask_All >
-		inline ReferenceType channelAtIndex( ContainerType &container, unsigned int index )
-		{
-			GANDER_ASSERT(
-				( container.size() == static_cast< Derived * >( this )->channels().size() ),
-				"Container has a different number of elements to the Layout's number of channels."
-			);
-			
-			GANDER_ASSERT( index < static_cast< Derived * >( this )->channels().size(), "Channel is not represented by this layout." );
-			return static_cast< Derived * >( this )->_channelAtIndex( container, maskedChannelIndex< ChannelMask( Mask ) >( index ) );
-		}
+		inline ReferenceType channelAtIndex( ContainerType &container, unsigned int index );
 		
 		template< class ContainerType >
 		inline void setChannelPointer( ContainerType &container, Channel channel, PointerType pointer );
 		
-
 		//! @name Dynamic methods.
 		/// All of these methods should be implemented by any derived class.
 		/// These methods provide an interface to the layout that allow the structure of the channels to be modified.
 		//@{
 		/// Inserts a set of channels into the passed container and also adds them to the layout. Whether the channels are brothers can also optionally be defined.
 		template< class ContainerType >
-		void addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			return static_cast< Derived * >( this )->_addChannels( container, c, b );
-		}
+		void addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b = Brothers_None );
 		/// Adds a set of channels to the layout. Whether the channels are brothers can also optionally be defined.
-		void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			return static_cast< Derived * >( this )->_addChannels( c, b );
-		}
+		void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None );
 		//@}
 		
 	protected :	
