@@ -154,7 +154,7 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 			);
 
 			// Get a set of the current channels and the unique new ones.
-			ChannelSet currentChannels( BaseType::layout().channels() );
+			ChannelSet currentChannels( channels() );
 			ChannelSet newChannels( c - currentChannels );
 			
 			_addChannels( c, b );
@@ -242,13 +242,6 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 			GANDER_ASSERT( 0, "No valid channel specified." )
 		}
 
-		/// Returns the index of the given channel.	
-		template< EnumType C, EnumType Mask = Mask_All, bool >
-		inline unsigned int _indexOfChannel() const
-		{
-			return m_channels.index( Channel( C ) );
-		}
-		
 		/// Returns the index of a channel in the layout when masked.
 		template< Gander::Image::ChannelMask Mask = Mask_All >
 		inline unsigned int _maskedChannelIndex( unsigned int index ) const

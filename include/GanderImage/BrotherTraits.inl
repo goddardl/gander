@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,6 +58,22 @@ struct IndexOfChannelInBrothers \
 	enum\
 	{\
 		Value = ( C == FirstBrotherInBrothers ) ? 0 : ( C == SecondBrotherInBrothers ) ? 1 : ( C == ThirdBrotherInBrothers ) ? 2 : ( C == FourthBrotherInBrothers ) ? 3 : 0,\
+	};\
+};\
+template< EnumType Index >\
+struct BrotherIndexToChannelIndex \
+{\
+	enum\
+	{\
+		Value = ( Index == 0 ) ? BrotherOrder1 : ( Index == 1 ) ? BrotherOrder2 : ( Index == 2 ) ? BrotherOrder3 : ( Index == 3 ) ? BrotherOrder4 : 0,\
+	};\
+};\
+template< EnumType Index >\
+struct ChannelIndexToBrotherIndex \
+{\
+	enum\
+	{\
+		Value = ( Index == BrotherOrder1 ) ? 0 : ( Index == BrotherOrder2 ) ? 1 : ( Index == BrotherOrder3 ) ? 2 : ( Index == BrotherOrder4 ) ? 3 : 0,\
 	};\
 };\
 static BrotherTraitsRegistry::BrotherTraitsRegistration< BROTHERS_ENUM > g_brothersRegistration;\

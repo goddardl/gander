@@ -126,13 +126,6 @@ inline int8u LayoutBase< Derived >::step( Channel channel ) const
 }
 
 template< class Derived >
-template< EnumType Channel, EnumType Mask, bool DisableStaticAsserts >
-inline unsigned int LayoutBase< Derived >::indexOfChannel() const
-{
-	return static_cast< Derived const * >( this )->template _indexOfChannel< Channel, Mask, DisableStaticAsserts >();
-}
-
-template< class Derived >
 template< unsigned Index, bool DisableStaticAsserts, class ReturnType >
 inline ReturnType &LayoutBase< Derived >::child()
 {
@@ -165,46 +158,6 @@ inline bool LayoutBase< Derived >::equalTo( const L &rhs ) const
    );
 }
 		
-template< class Derived >
-template< EnumType Channel, EnumType Mask, bool >
-inline unsigned int LayoutBase< Derived >::_indexOfChannel() const
-{
-	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-	return 0;
-}
-		
-template< class Derived >
-template< EnumType Index >
-inline int LayoutBase< Derived >::_pointerIndex() const
-{
-	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-	return 0;
-}
-
-template< class Derived >
-template< EnumType Index >
-inline int LayoutBase< Derived >::_pointerOffset() const
-{
-	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-	return 0;
-}
-		
-template< class Derived >
-template< EnumType Index >
-inline int LayoutBase< Derived >::pointerIndex() const
-{
-	GANDER_ASSERT( ( Index < channels().size() ), "Index is out of bounds." )
-	return static_cast< Derived const * >( this )->template _pointerIndex< Index >();
-}
-
-template< class Derived >
-template< EnumType Index >
-inline int LayoutBase< Derived >::pointerOffset() const
-{
-	GANDER_ASSERT( ( Index < channels().size() ), "Index is out of bounds." )
-	return static_cast< Derived const * >( this )->template _pointerOffset< Index >();
-}
-
 }; // namespace Image
 
 }; // namespace Gander

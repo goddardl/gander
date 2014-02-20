@@ -75,19 +75,32 @@ struct DynamicLayoutBase : public LayoutBase< Derived >
 		template< class ContainerType >
 		inline ReferenceType channel( ContainerType &container, Channel channel )
 		{
+			GANDER_ASSERT(
+				( container.size() == static_cast< Derived * >( this )->channels().size() ),
+				"Container has a different number of elements to the Layout's number of channels."
+			);
+			
 			GANDER_ASSERT( static_cast< Derived * >( this )->channels().contains( channel ), "Channel is not represented by this layout." );
 			return static_cast< Derived * >( this )->_channel( container, channel );
+		}
+		
+		template< Gander::Image::ChannelMask Mask = Mask_All >
+		inline unsigned int maskedChannelIndex( unsigned int index ) const
+		{
+			return static_cast< Derived const * >( this )->template _maskedChannelIndex< Mask >( index );
 		}
 
 		template< class ContainerType, EnumType Mask = Mask_All >
 		inline ReferenceType channelAtIndex( ContainerType &container, unsigned int index )
 		{
+			GANDER_ASSERT(
+				( container.size() == static_cast< Derived * >( this )->channels().size() ),
+				"Container has a different number of elements to the Layout's number of channels."
+			);
+			
 			GANDER_ASSERT( index < static_cast< Derived * >( this )->channels().size(), "Channel is not represented by this layout." );
-			return static_cast< Derived * >( this )->template _channelAtIndex( container, maskedChannelIndex< Mask >( index ) );
+			return static_cast< Derived * >( this )->_channelAtIndex( container, maskedChannelIndex< ChannelMask( Mask ) >( index ) );
 		}
-		
-		template< Gander::Image::ChannelMask Mask = Mask_All >
-		inline unsigned int maskedChannelIndex( unsigned int index ) const;
 		
 		template< class ContainerType >
 		inline void setChannelPointer( ContainerType &container, Channel channel, PointerType pointer );

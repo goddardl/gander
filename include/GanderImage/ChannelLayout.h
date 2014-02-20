@@ -116,36 +116,12 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 			};
 		};
 		
-		/// Returns the index to the base pointer for the given channel.
-		template< ChannelDefault C >
-		inline int _pointerIndex() const
-		{
-			return 0;
-		}
-
-		/// Returns the offset to be applied to the base pointer in order to access the given channel.
-		template< ChannelDefault C >
-		inline int _pointerOffset() const
-		{
-			return 0;
-		}
-
 		using BaseType::contains;
 
 	private :
 
 		friend class StaticLayoutBase< ChannelLayout< T, S >, T >;	
 		friend class LayoutBase< ChannelLayout< T, S > >;	
-		
-		template< EnumType Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
-		struct MaskedChannelIndex
-		{
-			GANDER_IMAGE_STATIC_ASSERT( ( ( Mask != Mask_None ) || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-			enum
-			{
-				Value = 0,
-			};
-		};
 		
 		template< ChannelDefault C >
 		inline ReferenceType _channel( ChannelContainerType &container )

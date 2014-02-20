@@ -1,6 +1,8 @@
 Todo:
 1) 
-Add tests for the channel() and channelAtIndex() methods for the CompoundChannelLayout, ChannelLayout and DynamicLayout.
+Get the BrothersLayout to store or at least look like it stores it's channels in the channel order.
+
+Add tests for the channel() and channelAtIndex() methods for the CompoundChannelLayout.
 
 Implement in the DynamicLayoutBase :
 Template< class ContainerType >

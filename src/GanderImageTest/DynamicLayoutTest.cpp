@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -119,7 +119,7 @@ struct DynamicLayoutTest
 	{
 		typedef DynamicLayout< float > Layout;
 		Layout layout;
-		layout.addChannels( Mask_Blue | Mask_Red, Brothers_BGR );
+		layout.addChannels( Mask_Blue | Mask_Red );
 
 		Layout::ChannelContainerType c( layout );
 		Layout::ChannelPointerContainerType cp( layout );
@@ -128,9 +128,70 @@ struct DynamicLayoutTest
 		BOOST_CHECK_EQUAL( c.size(), layout.numberOfChannels() );
 		BOOST_CHECK_EQUAL( layout.channels(), ChannelSet( Mask_Blue | Mask_Red ) );
 
-		todo:
-		Write the tests for the channel() and channelIndex() methods here. It should be really thorough
-		and test the indexing of masked channels and the insertion of more channels. 
+		float br[2] = { 3., 2. };	
+		layout.setChannelPointer< Layout::ChannelPointerContainerType >( cp, Chan_Blue, &br[0] );
+		layout.setChannelPointer< Layout::ChannelPointerContainerType >( cp, Chan_Red, &br[1] );
+		layout.channel< Layout::ChannelContainerType >( c, Chan_Blue ) = 3.;
+		layout.channel< Layout::ChannelContainerType >( c, Chan_Red ) = 2.;
+		
+		BOOST_CHECK_EQUAL( ( layout.channel< Layout::ChannelContainerType >( c, Chan_Blue ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Layout::ChannelContainerType >( c, Chan_Red ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Layout::ChannelPointerContainerType >( cp, Chan_Blue ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Layout::ChannelPointerContainerType >( cp, Chan_Red ) ), 2. );
+		
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType >( c, 0 ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType >( c, 1 ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 0 ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 1 ) ), 3. );
+		
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType, Mask_Blue >( c, 0 ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType, Mask_Red >( c, 0 ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelPointerContainerType, Mask_Blue >( cp, 0 ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelPointerContainerType, Mask_Red >( cp, 0 ) ), 2. );
+		
+		BOOST_CHECK_THROW( ( layout.channelAtIndex< Layout::ChannelPointerContainerType, Mask_Red >( cp, 1 ) ), std::runtime_error );
+		BOOST_CHECK_THROW( ( layout.channelAtIndex< Layout::ChannelContainerType, Mask_Red >( c, 1 ) ), std::runtime_error );
+
+		Layout layout2( layout );
+		layout.addChannels< Layout::ChannelContainerType >( c, Chan_U );
+		layout.addChannels< Layout::ChannelContainerType >( c, Chan_Green );
+		layout.channel< Layout::ChannelContainerType >( c, Chan_Green ) = 1.;
+		layout.channel< Layout::ChannelContainerType >( c, Chan_U ) = 7.;
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType >( c, 0 ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType >( c, 1 ) ), 1. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType >( c, 2 ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType >( c, 3 ) ), 7. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType, ChannelMask( CombineMasks< Mask_U, Mask_Blue, Mask_Red >::Value ) >( c, 0 ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType, ChannelMask( CombineMasks< Mask_U, Mask_Blue, Mask_Red >::Value ) >( c, 1 ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< Layout::ChannelContainerType, ChannelMask( CombineMasks< Mask_U, Mask_Blue, Mask_Red >::Value ) >( c, 2 ) ), 7. );
+		BOOST_CHECK_THROW( ( layout.channelAtIndex< Layout::ChannelContainerType, Mask_Red >( c, 3 ) ), std::runtime_error );
+		BOOST_CHECK_EQUAL( ( layout.channel< Layout::ChannelContainerType >( c, Chan_Red ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Layout::ChannelContainerType >( c, Chan_Green ) ), 1. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Layout::ChannelContainerType >( c, Chan_Blue ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Layout::ChannelContainerType >( c, Chan_U ) ), 7. );
+		
+		// Test that an exception is thrown if the container has a different number of elements than the layout's number of channels.
+		layout.addChannels( Chan_V );
+		BOOST_CHECK( c.size() != layout.numberOfChannels() );
+		BOOST_CHECK_THROW( ( layout.channel< Layout::ChannelContainerType >( c, Chan_V ) ), std::runtime_error );
+
+		layout2.addChannels< Layout::ChannelPointerContainerType >( cp, Chan_Alpha );
+		layout2.addChannels< Layout::ChannelPointerContainerType >( cp, Chan_V );
+		float av[2] = { 6., 5. };	
+		
+		BOOST_CHECK_EQUAL( cp.size(), layout2.numberOfChannelPointers() );
+		layout2.setChannelPointer< Layout::ChannelPointerContainerType >( cp, Chan_Alpha, &av[0] );
+		layout2.setChannelPointer< Layout::ChannelPointerContainerType >( cp, Chan_V, &av[1] );
+		BOOST_CHECK_EQUAL( ( layout2.channel< Layout::ChannelPointerContainerType >( cp, Chan_Red ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout2.channel< Layout::ChannelPointerContainerType >( cp, Chan_Blue ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout2.channel< Layout::ChannelPointerContainerType >( cp, Chan_Alpha ) ), 6. );
+		BOOST_CHECK_EQUAL( ( layout2.channel< Layout::ChannelPointerContainerType >( cp, Chan_V ) ), 5. );
+		BOOST_CHECK_EQUAL( ( layout2.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 0 ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout2.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 1 ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout2.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 2 ) ), 6. );
+		BOOST_CHECK_EQUAL( ( layout2.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 3 ) ), 5. );
+		layout2.channel< Layout::ChannelPointerContainerType >( cp, Chan_V ) = 1.;
+		BOOST_CHECK_EQUAL( av[1], 1. );
 	}
 
 	void testMaskedChannelIndex()

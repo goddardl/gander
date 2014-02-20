@@ -138,20 +138,40 @@ struct StaticLayoutBase : public LayoutBase< Derived >
 		template< class ContainerType >
 		inline void setChannelPointer( ContainerType &container, Channel channel, PointerType pointer );
 
-		template< EnumType Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
+		template< EnumType MaskedIndex, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
 		struct MaskedChannelIndex
 		{
-			GANDER_IMAGE_STATIC_ASSERT( ( Index != -1 ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_TRAITS_STRUCTS_REQUIRED_BY_THE_BASE_CLASS );
-			
-			// Derived classes of StaticLayoutBase need to implement this struct and provide the following:
-			//
-			// - An enum that maps the index ( the 'Index' template argument ) of a channel in set of channels
-			// ( defined by the 'Mask' template argument ) into the index of the same channel in the layout. 
-			// enum
-			// {
-			//		Value = Index,
-			// };
+			private :
+
+				enum
+				{
+					/// Although this looks like voodoo, the idea is quite simple. What we want to do is find out what channel lies at an index (MaskedIndex) into a set of channels,
+					/// represented by the intersection of "Mask" and "BaseType::ChannelMask".
+					/// To do that, we first create an array of 4 4-bit numbers and flatten them into an EnumArray.
+					/// This results in the enum 0x3210 which can be thought of as an array of 4 4-bit values, shifted into an enum. This would look like:
+					/// Index:     4     3     2     1     0
+					/// Value:{ 1111, 0011, 0010, 0001, 0000 } = 0xF3210
+					/// We then use the mask to remove all elements from this array that aren't masked. This gives us a mapping of the remaining masked channel indices to the
+					/// actual index of the channel within this layout's set of (up to) 4 channels.
+					/// Finally, we use this lookup to select the element that is at "MaskedIndex".
+					/// As an additional note, we fill the remaining bits of the enum with the value "15" so that we can test at compile time whether a bad index has been given.
+					RemainingIndices = 
+						Gander::template EnumArrayHelper< 0xFFFFFFFFFFFF3210, 4 >:: // The enum array.
+						template RemoveElements< ( ( ( Mask >> ( Gander::template EnumHelper< Derived::ChannelMask >::FirstSetBit ) ) & 0xF ) | 0xFFFFFFF0 ) >::Value,
+					Index = Gander::template EnumArrayHelper< RemainingIndices, 4 >::template Element< MaskedIndex >::Value
+				};
+
+				GANDER_IMAGE_STATIC_ASSERT( Index != 0xF || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+				GANDER_IMAGE_STATIC_ASSERT( Derived::NumberOfChannels <= 4, THIS_FUNCTION_DOES_NOT_SUPPORT_MORE_THAN_FOUR_CHANNELS__PLEASE_EXTEND_IT_OR_OVERLOAD_IT_TO_ADD_SUPPORT_FOR_MORE )
+
+			public :
+
+				enum
+				{
+					Value = Index
+				};
 		};
+
 
 };
 

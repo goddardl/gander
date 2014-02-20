@@ -141,6 +141,7 @@ struct LayoutBase
 		inline unsigned int numberOfChannels() const;
 		inline unsigned int numberOfChannelPointers() const;
 		inline ChannelSet channels() const;
+		inline ChannelSet requiredChannels() const;
 		//@}
 		
 		//! @name Compound methods.
@@ -164,12 +165,6 @@ struct LayoutBase
 		/// is to provide this information for a given channel index.
 		//@{
 		/// Returns the index to the base pointer for the given channel.
-		template< EnumType Index >
-		inline int pointerIndex() const;
-		/// Returns the offset to be applied to the base pointer in order to access the given channel.
-		template< EnumType Index >
-		inline int pointerOffset() const;
-		/// Returns the value to be added to a pointer to a channel in order to increment it to the next pixel location.
 		template< ChannelDefault C = Chan_None >
 		inline int8u step( Channel channel = Chan_None ) const;
 		//@}
@@ -188,11 +183,6 @@ struct LayoutBase
 
 		/// Returns true if the Layout supports the Dynamic methods that allow the number of channels and their structure to be manipulated.
 		inline bool isDynamic() const;
-
-		template< EnumType Channel, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline unsigned int indexOfChannel() const;
-		
-		inline ChannelSet requiredChannels() const;
 
 		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
 		template< class L > inline bool operator != ( L const &rhs ) const { return !static_cast< Derived const * >( this )->equalTo( rhs ); }
@@ -268,19 +258,6 @@ struct LayoutBase
 		/// Returns the index of a channel in the layout when masked.
 		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline int _maskedChannelIndex() const;
-	
-		/// Returns the index of a channel within the layout.	
-		template< EnumType Channel, EnumType Mask = Mask_All, bool >
-		inline unsigned int _indexOfChannel() const;
-		
-		/// Returns the index to the base pointer for the given channel.
-		template< EnumType Index >
-		inline int _pointerIndex() const;
-		
-		/// Returns the offset to be applied to the base pointer in order to access the given channel.
-		template< EnumType Index >
-		inline int _pointerOffset() const;
-
 };
 
 }; // namespace Image

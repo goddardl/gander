@@ -117,19 +117,6 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		friend class StaticLayoutBase< BrothersLayout< T, B >, T >;	
 		friend class LayoutBase< BrothersLayout< T, B > >;	
 		
-		template< ChannelDefault C, class ContainerType >
-		inline ReferenceType _channel( ContainerType &container )
-		{
-			return 2.;
-		}
-
-		template< EnumType Index, class ContainerType, EnumType Mask = Mask_All >
-		inline ReferenceType _channel( ContainerType &container )
-		{
-			return 1.;
-		}
-
-
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
 		inline ChannelSet _requiredChannels() const
@@ -152,81 +139,6 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 			return BrotherTraits<B>::NumberOfBrothers;
 		}
 		
-		/// Returns the index of a channel within the layout.	
-		template< EnumType Channel, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline unsigned int _indexOfChannel() const
-		{
-			enum
-			{
-				BadIndex = 5,
-				
-				Mask1 = ChannelToMask< BrotherTraits<B>::FirstBrotherInBrothers >::Value,
-				Mask2 = ChannelToMask< BrotherTraits<B>::SecondBrotherInBrothers >::Value,
-				Mask3 = ChannelToMask< BrotherTraits<B>::ThirdBrotherInBrothers >::Value,
-				Mask4 = ChannelToMask< BrotherTraits<B>::FourthBrotherInBrothers >::Value,
-
-				Contains1 = ( Mask1 & Mask ) != 0,
-				Contains2 = ( Mask2 & Mask ) != 0,
-				Contains3 = ( Mask3 & Mask ) != 0,
-				Contains4 = ( Mask4 & Mask ) != 0,
-
-				Value = Channel == BrotherTraits<B>::FirstBrotherInBrothers && Contains1 ? 0 :
-						Channel == BrotherTraits<B>::SecondBrotherInBrothers && Contains2 ? 1 :
-						Channel == BrotherTraits<B>::ThirdBrotherInBrothers && Contains3 ? 2 :
-						Channel == BrotherTraits<B>::FourthBrotherInBrothers && Contains4 ? 3 : BadIndex,
-			};
-			
-			GANDER_IMAGE_STATIC_ASSERT( Value != BadIndex || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-						
-			return Value;
-		}
-		
-		template< EnumType MaskedIndex, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
-		struct MaskedChannelIndex
-		{
-			private :
-
-				enum
-				{
-					Mask1 = ChannelToMask< BrotherTraits<B>::FirstBrotherInBrothers >::Value,
-					Mask2 = ChannelToMask< BrotherTraits<B>::SecondBrotherInBrothers >::Value,
-					Mask3 = ChannelToMask< BrotherTraits<B>::ThirdBrotherInBrothers >::Value,
-					Mask4 = ChannelToMask< BrotherTraits<B>::FourthBrotherInBrothers >::Value,
-
-					Contains1 = ( Mask1 & Mask ) != 0,
-					Contains2 = ( Mask2 & Mask ) != 0,
-					Contains3 = ( Mask3 & Mask ) != 0,
-					Contains4 = ( Mask4 & Mask ) != 0,
-
-					BadIndex = 5,
-
-					Index =
-						MaskedIndex == 0 ?
-						Contains1 == true ? 0 :
-						Contains2 == true ? 1 :
-						Contains3 == true ? 2 :
-						Contains4 == true ? 3 : BadIndex :
-						MaskedIndex == 1 ?
-						Contains2 == true && Contains1 == true ? 1 :
-						Contains3 == true && ( Contains1 + Contains2 == 1 ) ? 2 :
-						Contains4 == true && ( Contains1 + Contains2 + Contains3 == 1 ) ? 3 : BadIndex :
-						MaskedIndex == 2 ?
-						Contains3 == true && ( Contains1 + Contains2 == 2 ) ? 2 :
-						Contains4 == true && ( Contains1 + Contains2 + Contains3 == 2 ) ? 3 : BadIndex :
-						MaskedIndex == 3 ?
-						Contains4 == true && ( Contains1 + Contains2 + Contains3 == 3 ) ? 3 : BadIndex : BadIndex
-				};
-
-				GANDER_IMAGE_STATIC_ASSERT( Index != BadIndex || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-
-			public :
-
-				enum
-				{
-					Value = Index,
-				};
-		};
-
 		template< ChannelDefault C >
 		inline ReferenceType _channel( ChannelPointerContainerType &container )
 		{
@@ -242,13 +154,13 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		template< EnumType Index >
 		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container )
 		{
-			return *( container[0] + Index );
+			return *( container[0] + BrotherTraits<B>::template ChannelIndexToBrotherIndex< Index >::Value );
 		}
 		
 		template< EnumType Index >
 		inline ReferenceType _channelAtIndex( ChannelContainerType &container )
 		{
-			return container[ Index ];
+			return container[ BrotherTraits<B>::template BrotherIndexToChannelIndex< Index >::Value ];
 		}
 		
 		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer )
@@ -256,25 +168,11 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 			container[0] = pointer;
 		}
 
-		/// Returns the index to the base pointer for the given channel.
-		template< EnumType Index >
-		inline int _pointerIndex() const
-		{
-			return 0;
-		}
-
-		/// Returns the offset to be applied to the base pointer in order to access the given channel.
-		template< EnumType Index >
-		inline int _pointerOffset() const
-		{
-			return 0;
-		}
-		
 		/// Returns the index of a channel in the layout when masked.
 		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline int _maskedChannelIndex() const
 		{
-			return MaskedChannelIndex< Index, Mask, DisableStaticAsserts >::Value;
+			return BaseType::template MaskedChannelIndex< Index, Mask, DisableStaticAsserts >::Value;
 		}
 };
 

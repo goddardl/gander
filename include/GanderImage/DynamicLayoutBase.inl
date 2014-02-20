@@ -40,13 +40,6 @@ namespace Image
 
 template< class Derived, class DataType >
 template< Gander::Image::ChannelMask Mask >
-inline unsigned int DynamicLayoutBase< Derived, DataType >::maskedChannelIndex( unsigned int index ) const
-{
-	return static_cast< Derived const * >( this )->template _maskedChannelIndex< Mask >( index );
-}
-
-template< class Derived, class DataType >
-template< Gander::Image::ChannelMask Mask >
 inline unsigned int DynamicLayoutBase< Derived, DataType >::_maskedChannelIndex( unsigned int index ) const
 {
 	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
