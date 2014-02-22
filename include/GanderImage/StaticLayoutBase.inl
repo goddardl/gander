@@ -76,11 +76,6 @@ inline typename StaticLayoutBase< Derived, DataType >::ReferenceType StaticLayou
 		case( 8 ) : return static_cast< Derived * >( this )->template _channel< ChannelDefault( 8 ) >( container );
 		case( 9 ) : return static_cast< Derived * >( this )->template _channel< ChannelDefault( 9 ) >( container );
 		case( 10 ) : return static_cast< Derived * >( this )->template _channel< ChannelDefault( 10 ) >( container );
-		case( 11 ) : return static_cast< Derived * >( this )->template _channel< ChannelDefault( 11 ) >( container );
-		case( 12 ) : return static_cast< Derived * >( this )->template _channel< ChannelDefault( 12 ) >( container );
-		case( 13 ) : return static_cast< Derived * >( this )->template _channel< ChannelDefault( 13 ) >( container );
-		case( 14 ) : return static_cast< Derived * >( this )->template _channel< ChannelDefault( 14 ) >( container );
-		case( 15 ) : return static_cast< Derived * >( this )->template _channel< ChannelDefault( 15 ) >( container );
 		default : GANDER_ASSERT( 0, "Channel does not exist in the LayoutContainer." ); break;
 	}
 }
