@@ -72,14 +72,20 @@ struct DynamicLayoutBase : public LayoutBase< Derived >
 			IsDynamic = true,
 		};
 	
+		template< class ContainerType, ChannelDefault C >
+		inline ReferenceType channel( ContainerType &container );
+		
 		template< class ContainerType >
 		inline ReferenceType channel( ContainerType &container, Channel channel );
 		
-		template< Gander::Image::ChannelMask Mask = Mask_All >
-		inline unsigned int maskedChannelIndex( unsigned int index ) const;
+		template< class ContainerType, EnumType Index, EnumType Mask = Mask_All >
+		inline ReferenceType channelAtIndex( ContainerType &container );
 		
 		template< class ContainerType, EnumType Mask = Mask_All >
 		inline ReferenceType channelAtIndex( ContainerType &container, unsigned int index );
+		
+		template< Gander::Image::ChannelMask Mask = Mask_All >
+		inline unsigned int maskedChannelIndex( unsigned int index ) const;
 		
 		template< class ContainerType >
 		inline void setChannelPointer( ContainerType &container, Channel channel, PointerType pointer );

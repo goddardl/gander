@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,6 +48,7 @@
 #include "GanderImageTest/OpTest.h"
 #include "GanderImageTest/ChannelPtrContainerTest.h"
 #include "GanderImageTest/CompoundLayoutTest.h"
+#include "GanderImageTest/CompoundLayoutContainerTest.h"
 #include "GanderImageTest/ChannelLayoutTest.h"
 #include "GanderImageTest/BrothersLayoutTest.h"
 #include "GanderImageTest/DynamicLayoutTest.h"

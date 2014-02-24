@@ -83,6 +83,8 @@ struct ChannelTraitsInterface
 template< class Layout, class Container >
 struct ChannelPointerContainerWrapper : public Container
 {
+	typedef Layout LayoutType;
+
 	ChannelPointerContainerWrapper( const Layout &layout ) :
 		Container( layout.numberOfChannelPointers() )
 	{
@@ -94,6 +96,8 @@ struct ChannelPointerContainerWrapper : public Container
 template< class Layout, class Container >
 struct ChannelContainerWrapper : public Container
 {
+	typedef Layout LayoutType;
+	
 	ChannelContainerWrapper( const Layout &layout ) :
 		Container( layout.numberOfChannels() )
 	{

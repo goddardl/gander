@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,8 +49,6 @@
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
-#include "GanderImage/LayoutContainerBase.h"
-
 namespace Gander
 {
 
@@ -60,28 +58,30 @@ namespace Image
 namespace Detail
 {
 
-template< class CompoundLayout, EnumType N >
+typedef enum
+{
+	ChannelContainer,
+	ChannelPointerContainer,
+} ContainerName;
+
+template< class CompoundLayout, EnumType N, ContainerName Container >
 struct CompoundLayoutContainerRecurse;
 
-template< class CompoundLayout >
+template< class CompoundLayout, ContainerName Container >
 struct CompoundLayoutContainer;
 
-template< class CompoundLayout >
-struct CompoundLayoutContainerRecurse< CompoundLayout, 0 > : public LayoutContainerBaseInterface< CompoundLayoutContainer< CompoundLayout >, CompoundLayout >
+template< class CompoundLayout, ContainerName Container >
+struct CompoundLayoutContainerRecurse< CompoundLayout, 0, Container >
 {
-	private :
-
-		typedef LayoutContainerBaseInterface< CompoundLayoutContainer< CompoundLayout >, CompoundLayout > BaseType;
-	
 	protected :
 
-		inline CompoundLayoutContainerRecurse( CompoundLayout &layout ) :
-			BaseType( layout )
+		inline CompoundLayoutContainerRecurse( CompoundLayout &layout )
 		{
 		}
 		
-		inline CompoundLayoutContainerRecurse()
+		inline unsigned int size() const
 		{
+			return 0;
 		}
 		
 		template< class ReturnType, EnumType Index >
@@ -100,19 +100,24 @@ struct CompoundLayoutContainerRecurse< CompoundLayout, 0 > : public LayoutContai
 		}
 };
 
-template< class CompoundLayout, EnumType N >
-struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< CompoundLayout, N - 1 >
+template< class CompoundLayout, EnumType N, ContainerName Container >
+struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< CompoundLayout, N - 1, Container >
 {
-	private :
-
-		typedef CompoundLayoutContainerRecurse< CompoundLayout, N - 1  > BaseType;
-
 	public :
 
 		enum { LayoutIndex = CompoundLayout::NumberOfLayouts - N };
-		typedef LayoutContainer< typename CompoundLayout::template LayoutTraits< LayoutIndex >::LayoutType > ContainerType;
-		typedef typename ContainerType::LayoutType LayoutType;
+		
+		typedef CompoundLayoutContainerRecurse< CompoundLayout, N, Container > Type;
+		typedef CompoundLayoutContainerRecurse< CompoundLayout, N - 1, Container > BaseType;
+		typedef typename CompoundLayout::template LayoutTraits< LayoutIndex >::LayoutType LayoutType;	
+		typedef typename LayoutType::StorageType ChannelType;
 		typedef typename LayoutType::StorageType StorageType;
+		typedef typename LayoutType::PointerType PointerType;
+		typedef typename LayoutType::ReferenceType ReferenceType;
+	
+		typedef typename LayoutType::ChannelContainerType ChannelContainerType;
+		typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
+		typedef typename std::conditional< Container == ChannelContainer, ChannelContainerType, ChannelPointerContainerType >::type ContainerType;
 
 	protected :
 	
@@ -122,11 +127,12 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 		{
 		}
 		
-		inline CompoundLayoutContainerRecurse()
+		inline unsigned int size() const
 		{
+			return m_container.size() + BaseType::size();
 		}
-		
-		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+
+		inline void _addChannels( CompoundLayout &layout, ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
 			if( !LayoutType::IsDynamic )
 			{
@@ -134,7 +140,7 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 			}
 			else
 			{
-				m_container.addChannels( c, b );
+				layout.template child< LayoutIndex, true, LayoutType >().template addChannels< ContainerType >( m_container, c, b );
 			}
 		}
 		
@@ -155,39 +161,44 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 
 		ContainerType m_container;
 		
-		template< class, class > friend class LayoutContainerBaseInterface;	
 };
 
-template< class CompoundLayout >
-class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutContainerRecurse< CompoundLayout, CompoundLayout::NumberOfLayouts >
+template< class CompoundLayout, ContainerName Container >
+class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutContainerRecurse< CompoundLayout, CompoundLayout::NumberOfLayouts, Container >
 {
 	private :
 
-		typedef typename Gander::Image::Detail::CompoundLayoutContainerRecurse< CompoundLayout, CompoundLayout::NumberOfLayouts > BaseType;
+		typedef typename Gander::Image::Detail::CompoundLayoutContainerRecurse< CompoundLayout, CompoundLayout::NumberOfLayouts, Container > BaseType;
 
 	public :
-	
-		using BaseType::channel;
-		using BaseType::channelAtIndex;
-		using BaseType::addChannels;
 	
 		inline CompoundLayoutContainer( CompoundLayout &layout ) :
 			BaseType( layout )
 		{
 		}
 		
-		inline CompoundLayoutContainer()
-		{
-		}
-		
 		template< EnumType Index >
-		inline LayoutContainer< typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType > &child()
+		inline typename std::conditional< Container == ChannelContainer, 
+			typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelContainerType,
+			typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelPointerContainerType
+		>::type &child()
 		{
-			return BaseType::template child< LayoutContainer< typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType >, Index >();
+			typedef typename std::conditional<
+				Container == ChannelContainer, 
+				typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelContainerType,
+				typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelPointerContainerType
+			>::type ReturnType;
+
+			return BaseType::template child< ReturnType, Index >();
 		};
 
+		inline unsigned int size() const
+		{
+			return BaseType::size();
+		}
+
 		template< EnumType Index, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false, class ChannelType = typename CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::StorageType >
-		inline ChannelType &channelAtIndex()
+		inline ChannelType &channelAtIndex( CompoundLayout &layout )
 		{
 			enum
 			{
@@ -203,29 +214,35 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 			return ( ChannelType & ) child< ChildIndex >().template channelAtIndex< ChannelIndexInLayout, Mask, DisableStaticAsserts >();
 		}
 		
-		template< ChannelDefault C, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false, class ChannelType = typename CompoundLayout::template ChannelTraits< C, true >::StorageType >
-		inline ChannelType &channel()
+		template<
+			ChannelDefault C,
+			bool DisableStaticAsserts = false,
+			class ReferenceType = typename CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::ReferenceType
+		>
+		inline ReferenceType channel( typename CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutType &layout )
 		{
+			typedef typename CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutType LayoutType;	
+			
 			enum
 			{
 				ChildIndex = CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutIndex,
 			};
 			
-			GANDER_ASSERT( ( std::is_same< ChannelType, typename CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::StorageType >::value ), "Incorrect return type specified." );
-			
-			return ( ChannelType & ) child< ChildIndex >().template channel< C, Mask, DisableStaticAsserts >();
+			GANDER_ASSERT( ( std::is_same< ReferenceType, typename LayoutType::ReferenceType >::value ), "Incorrect return type specified." );
+	
+			typedef typename std::conditional< Container == ChannelContainer, 
+				typename LayoutType::ChannelContainerType,
+				typename LayoutType::ChannelPointerContainerType
+			>::type ContainerType;
+
+			return ( ReferenceType & ) layout.template channel< ContainerType, C >( child< ChildIndex >() );
 		}
 	
-	protected :
-		
-		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
 			BaseType::_addChannels( c, b );
 		}
 
-	private :
-
-		template< class, class > friend class LayoutContainerBaseInterface;	
 };
 
 }; // namespace Detail

@@ -1,6 +1,5 @@
 Todo:
 1) 
-Get the BrothersLayout to store or at least look like it stores it's channels in the channel order.
 
 Add tests for the channel() and channelAtIndex() methods for the CompoundChannelLayout.
 

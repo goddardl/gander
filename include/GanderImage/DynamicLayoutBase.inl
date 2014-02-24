@@ -74,6 +74,13 @@ inline unsigned int DynamicLayoutBase< Derived, DataType >::maskedChannelIndex( 
 }
 
 template< class Derived, class DataType >
+template< class ContainerType, EnumType Index, EnumType Mask >
+inline typename DynamicLayoutBase< Derived, DataType >::ReferenceType DynamicLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container )
+{
+	return channelAtIndex< ContainerType, Mask >( container, Index );
+}
+
+template< class Derived, class DataType >
 template< class ContainerType, EnumType Mask >
 inline typename DynamicLayoutBase< Derived, DataType >::ReferenceType DynamicLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container, unsigned int index )
 {
@@ -84,6 +91,13 @@ inline typename DynamicLayoutBase< Derived, DataType >::ReferenceType DynamicLay
 
 	GANDER_ASSERT( index < static_cast< Derived * >( this )->channels().size(), "Channel is not represented by this layout." );
 	return static_cast< Derived * >( this )->_channelAtIndex( container, maskedChannelIndex< ChannelMask( Mask ) >( index ) );
+}
+
+template< class Derived, class DataType >
+template< class ContainerType, ChannelDefault C >
+inline typename DynamicLayoutBase< Derived, DataType >::ReferenceType DynamicLayoutBase< Derived, DataType >::channel( ContainerType &container )
+{
+	return channel< ContainerType >( container, Channel( C ) );
 }
 
 template< class Derived, class DataType >

@@ -225,6 +225,89 @@ struct CompoundLayoutTest
 		BOOST_CHECK_EQUAL( int( l.step( Chan_Mask ) ), 1 );
 		BOOST_CHECK_EQUAL( int( l.step<Chan_Mask>() ), 1 );
 	}
+	
+	void testContainerAccess() 
+	{
+		typedef BrothersLayout<float, Brothers_RGB> Storage0;
+		typedef ChannelLayout<float, Chan_Alpha> Storage1;
+		typedef ChannelLayout<float, Chan_Z> Storage2;
+		typedef BrothersLayout<float, Brothers_VU> Storage3;
+		typedef DynamicLayout<float> Storage4;
+			
+		typedef CompoundLayout< Storage0, Storage1, Storage2, Storage3, Storage4 > Layout;
+		
+		Layout layout;
+		layout.addChannels( Mask_Backward );
+	
+		BOOST_CHECK( ( layout.child<0>() == Storage0() ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Red >::LayoutType, Storage0 >::value ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Green >::LayoutType, Storage0 >::value ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Blue >::LayoutType, Storage0 >::value ) );
+		BOOST_CHECK( ( layout.child<1>() == Storage1() ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Alpha >::LayoutType, Storage1 >::value ) );
+		BOOST_CHECK( ( layout.child<2>() == Storage2() ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Z >::LayoutType, Storage2 >::value ) );
+		BOOST_CHECK( ( layout.child<3>() == Storage3() ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_U >::LayoutType, Storage3 >::value ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_V >::LayoutType, Storage3 >::value ) );
+
+		Storage4 dynamicLayout;
+		dynamicLayout.addChannels( Mask_Backward );
+		BOOST_CHECK( ( layout.child<4>() == dynamicLayout ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Backward >::LayoutType, Storage4 >::value ) );
+		
+		Layout::ChannelContainerType c( layout );
+		Layout::ChannelPointerContainerType cp( layout );
+		BOOST_CHECK_EQUAL( layout.channels(), ChannelSet( Mask_RGBA | Mask_Z | Mask_UV | Mask_Backward ) );
+		BOOST_CHECK_EQUAL( cp.size(), layout.numberOfChannelPointers() );
+		BOOST_CHECK_EQUAL( c.size(), layout.numberOfChannels() );
+		
+		layout.channel< Chan_Red >( c ) = 1.;
+		layout.channel< Chan_Green >( c ) = 2.;
+		layout.channel< Chan_Blue >( c ) = 3.;
+		layout.channel< Chan_Alpha >( c ) = 4.;
+		layout.channel< Chan_Z >( c ) = 5.;
+		layout.channel< Chan_U >( c ) = 6.;
+		layout.channel< Chan_V >( c ) = 7.;
+		layout.channel< Chan_Backward >( c ) = 8.;
+		
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Red >( c ) ), 1. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Green >( c ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Blue >( c ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Alpha >( c ) ), 4. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Z >( c ) ), 5. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_U >( c ) ), 6. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_V >( c ) ), 7. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Backward >( c ) ), 8. );
+		
+		layout.channelAtIndex< 0 >( c ) = 8.;
+		layout.channelAtIndex< 1 >( c ) = 7.;
+		layout.channelAtIndex< 2 >( c ) = 6.;
+		layout.channelAtIndex< 3 >( c ) = 5.;
+		layout.channelAtIndex< 4 >( c ) = 4.;
+		layout.channelAtIndex< 5 >( c ) = 3.;
+		layout.channelAtIndex< 6 >( c ) = 2.;
+		layout.channelAtIndex< 7 >( c ) = 1.;
+		
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 0 >( c ) ), 8. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 1 >( c ) ), 7. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 2 >( c ) ), 6. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 3 >( c ) ), 5. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 4 >( c ) ), 4. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 5 >( c ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 6 >( c ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 7 >( c ) ), 1. );
+		
+	/*	
+		layout.channel< Chan_Green >( c ) = 2.;
+		layout.channel< Chan_Blue >( c ) = 3.;
+		layout.channel< Chan_Alpha >( c ) = 4.;
+		layout.channel< Chan_Z >( c ) = 5.;
+		layout.channel< Chan_U >( c ) = 6.;
+		layout.channel< Chan_V >( c ) = 7.;
+		layout.channel< Chan_Backward >( c ) = 8.;
+		*/
+	}
 
 	void testCommonLayoutAttributes()
 	{
@@ -290,6 +373,7 @@ struct CompoundLayoutTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testStep, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testContains, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testCommonLayoutAttributes, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testContainerAccess, instance ) );
 	}
 };
 
