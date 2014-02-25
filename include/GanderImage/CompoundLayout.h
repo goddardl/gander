@@ -67,7 +67,7 @@ namespace Detail
 {
 
 /// The ChannelIndexHelper class is a helper class that returns the index of the Layout within the template arguments that contains the channel of the given index.
-template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType M = Mask_All,
+template< bool IsDynamic, EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType M = Mask_All,
 	class T0 = None, class T1 = None, class T2 = None, class T3 = None, class T4 = None, class T5 = None, class T6 = None, class T7 = None >
 struct ChannelIndexHelper;
 
@@ -95,25 +95,25 @@ struct ChannelToLayoutIndex : public ChannelToLayoutIndex< C, NumberOfLayouts, T
 };
 
 /// The last recursive base of the ChannelIndexHelper helper class. 
-template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType ChannelMask >
-struct ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, ChannelIndex, ChannelMask, None, None, None, None, None, None, None, None >
+template< bool IsDynamic, EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType ChannelMask >
+struct ChannelIndexHelper< IsDynamic, NumberOfLayouts, CompleteChannelMask, ChannelIndex, ChannelMask, None, None, None, None, None, None, None, None >
 {
 	enum
 	{
 		NumberOfChannels = 0,
 		NumberOfMaskedChannels = 0,
 		LayoutNumber = 0,
-		Value = -1,
-		ChannelIndexInLayout = 0,
-		CompleteNumberOfMaskedChannels = Gander::template EnumHelper< CompleteChannelMask & ChannelMask >::NumberOfSetBits
+		Value = IsDynamic ? NumberOfLayouts - 1 : -1,
+		CompleteNumberOfMaskedChannels = Gander::template EnumHelper< CompleteChannelMask & ChannelMask >::NumberOfSetBits,
+		ChannelIndexInLayout = CompleteNumberOfMaskedChannels < ( ChannelIndex + 1 ) ? ChannelIndex - CompleteNumberOfMaskedChannels : 0,
 	};
 };
 
 /// The body of the ChannelIndexHelper class.
-template< EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType M, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
-struct ChannelIndexHelper : public ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, ChannelIndex, M, T1, T2, T3, T4, T5, T6, T7, None >
+template< bool IsDynamic, EnumType NumberOfLayouts, EnumType CompleteChannelMask, EnumType ChannelIndex, EnumType M, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7 >
+struct ChannelIndexHelper : public ChannelIndexHelper< IsDynamic, NumberOfLayouts, CompleteChannelMask, ChannelIndex, M, T1, T2, T3, T4, T5, T6, T7, None >
 {
-	typedef ChannelIndexHelper< NumberOfLayouts, CompleteChannelMask, ChannelIndex, M, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
+	typedef ChannelIndexHelper< IsDynamic, NumberOfLayouts, CompleteChannelMask, ChannelIndex, M, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
 	enum
 	{
 		NumberOfChannels = BaseType::NumberOfChannels + T0::NumberOfChannels,
@@ -157,7 +157,7 @@ struct CompoundLayoutRecurseBase : public LayoutBase< Derived >
 		struct LayoutTraits
 		{
 			GANDER_IMAGE_STATIC_ASSERT(
-				EnumType( Derived::NumberOfLayouts ) > LayoutIndexValue || DisableStaticAsserts,
+				( EnumType( Derived::NumberOfLayouts ) > LayoutIndexValue || DisableStaticAsserts ),
 				THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST
 			);
 
@@ -192,6 +192,7 @@ struct CompoundLayoutRecurseBase : public LayoutBase< Derived >
 
 				typedef typename Detail::ChannelIndexHelper
 				<
+					Derived::IsDynamic,
 					Derived::NumberOfLayouts,
 					Derived::ChannelMask,
 					ChannelIndex,

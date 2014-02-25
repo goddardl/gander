@@ -109,7 +109,8 @@ struct CompoundLayoutTest
 		typedef BrothersLayout<float, Brothers_RGB> Layout1;
 		typedef ChannelLayout<float, Chan_Alpha> Layout2;
 		typedef ChannelLayout<float, Chan_Z> Layout3;
-		typedef BrothersLayout<float, Brothers_UV> Layout4;
+		typedef DynamicLayout<float> Layout4;
+
 		typedef CompoundLayout< Layout1, Layout2, Layout3, Layout4 > Layout;
 		
 		BOOST_CHECK_EQUAL( int( Layout::ChannelTraitsAtIndex<0, Mask_All>::LayoutIndex ), 0 ); // Red 
