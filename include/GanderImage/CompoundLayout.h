@@ -567,7 +567,7 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 			
 			GANDER_ASSERT( ( std::is_same< ReferenceType, typename LayoutType::ReferenceType >::value ), "Incorrect return type specified." );
 	
-			return ( ReferenceType & ) child< ChildIndex, true >().template channelAtIndex< ContainerType, ChannelIndexInLayout >( container.template child< ChildIndex >() );
+			return ( ReferenceType & ) child< ChildIndex, true >().template channelAtIndex< ContainerType, ChannelIndexInLayout, Mask >( container.template child< ChildIndex >() );
 		}
 
 	private :
@@ -580,30 +580,6 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 		{
 			return BaseType::_requiredChannels();
 		}
-	/*	
-		template< ChannelDefault C >
-		inline ReferenceType channel( ChannelPointerContainerType &container )
-		{
-			return *container[0];
-		}
-
-		template< EnumType Index >
-		inline ReferenceType channelAtIndex( ChannelContainerType &container )
-		{
-			return container[0];
-		}
-		
-		template< EnumType Index >
-		inline ReferenceType channelAtIndex( ChannelPointerContainerType &container )
-		{
-			return *container[0];
-		}
-
-		inline void setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer )
-		{
-			container[0] = pointer;
-		}
-	*/
 		
 		/// Returns the step value for a given channel.
 		template< ChannelDefault C = Chan_None >
