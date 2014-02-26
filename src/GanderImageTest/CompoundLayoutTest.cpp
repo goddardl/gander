@@ -261,7 +261,9 @@ struct CompoundLayoutTest
 		
 		Layout::ChannelContainerType c( layout );
 		Layout::ChannelPointerContainerType cp( layout );
+
 		BOOST_CHECK_EQUAL( layout.channels(), ChannelSet( Mask_RGBA | Mask_Z | Mask_UV | Mask_Backward | Mask_Forward ) );
+		BOOST_CHECK_EQUAL( layout.requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha | Mask_Z | Mask_V | Mask_Backward | Mask_Forward ) );
 		BOOST_CHECK_EQUAL( cp.size(), layout.numberOfChannelPointers() );
 		BOOST_CHECK_EQUAL( c.size(), layout.numberOfChannels() );
 		
@@ -323,6 +325,78 @@ struct CompoundLayoutTest
 		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 2, ChannelMask( CombineMasks< Mask_Red, Mask_Blue, Mask_Z, Mask_V, Mask_Backward >::Value ) >( c ) ), 4. );
 		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 3, ChannelMask( CombineMasks< Mask_Red, Mask_Blue, Mask_Z, Mask_V, Mask_Backward >::Value ) >( c ) ), 2. );
 		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 4, ChannelMask( CombineMasks< Mask_Red, Mask_Blue, Mask_Z, Mask_V, Mask_Backward >::Value ) >( c ) ), 0. );
+
+		float bgra[4] = { 3., 2., 1., 4. };	
+		float z = 5.;	
+		float vu[2] = { 7., 6. };	
+		float forward = 8.;	
+		float backward = 9.;
+
+		layout.setChannelPointer( cp, Chan_Blue, &bgra[0] );
+		layout.setChannelPointer( cp, Chan_Alpha, &bgra[3] );
+		layout.setChannelPointer( cp, Chan_Z, &z );
+		layout.setChannelPointer( cp, Chan_V, &vu[0] );
+		layout.setChannelPointer( cp, Chan_Forward, &forward );
+		layout.setChannelPointer( cp, Chan_Backward, &backward );
+
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Red >( cp ) ), 1. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Green >( cp ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Blue >( cp ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Alpha >( cp ) ), 4. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Z >( cp ) ), 5. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_U >( cp ) ), 6. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_V >( cp ) ), 7. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Forward >( cp ) ), 8. );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Backward >( cp ) ), 9. );
+		
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 0 >( cp ) ), 1. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 1 >( cp ) ), 2. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 2 >( cp ) ), 3. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 3 >( cp ) ), 4. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 4 >( cp ) ), 5. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 5 >( cp ) ), 6. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 6 >( cp ) ), 7. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 7 >( cp ) ), 8. );
+		BOOST_CHECK_EQUAL( ( layout.channelAtIndex< 8 >( cp ) ), 9. );
+		
+		layout.channel< Chan_Red >( cp ) = 9.;
+		layout.channel< Chan_Green >( cp ) = 8.;
+		layout.channel< Chan_Blue >( cp ) = 7.;
+		layout.channel< Chan_Alpha >( cp ) = 6.;
+		layout.channel< Chan_Z >( cp ) = 5.;
+		layout.channel< Chan_U >( cp ) = 4.;
+		layout.channel< Chan_V >( cp ) = 3.;
+		layout.channel< Chan_Forward >( cp ) = 2.;
+		layout.channel< Chan_Backward >( cp ) = 1.;
+		
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Red >( cp ) ), bgra[2] );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Green >( cp ) ), bgra[1] );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Blue >( cp ) ), bgra[0] );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Alpha >( cp ) ), bgra[3] );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Z >( cp ) ), z );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_U >( cp ) ), vu[1] );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_V >( cp ) ), vu[0] );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Forward >( cp ) ), forward );
+		BOOST_CHECK_EQUAL( ( layout.channel< Chan_Backward >( cp ) ), backward );
+
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, Mask_Red >( cp ) ), 9. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, Mask_Green >( cp ) ), 8. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, Mask_Blue >( cp ) ), 7. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, Mask_Alpha >( cp ) ), 6. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, Mask_Z >( cp ) ), 5. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, Mask_U >( cp ) ), 4. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, Mask_V >( cp ) ), 3. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, Mask_Forward >( cp ) ), 2. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, Mask_Backward >( cp ) ), 1. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, ChannelMask( CombineMasks< Mask_V, Mask_Backward >::Value ) >( cp ) ), 3. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 1, ChannelMask( CombineMasks< Mask_V, Mask_Backward >::Value ) >( cp ) ), 1. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 1, ChannelMask( CombineMasks< Mask_V, Mask_Backward, Mask_Forward >::Value ) >( cp ) ), 2. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 2, ChannelMask( CombineMasks< Mask_V, Mask_Backward, Mask_Forward >::Value ) >( cp ) ), 1. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 0, ChannelMask( CombineMasks< Mask_Red, Mask_Blue, Mask_Z, Mask_V, Mask_Backward >::Value ) >( cp ) ), 9. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 1, ChannelMask( CombineMasks< Mask_Red, Mask_Blue, Mask_Z, Mask_V, Mask_Backward >::Value ) >( cp ) ), 7. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 2, ChannelMask( CombineMasks< Mask_Red, Mask_Blue, Mask_Z, Mask_V, Mask_Backward >::Value ) >( cp ) ), 5. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 3, ChannelMask( CombineMasks< Mask_Red, Mask_Blue, Mask_Z, Mask_V, Mask_Backward >::Value ) >( cp ) ), 3. );
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< 4, ChannelMask( CombineMasks< Mask_Red, Mask_Blue, Mask_Z, Mask_V, Mask_Backward >::Value ) >( cp ) ), 1. );
 	}
 
 	void testCommonLayoutAttributes()

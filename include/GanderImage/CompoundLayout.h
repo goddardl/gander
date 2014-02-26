@@ -532,6 +532,50 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 			bool DisableStaticAsserts = false,
 			class ReferenceType = typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::ReferenceType
 		>
+		inline ReferenceType channel( ChannelPointerContainerType &container )
+		{
+
+			typedef typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType LayoutType;	
+			typedef typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType::ChannelPointerContainerType ContainerType;	
+			
+			enum
+			{
+				ChildIndex = CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutIndex,
+			};
+			
+			GANDER_ASSERT( ( std::is_same< ReferenceType, typename LayoutType::ReferenceType >::value ), "Incorrect return type specified." );
+	
+			return ( ReferenceType & ) child< ChildIndex, true >().template channel< ContainerType, C >( container.template child< ChildIndex >() );
+		}
+		
+		template<
+			EnumType Index,
+			EnumType Mask = Mask_All,
+			bool DisableStaticAsserts = false,
+			class ReferenceType = typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::ReferenceType
+		>
+		inline ReferenceType channelAtIndex( ChannelPointerContainerType &container )
+		{
+			typedef typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutType LayoutType;	
+			typedef typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutType::ChannelPointerContainerType ContainerType;	
+			
+			enum
+			{
+				ChildIndex = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutIndex,
+				ChannelIndexInLayout = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::ChannelIndexInLayout,
+			};
+			
+			GANDER_ASSERT( ( std::is_same< ReferenceType, typename LayoutType::ReferenceType >::value ), "Incorrect return type specified." );
+	
+			return ( ReferenceType & ) child< ChildIndex, true >().template channelAtIndex< ContainerType, ChannelIndexInLayout, Mask >( container.template child< ChildIndex >() );
+		}
+	
+		
+		template<
+			ChannelDefault C,
+			bool DisableStaticAsserts = false,
+			class ReferenceType = typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::ReferenceType
+		>
 		inline ReferenceType channel( ChannelContainerType &container )
 		{
 
@@ -569,6 +613,40 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 	
 			return ( ReferenceType & ) child< ChildIndex, true >().template channelAtIndex< ContainerType, ChannelIndexInLayout, Mask >( container.template child< ChildIndex >() );
 		}
+	
+		inline void setChannelPointer( ChannelPointerContainerType &container, Channel channel, void *pointer )
+		{
+			GANDER_ASSERT(
+				( container.size() == BaseType::numberOfChannelPointers() ),
+				"Container has a different number of elements to the Layout's number of channels."
+			);
+
+			switch( channel )
+			{
+				case( 1 ) :
+					setChannelPointer< ChannelDefault( 1 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 1 ), false >::PointerType& >( pointer ) ); break;
+				case( 2 ) :
+					setChannelPointer< ChannelDefault( 2 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 2 ), false >::PointerType& >( pointer ) ); break;
+				case( 3 ) :
+					setChannelPointer< ChannelDefault( 3 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 3), false >::PointerType& >( pointer ) ); break;
+				case( 4 ) :
+					setChannelPointer< ChannelDefault( 4 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 4 ), false >::PointerType& >( pointer ) ); break;
+				case( 5 ) :
+					setChannelPointer< ChannelDefault( 5 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 5 ), false >::PointerType& >( pointer ) ); break;
+				case( 6 ) :
+					setChannelPointer< ChannelDefault( 6 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 6 ), false >::PointerType& >( pointer ) ); break;
+				case( 7 ) :
+					setChannelPointer< ChannelDefault( 7 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 7 ), false >::PointerType& >( pointer ) ); break;
+				case( 8 ) :
+					setChannelPointer< ChannelDefault( 8 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 8 ), false >::PointerType& >( pointer ) ); break;
+				case( 9 ) :
+					setChannelPointer< ChannelDefault( 9 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 9 ), false >::PointerType& >( pointer ) ); break;
+				case( 10 ) :
+					setChannelPointer< ChannelDefault( 10 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 10 ), false >::PointerType& >( pointer ) ); break;
+				default : GANDER_ASSERT( 0, "Channel does not exist in the CompoundLayout." ); break;
+			}
+		}
+
 
 	private :
 
@@ -602,6 +680,27 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 				return BaseType::_step( channel );
 			}
 		}
+		
+		template<
+			ChannelDefault C,
+			bool DisableStaticAsserts = false,
+			class PointerType = typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::PointerType
+		>	
+		inline void setChannelPointer( ChannelPointerContainerType &container, PointerType &pointer )
+		{
+			typedef typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType LayoutType;	
+			typedef typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType::ChannelPointerContainerType ContainerType;	
+			
+			enum
+			{
+				ChildIndex = CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutIndex,
+			};
+			
+			GANDER_ASSERT( ( std::is_same< PointerType, typename LayoutType::PointerType >::value ), "Incorrect return type specified." );
+	
+			child< ChildIndex, true >().template setChannelPointer< ContainerType >( container.template child< ChildIndex >(), C, pointer );
+		}
+	
 };
 
 }; // namespace Image
