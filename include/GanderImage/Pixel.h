@@ -45,7 +45,7 @@
 #include "GanderImage/StaticAssert.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
-#include "GanderImage/CompoundLayout.h"
+#include "GanderImage/PixelLayout.h"
 
 namespace Gander
 {
@@ -67,21 +67,6 @@ template< class L >
 struct PixelBase
 {
 	public :
-		
-		typedef L LayoutType;
-
-		template< ChannelDefault C = Chan_None >
-		struct ChannelTraits : public LayoutType::template ChannelTraits< C >
-		{
-			ChannelTraits( LayoutType layout, Channel channel ) :
-				LayoutType::template ChannelTraits< C >( layout, channel )
-			{
-			}
-		};
-		
-		template< EnumType LayoutIndex >
-		struct LayoutTraits : public LayoutType::template LayoutTraits< LayoutIndex >
-		{};
 
 		/// The default constructor.
 		/// The default constructor can be used for all layouts which aren't dynamic.
@@ -90,27 +75,12 @@ struct PixelBase
 		{
 			GANDER_IMAGE_STATIC_ASSERT( !L::IsDynamic, CLASS_CONTAINS_A_DYNAMIC_LAYOUT_PLEASE_USE_THE_CONSTRUCTOR_THAT_INITIALIZES_IT );
 		}
-
 		/// The dynamic constructor.
 		/// A basic constructor that just initializes the internal instance of the layout to the parameter that is passed to it.
 		/// This constructor must be used when using a dynamic layout to ensure that the layout is initialized correctly.
 		PixelBase( const L &layout ) :
 			m_layout( layout )
 		{
-		}
-		
-		/// Returns a ChannelSet of the channels that pointers are required for in order
-		/// to access all of the channels in this layout.
-		inline ChannelSet requiredChannels() const
-		{
-			return m_layout.requiredChannels();
-		}
-
-		/// The runtime creator of the ChannelTraits struct.
-		template< ChannelDefault C = Chan_None >
-		ChannelTraits<C> channelTraits( Channel channel )
-		{
-			return ChannelTraits<C>( m_layout, channel );
 		}
 		
 	protected:
@@ -121,16 +91,6 @@ struct PixelBase
 template< class L >
 struct PixelRecurse< L, 0 > : public PixelBase< L >
 {
-	public :
-
-		typedef PixelBase< L > BaseType;
-
-		PixelRecurse( const L &layout ) :
-			BaseType( layout )
-		{}
-		
-		PixelRecurse() {}
-		
 		template< class ChannelType, ChannelMask Mask, EnumType Index >
 		inline ChannelType &channelAtIndex()
 		{
@@ -138,14 +98,6 @@ struct PixelRecurse< L, 0 > : public PixelBase< L >
 			static ChannelType t( 0 );
 			return t;
 		};
-
-		template< class ChannelType, ChannelMask Mask, EnumType Channel >
-		inline ChannelType &channel()
-		{
-			//\todo: The requested channel does not exist so report it with an error...
-			static ChannelType t( 0 );
-			return t;
-		}
 };
 
 template< class L, EnumType N >
@@ -187,7 +139,7 @@ struct PixelRecurse : public PixelRecurse< L, N - 1 >
 		{
 			if( BaseType::m_layout.template containsChannel< Channel >() )
 			{
-				return m_data[0];
+				return m_data[ChannelIndexInLayout];
 			}
 			else
 			{
@@ -209,13 +161,30 @@ class Pixel : public Detail::PixelRecurse< L, L::NumberOfLayouts >
 {
 	public :
 		
+		enum
+		{
+			NumberOfLayouts = L::NumberOfLayouts,
+		};
+
 		typedef L LayoutType;
+
+		template< ChannelDefault C = Chan_None >
+		struct ChannelTraits : public LayoutType::template ChannelTraits< C >
+		{
+			ChannelTraits( L layout, Channel channel ) :
+				LayoutType::template ChannelTraits< C >( layout, channel )
+			{
+			}
+		};
+		
+		template< EnumType LayoutIndex >
+		struct LayoutTraits : public LayoutType::template LayoutTraits< LayoutIndex >
+		{};
 		
 		/// The default constructor.
 		/// The default constructor can be used for all layouts which aren't dynamic.
 		/// For dynamic layouts, please use the other constructor.
 		Pixel() {}
-
 		/// The dynamic constructor.
 		/// A basic constructor that just initializes the internal instance of the layout to the parameter that is passed to it.
 		/// This constructor must be used when using a dynamic layout to ensure that the layout is initialized correctly.
@@ -223,6 +192,20 @@ class Pixel : public Detail::PixelRecurse< L, L::NumberOfLayouts >
 			BaseType( layout )
 		{}
 		
+		/// Returns a ChannelSet of the channels that pointers are required for in order
+		/// to access all of the channels in this layout.
+		inline ChannelSet requiredChannels() const
+		{
+			return m_layout.requiredChannels();
+		}
+
+		/// The runtime creator of the channel traits struct.
+		template< ChannelDefault C = Chan_None >
+		ChannelTraits<C> channelTraits( Channel channel )
+		{
+			return ChannelTraits<C>( m_layout, channel );
+		}
+
 		template< class ChannelType, ChannelMask Mask = Mask_All >
 		inline ChannelType &channelAtIndex( unsigned int index )
 		{
@@ -251,11 +234,9 @@ class Pixel : public Detail::PixelRecurse< L, L::NumberOfLayouts >
 				case( 3 ) : return BaseType::template channel< ChannelType, Mask, 3 >(); break;
 				case( 4 ) : return BaseType::template channel< ChannelType, Mask, 4 >(); break;
 				case( 5 ) : return BaseType::template channel< ChannelType, Mask, 5 >(); break;
-				case( 6 ) : return BaseType::template channel< ChannelType, Mask, 6 >(); break;
-				case( 7 ) : return BaseType::template channel< ChannelType, Mask, 7 >(); break;
-				case( 8 ) : return BaseType::template channel< ChannelType, Mask, 8 >(); break;
-				case( 9 ) : return BaseType::template channel< ChannelType, Mask, 9 >(); break;
-				case( 10 ) : return BaseType::template channel< ChannelType, Mask, 10 >(); break;
+				case( 6 ) : return BaseType::template channel< ChannelType, Mask, 4 >(); break;
+				case( 7 ) : return BaseType::template channel< ChannelType, Mask, 5 >(); break;
+				case( 8 ) : return BaseType::template channel< ChannelType, Mask, 4 >(); break;
 			};
 			
 			static ChannelType t( 0 );
