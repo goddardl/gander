@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,8 +31,8 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERIMAGE_PIXELBASE__
-#define __GANDERIMAGE_PIXELBASE__
+#ifndef __GANDERIMAGE_PIXEL__
+#define __GANDERIMAGE_PIXEL__
 
 #include <iostream>
 #include <stdexcept>
@@ -40,12 +40,95 @@
 #include "boost/format.hpp"
 
 #include "Gander/Common.h"
-#include "Gander/Tuple.h"
+#include "Gander/EnumHelper.h"
+#include "Gander/Interfaces.h"
 
 #include "GanderImage/StaticAssert.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
-#include "GanderImage/PixelLayout.h"
+
+struct AreEqual
+{
+	typedef bool ReturnType;
+	template< class T, class S >
+	ReturnType operator () ( T t, S s )
+	{
+		std::cerr << s << " == " << t << " = " << ( t == s ) << std::endl;
+		return ( t == s );
+	}
+};
+
+template< typename Op >
+struct NoAggregation
+{
+	typedef typename Op::ReturnType ReturnType;
+	inline void append( typename Op::ReturnType ){};
+	inline ReturnType value() const { return ReturnType(); };
+};
+
+template< typename Op >
+struct AndAccumulate
+{
+	typedef typename Op::ReturnType ReturnType;
+	
+	inline AndAccumulate() : m_value( ~ReturnType(0) ) {}
+
+	inline void append( typename Op::ReturnType value ){ m_value &= value; }
+
+	inline ReturnType value() const { return m_value; };
+
+	ReturnType m_value;
+};
+
+template< typename Pixel1, class Pixel2, class Op, class Aggregator, Gander::EnumType FullMask, Gander::EnumType StaticMask, Gander::EnumType PartialMask > struct ForEachRecurse;
+
+template< typename Pixel1, class Pixel2, class Op, class Aggregator, Gander::EnumType FullMask, Gander::EnumType StaticMask > struct ForEachRecurse< Pixel1, Pixel2, Op, Aggregator, FullMask, StaticMask, 0 >
+{
+	inline void operator () ( const Pixel1 &p1, const Pixel2 &p2, Op &op, Aggregator &a )
+	{
+		if( p1.isDynamic() || p2.isDynamic() )
+		{
+			Gander::Image::ChannelSet dynamicChannels( Gander::Image::ChannelMask( FullMask & ( ~StaticMask ) ) ); 
+			dynamicChannels &= p1.channels();
+			dynamicChannels &= p2.channels();
+		
+			write a loop here which loops over the dynamic channels and applies the op to them. 
+			Then, write test cases that prove it works...	
+		}
+	};
+};
+	
+template< typename Pixel1, class Pixel2, class Op, class Aggregator, Gander::EnumType FullMask, Gander::EnumType StaticMask, Gander::EnumType PartialMask >
+struct ForEachRecurse
+{
+	enum
+	{
+		Index = Gander::template EnumHelper< PartialMask >::FirstSetBit,
+		NextPartialMask = PartialMask & ( ( ~( Gander::EnumType(0) ) ) << ( Index + 1 ) ),
+		Channel = Index + 1,
+	};
+
+	inline void operator () ( Pixel1 &p1, Pixel2 &p2, Op &op, Aggregator &a )
+	{
+		std::cerr << "Channel " << int( Channel ) << std::endl;
+		a.append( op( p1.template channel< Gander::Image::ChannelDefault( Channel ) >(), p2.template channel< Gander::Image::ChannelDefault( Channel ) >()  ) );
+		ForEachRecurse< Pixel1, Pixel2, Op, Aggregator, FullMask, StaticMask, NextPartialMask >()( p1, p2, op, a );
+	}
+};
+
+template< class Pixel1, class Pixel2, class Op, class Aggregator = NoAggregation< Op > >
+typename Aggregator::ReturnType forEachChannel( Pixel1 &p1, Pixel2 &p2, Op op, Aggregator a = Aggregator() )
+{
+	enum
+	{
+		FullMask = Gander::Image::Mask_All,
+		StaticMask = ( Pixel1::LayoutType::ChannelMask & Pixel2::LayoutType::ChannelMask & FullMask ),
+	};
+	
+	ForEachRecurse< Pixel1, Pixel2, Op, Aggregator, FullMask, StaticMask, StaticMask >()( p1, p2, op, a );
+	
+	return a.value();
+}
 
 namespace Gander
 {
@@ -53,199 +136,86 @@ namespace Gander
 namespace Image
 {
 
-namespace Detail
+template< class Pixel1, class Pixel2 >
+class PixelOp
 {
-
-template< class T, class S, bool Condition > struct TypeSelector;
-template< class T, class S > struct TypeSelector< T, S, false > { typedef T Type; };
-template< class T, class S > struct TypeSelector< T, S, true > { typedef S Type; };
-
-template< class L, EnumType N >
-struct PixelRecurse;
-
-template< class L >
-struct PixelBase
-{
-	public :
-
-		/// The default constructor.
-		/// The default constructor can be used for all layouts which aren't dynamic.
-		/// For dynamic layouts, please use the other constructor.
-		PixelBase()
-		{
-			GANDER_IMAGE_STATIC_ASSERT( !L::IsDynamic, CLASS_CONTAINS_A_DYNAMIC_LAYOUT_PLEASE_USE_THE_CONSTRUCTOR_THAT_INITIALIZES_IT );
-		}
-		/// The dynamic constructor.
-		/// A basic constructor that just initializes the internal instance of the layout to the parameter that is passed to it.
-		/// This constructor must be used when using a dynamic layout to ensure that the layout is initialized correctly.
-		PixelBase( const L &layout ) :
-			m_layout( layout )
-		{
-		}
-		
-	protected:
-		
-		L m_layout;
 };
 
-template< class L >
-struct PixelRecurse< L, 0 > : public PixelBase< L >
+template< class Derived, class Layout, class Container >
+class PixelBase : public EqualComparisonOperators< Derived >
 {
-		template< class ChannelType, ChannelMask Mask, EnumType Index >
-		inline ChannelType &channelAtIndex()
-		{
-			//\todo: The requested channel does not exist so report it with an error...
-			static ChannelType t( 0 );
-			return t;
-		};
-};
-
-template< class L, EnumType N >
-struct PixelRecurse : public PixelRecurse< L, N - 1 >
-{
-	public :
-
-		typedef PixelRecurse< L, N - 1  > BaseType;
-		typedef typename L::template LayoutTraits< L::NumberOfLayouts - N >::LayoutType LayoutType;
-		typedef typename LayoutType::StorageType StorageType;
-		
-		PixelRecurse( const L &layout ) :
-			BaseType( layout )
-		{}
-		
-		PixelRecurse() {}
-
-		template< class ChannelType, ChannelMask Mask, EnumType Index >
-		inline ChannelType &channelAtIndex()
-		{
-			enum
-			{
-				RequestedLayoutIndex = L::template ChannelIndexHelper< Index, Mask >::Value,
-				ChannelIndexInLayout = L::template ChannelIndexHelper< Index, Mask >::ChannelIndexInLayout 
-			};
-			
-			if( RequestedLayoutIndex == EnumType( LayoutIndex ) )
-			{
-				return m_data[ChannelIndexInLayout];
-			}
-			else
-			{
-				return BaseType::template channelAtIndex< ChannelType, Mask, Index >();
-			}
-		}
-
-		template< class ChannelType, ChannelMask Mask, EnumType Channel >
-		inline ChannelType &channel()
-		{
-			if( BaseType::m_layout.template containsChannel< Channel >() )
-			{
-				return m_data[ChannelIndexInLayout];
-			}
-			else
-			{
-				return BaseType::template channel< ChannelType, Mask, Channel >();
-			}
-		}
-
 	private :
 
-		enum { LayoutIndex = L::NumberOfLayouts - N };
+		typedef Container ContainerType;
 
-		Tuple< StorageType, LayoutType::NumberOfChannels, LayoutType::IsDynamic > m_data;
-};
-
-};
-
-template< class L >
-class Pixel : public Detail::PixelRecurse< L, L::NumberOfLayouts >
-{
-	public :
+	public : 
 		
-		enum
+		typedef Layout LayoutType;
+		typedef PixelBase< Derived, Layout, Container > Type;
+		
+		PixelBase() :
+			m_container( m_layout )
 		{
-			NumberOfLayouts = L::NumberOfLayouts,
-		};
-
-		typedef L LayoutType;
-
-		template< ChannelDefault C = Chan_None >
-		struct ChannelTraits : public LayoutType::template ChannelTraits< C >
-		{
-			ChannelTraits( L layout, Channel channel ) :
-				LayoutType::template ChannelTraits< C >( layout, channel )
-			{
-			}
-		};
-		
-		template< EnumType LayoutIndex >
-		struct LayoutTraits : public LayoutType::template LayoutTraits< LayoutIndex >
-		{};
-		
-		/// The default constructor.
-		/// The default constructor can be used for all layouts which aren't dynamic.
-		/// For dynamic layouts, please use the other constructor.
-		Pixel() {}
-		/// The dynamic constructor.
-		/// A basic constructor that just initializes the internal instance of the layout to the parameter that is passed to it.
-		/// This constructor must be used when using a dynamic layout to ensure that the layout is initialized correctly.
-		Pixel( const L &layout ) :
-			BaseType( layout )
-		{}
-		
-		/// Returns a ChannelSet of the channels that pointers are required for in order
-		/// to access all of the channels in this layout.
-		inline ChannelSet requiredChannels() const
-		{
-			return m_layout.requiredChannels();
 		}
 
-		/// The runtime creator of the channel traits struct.
-		template< ChannelDefault C = Chan_None >
-		ChannelTraits<C> channelTraits( Channel channel )
-		{
-			return ChannelTraits<C>( m_layout, channel );
-		}
-
-		template< class ChannelType, ChannelMask Mask = Mask_All >
-		inline ChannelType &channelAtIndex( unsigned int index )
-		{
-			switch( index )
-			{
-				case( 0 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 0 >(); break;
-				case( 1 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 1 >(); break;
-				case( 2 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 2 >(); break;
-				case( 3 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 3 >(); break;
-				case( 4 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 4 >(); break;
-				case( 5 ) : return BaseType::template channelAtIndex< ChannelType, Mask, 5 >(); break;
-			};
-			
-			static ChannelType t( 0 );
-			return t;
-		}
-
-		template< class ChannelType, ChannelMask Mask = Mask_All >
-		inline ChannelType &channel( Channel channel )
-		{
-			switch( channel )
-			{
-				case( 0 ) : GANDER_ASSERT( 0 != channel, "Channel cannot be Chan_None." ); break;
-				case( 1 ) : return BaseType::template channel< ChannelType, Mask, 1 >(); break;
-				case( 2 ) : return BaseType::template channel< ChannelType, Mask, 2 >(); break;
-				case( 3 ) : return BaseType::template channel< ChannelType, Mask, 3 >(); break;
-				case( 4 ) : return BaseType::template channel< ChannelType, Mask, 4 >(); break;
-				case( 5 ) : return BaseType::template channel< ChannelType, Mask, 5 >(); break;
-				case( 6 ) : return BaseType::template channel< ChannelType, Mask, 4 >(); break;
-				case( 7 ) : return BaseType::template channel< ChannelType, Mask, 5 >(); break;
-				case( 8 ) : return BaseType::template channel< ChannelType, Mask, 4 >(); break;
-			};
-			
-			static ChannelType t( 0 );
-			return t;
-		}
-
-	private :
+		template< EnumType Index > struct LayoutTraits : public Layout::template LayoutTraits< Index > {};
+		template< ChannelDefault C > struct ChannelTraits : public Layout::template ChannelTraits< C > {};
+		
+		inline unsigned int numberOfChannels() const { return m_layout.numberOfChannels(); }
+		inline ChannelSet channels() const { return m_layout.channels(); }
+		inline bool isDynamic() const { return m_layout.isDynamic(); }
+		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None ) { m_layout.template addChannels< ContainerType >( c, b ); };
 	
-		typedef Detail::PixelRecurse< L, L::NumberOfLayouts > BaseType;
+		template< class T >
+		bool equalTo( T const &rhs ) const
+		{
+			if( m_layout != rhs.m_layout )
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		template< ChannelDefault C, class ReturnType = typename Type::template ChannelTraits< C >::ReferenceType >
+		inline ReturnType channel()
+		{
+			return m_layout.template channel< typename Derived::ContainerType, C >( m_container );
+		}
+
+	protected :
+		
+		LayoutType m_layout;
+		ContainerType m_container;
+		
+};
+
+template< class Layout >
+struct Pixel : public PixelBase< Pixel< Layout >, Layout, typename Layout::ChannelContainerType >
+{
+	public :	
+
+		typedef typename Layout::ChannelContainerType ContainerType;
+		typedef Layout LayoutType;
+		typedef Pixel< Layout > Type;
+
+};
+
+template< class Layout >
+struct PixelAccessor : public PixelBase< PixelAccessor< Layout >, Layout, typename Layout::ChannelPointerContainerType >
+{
+	private :
+		
+		typedef PixelBase< PixelAccessor< Layout >, Layout, typename Layout::ChannelPointerContainerType > BaseType;
+
+	public :	
+		
+		typedef typename Layout::ChannelPointerContainerType ContainerType;
+		typedef Layout LayoutType;
+		typedef PixelAccessor< Layout > Type;
+
+		inline unsigned int numberOfChannelPointers() const { return BaseType::m_layout.numberOfChannelPointers(); };
+		inline ChannelSet requiredChannels() const { return BaseType::m_layout.requiredChannels(); };
 
 };
 

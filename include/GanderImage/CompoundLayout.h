@@ -647,7 +647,6 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 			}
 		}
 
-
 	private :
 
 		friend class LayoutBase< Type >;	
