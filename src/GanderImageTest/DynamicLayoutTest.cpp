@@ -101,18 +101,6 @@ struct DynamicLayoutTest
 		BOOST_CHECK_EQUAL( l.contains( Chan_Z ), false );
 		BOOST_CHECK_EQUAL( l.requiredChannels(), ChannelSet( Mask_Red | Mask_Green | Mask_UV | Mask_Alpha ) );
 		BOOST_CHECK_EQUAL( l.numberOfChannels(), 5 );
-		BOOST_CHECK_EQUAL( l.step( Chan_Red ), 3 );
-		BOOST_CHECK_EQUAL( l.step( Chan_Green ), 3 );
-		BOOST_CHECK_EQUAL( l.step( Chan_U ), 2 );
-		BOOST_CHECK_EQUAL( l.step( Chan_V ), 2 );
-		BOOST_CHECK_EQUAL( l.step( Chan_Alpha ), 1 );
-		BOOST_CHECK_EQUAL( l.step<Chan_Red>(), 3 );
-		BOOST_CHECK_EQUAL( l.step<Chan_Green>(), 3 );
-		BOOST_CHECK_EQUAL( l.step<Chan_U>(), 2 );
-		BOOST_CHECK_EQUAL( l.step<Chan_V>(), 2 );
-		BOOST_CHECK_EQUAL( l.step<Chan_Alpha>(), 1 );
-		BOOST_CHECK_THROW( l.step<Chan_Z>(), std::runtime_error );
-		BOOST_CHECK_THROW( l.step( Chan_Z ), std::runtime_error );
 	}
 	
 	void testContainerAccess() 

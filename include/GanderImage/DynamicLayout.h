@@ -72,7 +72,7 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 		typedef Detail::ChannelPointerContainerWrapper< Type, Gander::template Tuple< PointerType, BaseType::NumberOfChannelPointers, true > > ChannelPointerContainerType;
 		
 		template< ChannelDefault C = Chan_None, bool DisableStaticAsserts = false >
-		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
+		struct ChannelTraits
 		{
 			typedef Type LayoutType;
 			typedef T ChannelType;
@@ -86,11 +86,6 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 			{
 				LayoutIndex = 0,
 			};
-
-			ChannelTraits( const LayoutType &l, Channel channel = Chan_None ) :
-				Detail::ChannelTraitsInterface< LayoutType >( l, channel )
-			{
-			}
 		};
 		
 		template< int Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false  >

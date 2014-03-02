@@ -80,7 +80,7 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		typedef Detail::ChannelPointerContainerWrapper< Type, Gander::template Tuple< PointerType, NumberOfChannelPointers, false > > ChannelPointerContainerType;
 
 		template< ChannelDefault C = Chan_None >
-		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
+		struct ChannelTraits
 		{
 			typedef Type LayoutType;
 			typedef T ChannelType;
@@ -94,11 +94,6 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 			{
 				LayoutIndex = 0,
 			};
-
-			ChannelTraits( const LayoutType &l, Channel channel = Chan_None ) :
-				Detail::ChannelTraitsInterface< LayoutType >( l, channel )
-			{
-			}
 		};
 		
 		template< int Index, EnumType Mask = Mask_All  >
@@ -124,21 +119,6 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 			return ChannelSet( ChannelDefault( BrotherTraits<B>::FirstBrotherInBrothers ) );
 		}
 
-		/// Returns the step value for a given channel.
-		template< ChannelDefault C = Chan_None >
-		inline int8u _step( Channel channel = Chan_None ) const
-		{
-			if( C != Chan_None )
-			{
-				GANDER_ASSERT( contains( C ), "Channel is not represented by this layout." )
-			}
-			else
-			{
-				GANDER_ASSERT( contains( channel ), "Channel is not represented by this layout." )
-			}
-			return BrotherTraits<B>::NumberOfBrothers;
-		}
-		
 		template< ChannelDefault C >
 		inline ReferenceType _channel( ChannelPointerContainerType &container )
 		{

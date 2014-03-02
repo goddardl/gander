@@ -89,14 +89,14 @@ struct PixelTest
 		BOOST_CHECK( pixel == pixel2 );
 
 		std::cerr << forEachChannel( pixel, pixel2, AreEqual(), AndAccumulate<AreEqual>() ) << std::endl;
-
+/*
 		todo:
 
 		Make the struct that loops over the channels work for dynamic layouts too.
 		Sort out the op structure. Perhaps the base class can be the iterator and the Channel ops derive from it?
 		Add the pixel comparison to the pixel class using a AreEqual op.
 		Add a runtime channel() method to the compoundLayout and make the return type a template parameter which is set to the first layouts ReferenceType by default.
-
+*/
 	}
 };
 

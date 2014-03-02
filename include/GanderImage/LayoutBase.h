@@ -58,26 +58,6 @@ namespace Image
 namespace Detail
 {
 
-template< class LayoutType >
-struct ChannelTraitsInterface
-{
-	public :
-	
-		ChannelTraitsInterface( const LayoutType &l, Channel channel = Chan_None ) :
-			m_step( l.template step( channel ) )
-		{
-		}
-
-		int8u step() const
-		{
-			return m_step;
-		}
-
-	private :
-
-		int8u m_step;
-};
-
 /// This simple little struct is used to mask the default constructor on the container class
 /// and to assert that it is initialized with it's associated layout.
 template< class Layout, class Container >
@@ -161,18 +141,6 @@ struct LayoutBase
 		inline ReturnType &child();
 		//@}
 		
-		//! @name Channel pointer interface.
-		/// These methods are used when accessing channel data using a set of pointers by the ReferenceType class.
-		/// At it's most simplest, a set of channels can be accessed using one pointer to each of them. However,
-		/// if the channels are interleaved together then we only need to store a pointer to the first one and an
-		/// offset to the others from it. The purpose of these methods, which a derived class should implement,
-		/// is to provide this information for a given channel index.
-		//@{
-		/// Returns the index to the base pointer for the given channel.
-		template< ChannelDefault C = Chan_None >
-		inline int8u step( Channel channel = Chan_None ) const;
-		//@}
-		
 		/// Returns whether the layout represents the given set of channels.
 		inline bool contains( ChannelSet channels ) const;
 		
@@ -246,10 +214,6 @@ struct LayoutBase
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
 		inline ChannelSet _requiredChannels() const;
-
-		/// Returns the step value for a given channel.
-		template< ChannelDefault C = Chan_None >
-		inline int8u _step( Channel channel = Chan_None ) const;
 
 		/// Adds the channel to the Layout and logs all pertenant information.
 		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None );

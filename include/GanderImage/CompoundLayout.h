@@ -256,23 +256,6 @@ struct CompoundLayoutRecurseBase : public LayoutBase< Derived >
 					LayoutIndex = ChannelToLayoutIndex< C >::Value
 				};
 
-				ChannelTraits( const Derived &l, Channel channel = Chan_None ) 
-				{
-					if( C == Chan_None )
-					{
-						m_step = l.template step( channel );
-					}
-					else
-					{
-						m_step = l.template step<C>();
-					}
-				}
-				
-				int8u step() const
-				{
-					return m_step;
-				}
-
 			private :
 			
 				// Assert that the layout actually contains the requested channel or if the Layout is dynamic.
@@ -280,8 +263,6 @@ struct CompoundLayoutRecurseBase : public LayoutBase< Derived >
 					( ( ( LayoutType::ChannelMask & ChannelToMask<C>::Value ) != 0 ) || Derived::IsDynamic || ( C == Chan_None ) || ( DisableStaticAsserts ) ),
 					CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT
 				);
-
-				int8u m_step;
 		};
 		
 		template< int ChannelIndex, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
@@ -337,12 +318,6 @@ struct CompoundLayoutRecurse< Derived, false, None, None, None, None, None, None
 			return static_cast<unsigned int>( Derived::NumberOfChannels );
 		}
 
-		template< ChannelDefault C = Chan_None >
-		inline int8u _step( Channel channel = Chan_None ) const
-		{
-			GANDER_ASSERT( 0, "Layout does not contain the requested channel." );
-			return 0;
-		}
 };
 
 /// The specialization of the CompoundLayoutRecurse class for the dynamic layout.
@@ -410,12 +385,6 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 			return ( ReturnType & ) m_dynamicLayout;
 		}
 		
-		template< ChannelDefault C = Chan_None >
-		inline int8u _step( Channel channel = Chan_None ) const
-		{
-			return m_dynamicLayout.step( channel );
-		}
-
 		T0 m_dynamicLayout;
 };
 
@@ -467,18 +436,6 @@ struct CompoundLayoutRecurse : public CompoundLayoutRecurse< Derived, IS_DYNAMIC
 			else
 			{
 				return ( ReturnType & ) BaseType::template child< Index, DisableStaticAsserts, ReturnType >();
-			}
-		}
-
-		inline int8u _step( Channel channel ) const
-		{
-			if( m_layout.contains( channel ) )
-			{
-				return m_layout.step( channel );
-			}
-			else
-			{
-				return BaseType::_step( channel );
 			}
 		}
 
@@ -656,28 +613,6 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 		inline ChannelSet _requiredChannels() const
 		{
 			return BaseType::_requiredChannels();
-		}
-		
-		/// Returns the step value for a given channel.
-		template< ChannelDefault C = Chan_None >
-		inline int8u _step( Channel channel = Chan_None ) const
-		{
-			if( C != Chan_None )
-			{
-				if( ( !Type::IsDynamic ) || ( Gander::Image::template MaskContainsChannel< ChannelMask, C >::Value == true ) )
-				{
-					typedef typename BaseType::template ChannelTraits< C, false >::LayoutType LayoutType;
-					return LayoutType().template step<C>();
-				}
-				else
-				{
-					return BaseType::_step( C );
-				}
-			}
-			else
-			{
-				return BaseType::_step( channel );
-			}
 		}
 		
 		template<

@@ -83,7 +83,7 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		typedef Detail::ChannelPointerContainerWrapper< Type, Gander::template Tuple< PointerType, NumberOfChannelPointers, false > > ChannelPointerContainerType;
 
 		template< ChannelDefault C = Chan_None >
-		struct ChannelTraits : public Detail::ChannelTraitsInterface< Type >
+		struct ChannelTraits
 		{
 			typedef Type LayoutType;
 			typedef T ChannelType;
@@ -97,11 +97,6 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 			{
 				LayoutIndex = 0,
 			};
-			
-			ChannelTraits( const LayoutType &l, Channel channel = Chan_None ) :
-				Detail::ChannelTraitsInterface< LayoutType >( l, channel )
-			{
-			}
 		};
 		
 		template< int Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false   >
@@ -140,10 +135,6 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
 		inline ChannelSet _requiredChannels() const;
-		
-		/// Returns the step value for a given channel.
-		template< ChannelDefault C = Chan_None >
-		inline int8u _step( Channel channel = Chan_None ) const;
 		
 		/// Returns the index of a channel in the layout when masked.
 		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >

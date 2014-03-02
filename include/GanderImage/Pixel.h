@@ -92,8 +92,8 @@ template< typename Pixel1, class Pixel2, class Op, class Aggregator, Gander::Enu
 			dynamicChannels &= p1.channels();
 			dynamicChannels &= p2.channels();
 		
-			write a loop here which loops over the dynamic channels and applies the op to them. 
-			Then, write test cases that prove it works...	
+			//write a loop here which loops over the dynamic channels and applies the op to them. 
+			//Then, write test cases that prove it works...	
 		}
 	};
 };

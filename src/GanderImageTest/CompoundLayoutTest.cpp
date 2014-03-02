@@ -196,37 +196,6 @@ struct CompoundLayoutTest
 		BOOST_CHECK_EQUAL( int( l.contains( Chan_Z ) ), false );
 	}
 
-	void testStep()
-	{
-		typedef BrothersLayout<float, Brothers_RGB> Storage0;
-		typedef ChannelLayout<float, Chan_Alpha> Storage1;
-		typedef ChannelLayout<float, Chan_Z> Storage2;
-		typedef DynamicLayout<float> Storage3;
-		
-		typedef CompoundLayout< Storage0, Storage1, Storage2, Storage3 > Layout;
-		Layout l;
-		l.addChannels( Mask_UV, Brothers_VU );
-		BOOST_CHECK_EQUAL( l.channels(), ChannelSet( Mask_UV | Mask_RGB | Mask_Z | Mask_Alpha ) );
-		
-		BOOST_CHECK_EQUAL( int( l.numberOfChannels() ), 7 );
-		BOOST_CHECK_EQUAL( int( l.step<Chan_Alpha>() ), 1 );
-		BOOST_CHECK_EQUAL( int( l.step<Chan_Red>() ), 3 );
-		BOOST_CHECK_EQUAL( int( l.step<Chan_Green>() ), 3 );
-		BOOST_CHECK_EQUAL( int( l.step<Chan_Blue>() ), 3 );
-		BOOST_CHECK_EQUAL( int( l.step<Chan_U>() ), 2 );
-		BOOST_CHECK_EQUAL( int( l.step<Chan_V>() ), 2 );
-		BOOST_CHECK_EQUAL( int( l.step( Chan_U ) ), 2 );
-		BOOST_CHECK_EQUAL( int( l.step( Chan_V ) ), 2 );
-
-		BOOST_CHECK_EQUAL( int( l.step( Chan_Alpha ) ), 1 );
-		BOOST_CHECK_THROW( l.step( Chan_Mask ), std::runtime_error );
-		BOOST_CHECK_THROW( l.step<Chan_Mask>(), std::runtime_error );
-		
-		l.addChannels( Mask_Mask );
-		BOOST_CHECK_EQUAL( int( l.step( Chan_Mask ) ), 1 );
-		BOOST_CHECK_EQUAL( int( l.step<Chan_Mask>() ), 1 );
-	}
-	
 	void testContainerAccess() 
 	{
 		typedef BrothersLayout<float, Brothers_BGR> Storage0;
@@ -460,7 +429,6 @@ struct CompoundLayoutTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testLayoutTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testMaskedLayoutTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testChannelTraits, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testStep, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testContains, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testCommonLayoutAttributes, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompoundLayoutTest::testContainerAccess, instance ) );

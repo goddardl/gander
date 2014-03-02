@@ -80,23 +80,6 @@ inline ChannelSet ChannelLayout< T, S >::_requiredChannels() const
 	return ChannelSet( S );
 }
 
-/// Returns the step value for a given channel.
-template< class T, ChannelDefault S >
-template< ChannelDefault C >
-inline int8u ChannelLayout< T, S >::_step( Channel channel ) const
-{
-	if( C != Chan_None )
-	{
-		GANDER_ASSERT( contains( C ), "Channel is not represented by this layout." )
-	}
-	else
-	{
-		GANDER_ASSERT( contains( channel ), "Channel is not represented by this layout." )
-	}
-
-	return 1;
-}
-
 /// Returns the index of a channel in the layout when masked.
 template< class T, ChannelDefault S >
 template< EnumType Index, Gander::Image::ChannelMask Mask, bool DisableStaticAsserts >

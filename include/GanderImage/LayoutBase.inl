@@ -118,14 +118,6 @@ inline ChannelSet LayoutBase< Derived >::requiredChannels() const
 }
 		
 template< class Derived >
-template< ChannelDefault C >
-inline int8u LayoutBase< Derived >::step( Channel channel ) const
-{
-	GANDER_ASSERT( ( C == Chan_None || channel == Chan_None || channel == C ), "Specify either a compile-time argument or a runtime parameter but not both." );
-	return static_cast< Derived const * >( this )->_step<C>( channel );
-}
-
-template< class Derived >
 template< unsigned Index, bool DisableStaticAsserts, class ReturnType >
 inline ReturnType &LayoutBase< Derived >::child()
 {
@@ -135,14 +127,6 @@ inline ReturnType &LayoutBase< Derived >::child()
 		
 template< class Derived >
 inline ChannelSet LayoutBase< Derived >::_requiredChannels() const
-{
-	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
-	return 0; // We never get here.
-}
-
-template< class Derived >
-template< ChannelDefault C >
-inline int8u LayoutBase< Derived >::_step( Channel channel ) const
 {
 	GANDER_STATIC_ASSERT_ERROR( DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS );
 	return 0; // We never get here.

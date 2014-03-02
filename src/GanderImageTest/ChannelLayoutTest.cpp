@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -93,12 +93,6 @@ struct ChannelLayoutTest
 		BOOST_CHECK_EQUAL( l1.requiredChannels(), ChannelSet( Mask_Alpha ) );
 		BOOST_CHECK_EQUAL( l2.requiredChannels(), ChannelSet( Mask_Z ) );
 		BOOST_CHECK_EQUAL( l3.requiredChannels(), ChannelSet( Mask_Red ) );
-		
-		BOOST_CHECK_EQUAL( l1.step( Chan_Alpha ), 1 );
-		BOOST_CHECK_EQUAL( l1.step<Chan_Alpha>(), 1 );
-		
-		BOOST_CHECK_THROW( l1.step( Chan_Red ), std::runtime_error );
-		BOOST_CHECK_THROW( l1.step<Chan_Red>(), std::runtime_error );
 	}
 
 	void testChannelTraits()
