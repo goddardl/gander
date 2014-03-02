@@ -114,50 +114,31 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
-		inline ChannelSet _requiredChannels() const
-		{
-			return ChannelSet( ChannelDefault( BrotherTraits<B>::FirstBrotherInBrothers ) );
-		}
+		inline ChannelSet _requiredChannels() const;
 
 		template< ChannelDefault C >
-		inline ReferenceType _channel( ChannelPointerContainerType &container )
-		{
-			return *( container[0] + BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value );
-		}
+		inline ReferenceType _channel( ChannelPointerContainerType &container );
 
 		template< ChannelDefault C >
-		inline ReferenceType _channel( ChannelContainerType &container )
-		{
-			return container[ BrotherTraits<B>::template BrotherIndexToChannelIndex< BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value >::Value ];
-		}
+		inline ReferenceType _channel( ChannelContainerType &container );
 		
 		template< EnumType Index >
-		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container )
-		{
-			return *( container[0] + BrotherTraits<B>::template ChannelIndexToBrotherIndex< Index >::Value );
-		}
+		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container );
 		
 		template< EnumType Index >
-		inline ReferenceType _channelAtIndex( ChannelContainerType &container )
-		{
-			return container[ Index ];
-		}
+		inline ReferenceType _channelAtIndex( ChannelContainerType &container );
 		
-		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer )
-		{
-			container[0] = pointer;
-		}
+		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer );
 
 		/// Returns the index of a channel in the layout when masked.
 		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline int _maskedChannelIndex() const
-		{
-			return BaseType::template MaskedChannelIndex< Index, Mask, DisableStaticAsserts >::Value;
-		}
+		inline int _maskedChannelIndex() const;
 };
 
 }; // namespace Image
 
 }; // namespace Gander
+
+#include "GanderImage/BrothersLayout.inl"
 
 #endif
