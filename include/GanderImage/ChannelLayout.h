@@ -117,24 +117,32 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 
 		friend class StaticLayoutBase< ChannelLayout< T, S >, T >;	
 		friend class LayoutBase< ChannelLayout< T, S > >;	
-		
+	
+		/// Returns a reference to the given channel from the container which is specified by the "C" template argument.
 		template< ChannelDefault C >
 		inline ReferenceType _channel( ChannelContainerType &container );
 		
+		/// Returns a reference to the given channel from the container which is specified by the "C" template argument.
 		template< ChannelDefault C >
 		inline ReferenceType _channel( ChannelPointerContainerType &container );
 
+		/// Returns a reference to the channel found at the given index into the number of channels in the layout from the container.
 		template< EnumType Index >
 		inline ReferenceType _channelAtIndex( ChannelContainerType &container );
 		
+		/// Returns a reference to the channel found at the given index into the number of channels in the layout from the container.
 		template< EnumType Index >
 		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container );
-
-		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer );
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
 		inline ChannelSet _requiredChannels() const;
+
+		/// Sets the value of the pointer to the given channel in the container.
+		/// Pointers can only be set for channels that are returned from the requiredChannels() method. By setting pointers
+		/// for every channel in the requiredChannels() set, the layout can provide access through the channel() and channelAtIndex()
+		/// methods for every channel represented by the layout.
+		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer );
 		
 		/// Returns the index of a channel in the layout when masked.
 		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >

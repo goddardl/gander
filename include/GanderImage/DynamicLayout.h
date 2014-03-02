@@ -96,117 +96,27 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 				ChannelIndexInLayout = Index,
 			};
 		};
-	
+		
 		//! @name Methods required by the base class.
 		/// These methods are required by the base class as this layout is dynamic.
 		//@{
 		/// Returns the channels represented by this layout.
-		inline ChannelSet channels() const
-		{
-			return m_channels;
-		}
+		inline ChannelSet channels() const;
 
 		/// Returns the number of channels that this layout represents.
-		inline unsigned int numberOfChannels() const
-		{
-			return m_channels.size();
-		}
+		inline unsigned int numberOfChannels() const;
 
 		/// Returns the number of channel pointers that this layout requires
 		/// in order to access all of the channels that this layout represents.
-		inline unsigned int numberOfChannelPointers() const
-		{
-			return m_channels.size();
-		}
+		inline unsigned int numberOfChannelPointers() const;
 		//@}
 	
-		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer )
-		{
-			GANDER_ASSERT(
-				( container.size() == _requiredChannels().size() ),
-				"Container has a different number of elements to the Layout's number of channels."
-			);
-			container[ channels().index( channel ) ] = pointer;
-		}
-		
 		/// Inserts a new channel into the container and also adds the channel to the Layout, logging all pertenant information.
 		template< class ContainerType >
-		void _addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			GANDER_ASSERT(
-				( container.size() == m_channels.size() ),
-				"Container has a different number of elements to the Layout's number of channels."
-			);
-			
-			GANDER_ASSERT(
-				( b == Brothers_None || BrotherTraits<>::channels( b ).contains( c ) ),
-				( boost::format( "DynamicLayout: Channels \"%s\" do not belong to the specified brothers." ) % c ).str()
-			);
-
-			GANDER_ASSERT(
-				( !m_allBrothers.contains( c ) ),
-				( boost::format( "DynamicLayout: Channels \"%s\" cannot be added as another set of ChannelBrothers represents it." ) % c ).str()
-			);
-
-			// Get a set of the current channels and the unique new ones.
-			ChannelSet currentChannels( channels() );
-			ChannelSet newChannels( c - currentChannels );
-			
-			_addChannels( c, b );
-
-			// Loop over the new channels and insert a new data element for each one
-			// at the same index that it is stored in the channel set.
-			ChannelSet::const_iterator it( newChannels.begin() );
-			ChannelSet::const_iterator end( newChannels.end() );
-			for( ; it != end; ++it )
-			{
-				currentChannels += *it;
-				int index = currentChannels.index( *it );
-				container.insert( container.begin() + index, typename ContainerType::StorageType( 0 ) );
-			}
-		}
+		void _addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b = Brothers_None );
 
 		/// Adds the channel to the Layout and logs all pertenant information.
-		void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			GANDER_ASSERT(
-				( b == Brothers_None || BrotherTraits<>::channels( b ).contains( c ) ),
-				( boost::format( "DynamicLayout: Channels \"%s\" do not belong to the specified brothers." ) % c ).str()
-			);
-
-			GANDER_ASSERT(
-				( !m_allBrothers.contains( c ) ),
-				( boost::format( "DynamicLayout: Channels \"%s\" cannot be added as another set of ChannelBrothers represents it." ) % c ).str()
-			);
-			
-			int8u step = 1;
-			if( b != Brothers_None )
-			{
-				m_allBrothers += BrotherTraits<>::brotherMask( b );
-				step = BrotherTraits<>::numberOfBrothers( b );
-			}
-			else
-			{
-				m_allBrothers += c;
-			}
-
-			ChannelSet newChannels( c - m_channels );
-			ChannelSet existingChannels( c - newChannels );
-
-			GANDER_ASSERT(
-				( existingChannels.size() == 0 ),
-				( boost::format( "DynamicLayout: DynamicLayout: Cannot add channels \"%s\" as they already exist." ) % existingChannels ).str()
-			);
-
-			ChannelSet::const_iterator it( newChannels.begin() );
-			ChannelSet::const_iterator end( newChannels.end() );
-			for( ; it != end; ++it )
-			{
-				m_channels += *it;
-				int index = m_channels.index( *it );
-				m_steps.insert( m_steps.begin() + index, step );
-			}
-		}
+		void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None );
 	
 	private :
 
@@ -215,56 +125,30 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 		
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
-		inline ChannelSet _requiredChannels() const
-		{
-			return m_channels;
-		}
-
-		/// Returns the step value for a given channel.
-		template< ChannelDefault C = Chan_None >
-		inline int8u _step( Channel channel = Chan_None ) const
-		{
-			if( C != Chan_None )
-			{
-				GANDER_ASSERT( m_channels.contains( C ), "Channel is not represented by this layout." );
-				return m_steps[ m_channels.index( C ) ];
-			}
-			else
-			{
-				GANDER_ASSERT( m_channels.contains( channel ), "Channel is not represented by this layout." );
-				return m_steps[ m_channels.index( channel ) ];
-			}
-			GANDER_ASSERT( 0, "No valid channel specified." )
-		}
+		inline ChannelSet _requiredChannels() const;
 
 		/// Returns the index of a channel in the layout when masked.
 		template< Gander::Image::ChannelMask Mask = Mask_All >
-		inline unsigned int _maskedChannelIndex( unsigned int index ) const
-		{
-			ChannelSet i = m_channels.intersection( Mask );
-			GANDER_ASSERT( index < i.size(), "Index is out of bounds when accessing a channel in a masked set." );
-			return m_channels.index( i[ index ] );
-		}
+		inline unsigned int _maskedChannelIndex( unsigned int index ) const;
 
-		inline ReferenceType _channel( ChannelContainerType &container, Channel c )
-		{
-			return container[ m_channels.index( c ) ];
-		}
+		/// Returns a reference to the given channel from the container.
+		inline ReferenceType _channel( ChannelContainerType &container, Channel c );
 		
-		inline ReferenceType _channel( ChannelPointerContainerType &container, Channel c )
-		{
-			return *container[ m_channels.index( c ) ];
-		}
+		/// Returns a reference to the given channel from the container.
+		inline ReferenceType _channel( ChannelPointerContainerType &container, Channel c );
 
-		inline ReferenceType _channelAtIndex( ChannelContainerType &container, unsigned int index )
-		{
-			return container[ index ];
-		}
+		/// Returns a reference to the channel found at the given index into the number of channels in the layout from the container.
+		inline ReferenceType _channelAtIndex( ChannelContainerType &container, unsigned int index );
 		
-		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container, unsigned int index )
-		{
-			return *container[ index ];
-		}
+		/// Returns a reference to the channel found at the given index into the number of channels in the layout from the container.
+		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container, unsigned int index );
+		
+		/// Sets the value of the pointer to the given channel in the container.
+		/// Pointers can only be set for channels that are returned from the requiredChannels() method. By setting pointers
+		/// for every channel in the requiredChannels() set, the layout can provide access through the channel() and channelAtIndex()
+		/// methods for every channel represented by the layout.
+		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer );
+
 
 		/// The channels that this format represents.
 		ChannelSet m_channels;
@@ -279,5 +163,7 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 }; // namespace Image
 
 }; // namespace Gander
+
+#include "GanderImage/DynamicLayout.inl"
 
 #endif
