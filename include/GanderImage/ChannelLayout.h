@@ -124,76 +124,40 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		friend class LayoutBase< ChannelLayout< T, S > >;	
 		
 		template< ChannelDefault C >
-		inline ReferenceType _channel( ChannelContainerType &container )
-		{
-			return container[0];
-		}
+		inline ReferenceType _channel( ChannelContainerType &container );
 		
 		template< ChannelDefault C >
-		inline ReferenceType _channel( ChannelPointerContainerType &container )
-		{
-			return *container[0];
-		}
+		inline ReferenceType _channel( ChannelPointerContainerType &container );
 
 		template< EnumType Index >
-		inline ReferenceType _channelAtIndex( ChannelContainerType &container )
-		{
-			return container[0];
-		}
+		inline ReferenceType _channelAtIndex( ChannelContainerType &container );
 		
 		template< EnumType Index >
-		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container )
-		{
-			return *container[0];
-		}
+		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container );
 
-		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer )
-		{
-			container[0] = pointer;
-		}
+		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer );
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.
-		inline ChannelSet _requiredChannels() const
-		{
-			return ChannelSet( S );
-		}
+		inline ChannelSet _requiredChannels() const;
 		
 		/// Returns the step value for a given channel.
 		template< ChannelDefault C = Chan_None >
-		inline int8u _step( Channel channel = Chan_None ) const
-		{
-			if( C != Chan_None )
-			{
-				GANDER_ASSERT( contains( C ), "Channel is not represented by this layout." )
-			}
-			else
-			{
-				GANDER_ASSERT( contains( channel ), "Channel is not represented by this layout." )
-			}
-			
-			return 1;
-		}
+		inline int8u _step( Channel channel = Chan_None ) const;
 		
 		/// Returns the index of a channel in the layout when masked.
 		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline int _maskedChannelIndex() const
-		{
-			GANDER_IMAGE_STATIC_ASSERT( ( Mask & ChannelMask ) != 0 || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-			return 0;
-		}
+		inline int _maskedChannelIndex() const;
 		
 		/// Returns the index of a channel within the layout.	
 		template< EnumType Channel, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline unsigned int _indexOfChannel() const
-		{
-			GANDER_IMAGE_STATIC_ASSERT( ( Mask & ChannelMask ) != 0 || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-			return 0;
-		}
+		inline unsigned int _indexOfChannel() const;
 };
 
 }; // namespace Image
 
 }; // namespace Gander
+
+#include "GanderImage/ChannelLayout.inl"
 
 #endif
