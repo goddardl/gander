@@ -48,9 +48,14 @@ namespace Image
 namespace Detail
 {
 
-template< typename Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gander::EnumType StaticMask, Gander::EnumType PartialMask > struct ForEachRecurse;
+template< class Pixel1, class Pixel2, class Op >
+void ForEachOpAtRuntime1( const Pixel1 &p1, const Pixel2 &p2, Op &op, Channel channel )
+{
+}
 
-template< typename Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gander::EnumType StaticMask > struct ForEachRecurse< Pixel1, Pixel2, Op, FullMask, StaticMask, 0 >
+template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gander::EnumType StaticMask, Gander::EnumType PartialMask > struct ForEachRecurse;
+
+template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gander::EnumType StaticMask > struct ForEachRecurse< Pixel1, Pixel2, Op, FullMask, StaticMask, 0 >
 {
 	inline void operator () ( const Pixel1 &p1, const Pixel2 &p2, Op &op ) const
 	{
@@ -63,11 +68,26 @@ template< typename Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Ga
 			GANDER_ASSERT( 0, "Dynamic channels are not full supported yet. Seet the todo in Gander::Image::ForEachRecurse." );
 			for( ChannelSet::const_iterator it( dynamicChannels.begin() ); it != dynamicChannels.end(); ++it )
 			{
-				/// \todo: Apply the op to each of the channels that are in the dynamic layout.
+				/*
+				switch( *it )
+				{
+					case( 1 ) : op( p1.template channel< ChannelDefault( 1 ) >(), p2.template channel< ChannelDefault( 1 ) >() ); break;
+					case( 2 ) : op( p1.template channel< ChannelDefault( 2 ) >(), p2.template channel< ChannelDefault( 2 ) >() ); break;
+					case( 3 ) : op( p1.template channel< ChannelDefault( 3 ) >(), p2.template channel< ChannelDefault( 3 ) >() ); break;
+					case( 4 ) : op( p1.template channel< ChannelDefault( 4 ) >(), p2.template channel< ChannelDefault( 4 ) >() ); break;
+					case( 5 ) : op( p1.template channel< ChannelDefault( 5 ) >(), p2.template channel< ChannelDefault( 5 ) >() ); break;
+					case( 6 ) : op( p1.template channel< ChannelDefault( 6 ) >(), p2.template channel< ChannelDefault( 6 ) >() ); break;
+					case( 7 ) : op( p1.template channel< ChannelDefault( 7 ) >(), p2.template channel< ChannelDefault( 7 ) >() ); break;
+					case( 8 ) : op( p1.template channel< ChannelDefault( 8 ) >(), p2.template channel< ChannelDefault( 8 ) >() ); break;
+					case( 9 ) : op( p1.template channel< ChannelDefault( 9 ) >(), p2.template channel< ChannelDefault( 9 ) >() ); break;
+					case( 10 ) : op( p1.template channel< ChannelDefault( 10 ) >(), p2.template channel< ChannelDefault( 10 ) >() ); break;
+					default : GANDER_ASSERT( 0, "Channel does not exist in the LayoutContainer." ); break;
+				}
+				*/
 			}
 		}
 	};
-	
+
 	inline void operator () ( Pixel1 &p1, Pixel2 &p2, Op &op )
 	{
 		if( p1.isDynamic() || p2.isDynamic() )
@@ -79,13 +99,28 @@ template< typename Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Ga
 			GANDER_ASSERT( 0, "Dynamic channels are not full supported yet. Seet the todo in Gander::Image::ForEachRecurse." );
 			for( ChannelSet::const_iterator it( dynamicChannels.begin() ); it != dynamicChannels.end(); ++it )
 			{
-				/// \todo: Apply the op to each of the channels that are in the dynamic layout.
+				/*
+				switch( *it )
+				{
+					case( 1 ) : op( p1.template channel< ChannelDefault( 1 ) >(), p2.template channel< ChannelDefault( 1 ) >() ); break;
+					case( 2 ) : op( p1.template channel< ChannelDefault( 2 ) >(), p2.template channel< ChannelDefault( 2 ) >() ); break;
+					case( 3 ) : op( p1.template channel< ChannelDefault( 3 ) >(), p2.template channel< ChannelDefault( 3 ) >() ); break;
+					case( 4 ) : op( p1.template channel< ChannelDefault( 4 ) >(), p2.template channel< ChannelDefault( 4 ) >() ); break;
+					case( 5 ) : op( p1.template channel< ChannelDefault( 5 ) >(), p2.template channel< ChannelDefault( 5 ) >() ); break;
+					case( 6 ) : op( p1.template channel< ChannelDefault( 6 ) >(), p2.template channel< ChannelDefault( 6 ) >() ); break;
+					case( 7 ) : op( p1.template channel< ChannelDefault( 7 ) >(), p2.template channel< ChannelDefault( 7 ) >() ); break;
+					case( 8 ) : op( p1.template channel< ChannelDefault( 8 ) >(), p2.template channel< ChannelDefault( 8 ) >() ); break;
+					case( 9 ) : op( p1.template channel< ChannelDefault( 9 ) >(), p2.template channel< ChannelDefault( 9 ) >() ); break;
+					case( 10 ) : op( p1.template channel< ChannelDefault( 10 ) >(), p2.template channel< ChannelDefault( 10 ) >() ); break;
+					default : GANDER_ASSERT( 0, "Channel does not exist in the LayoutContainer." ); break;
+				}
+				*/
 			}
 		}
 	};
 };
 	
-template< typename Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gander::EnumType StaticMask, Gander::EnumType PartialMask >
+template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gander::EnumType StaticMask, Gander::EnumType PartialMask >
 struct ForEachRecurse
 {
 	enum

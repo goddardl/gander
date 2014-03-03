@@ -73,17 +73,23 @@ struct StaticLayoutBase : public LayoutBase< Derived >
 			IsDynamic = false,
 		};
 
-		template< class ContainerType, ChannelDefault C >
+		template< class ContainerType, ChannelDefault C, bool DisableStaticAsserts = false >
 		inline ReferenceType channel( ContainerType &container );
 
-		template< class ContainerType, ChannelDefault C >
+		template< class ContainerType, ChannelDefault C, bool DisableStaticAsserts = false >
 		inline ConstReferenceType channel( const ContainerType &container ) const;
 
-		template< class ContainerType, EnumType Index, EnumType Mask = Mask_All >
+		template< class ContainerType, EnumType Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline ReferenceType channelAtIndex( ContainerType &container );
 		
-		template< class ContainerType, EnumType Index, EnumType Mask = Mask_All >
+		template< class ContainerType, EnumType Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
 		inline ConstReferenceType channelAtIndex( const ContainerType &container ) const;
+		
+		template< class ContainerType, EnumType Mask = Mask_All >
+		inline ReferenceType channelAtIndex( ContainerType &container, unsigned int index );
+		
+		template< class ContainerType, EnumType Mask = Mask_All >
+		inline ConstReferenceType channelAtIndex( const ContainerType &container, unsigned int index ) const;
 		
 		template< class ContainerType >
 		inline ReferenceType channel( ContainerType &container, Channel c );
@@ -91,12 +97,6 @@ struct StaticLayoutBase : public LayoutBase< Derived >
 		template< class ContainerType >
 		inline ConstReferenceType channel( const ContainerType &container, Channel c ) const;
 
-		template< class ContainerType, EnumType Mask = Mask_All >
-		inline ReferenceType channelAtIndex( ContainerType &container, unsigned int index );
-		
-		template< class ContainerType, EnumType Mask = Mask_All >
-		inline ConstReferenceType channelAtIndex( const ContainerType &container, unsigned int index ) const;
-		
 		template< class ContainerType >
 		inline void setChannelPointer( ContainerType &container, Channel channel, PointerType pointer );
 

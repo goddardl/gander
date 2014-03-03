@@ -137,6 +137,10 @@ struct PixelTest
 		BOOST_CHECK( pixelAccessor == pixel2 );
 		BOOST_CHECK( pixelAccessor.channel<Chan_Z>() == 20. );
 		BOOST_CHECK( z == 20. );
+
+		Get the ForEachChannels struct working with dynamic channels and write a thorough set of tests to prove it. Do tests with compound layouts with dynamic channels etc.
+		There are alot of switch statements around, is there a way that they can be handled in one place? Perhaps a macro?
+
 	}
 
 	void testPixelInterface()

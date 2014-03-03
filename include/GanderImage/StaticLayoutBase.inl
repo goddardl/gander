@@ -57,31 +57,39 @@ inline void StaticLayoutBase< Derived, DataType >::setChannelPointer( ContainerT
 }
 
 template< class Derived, class DataType >
-template< class ContainerType, ChannelDefault C >
+template< class ContainerType, ChannelDefault C, bool DisableStaticAsserts >
 inline typename StaticLayoutBase< Derived, DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channel( ContainerType &container )
 {
+	GANDER_IMAGE_STATIC_ASSERT(
+		( ( ( Derived::ChannelMask & ChannelToMask<C>::Value ) != 0 ) || Derived::IsDynamic || ( C == Chan_None ) || ( DisableStaticAsserts ) ),
+		CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT
+	);
 	return static_cast< Derived * >( this )->template _channel< C >( container );
 }
 
 template< class Derived, class DataType >
-template< class ContainerType, ChannelDefault C >
+template< class ContainerType, ChannelDefault C, bool DisableStaticAsserts >
 inline typename StaticLayoutBase< Derived, DataType >::ConstReferenceType StaticLayoutBase< Derived, DataType >::channel( const ContainerType &container ) const
 {
+	GANDER_IMAGE_STATIC_ASSERT(
+		( ( ( Derived::ChannelMask & ChannelToMask<C>::Value ) != 0 ) || Derived::IsDynamic || ( C == Chan_None ) || ( DisableStaticAsserts ) ),
+		CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT
+	);
 	return static_cast< const Derived * >( this )->template _channel< C >( container );
 }
 		
 template< class Derived, class DataType >
-template< class ContainerType, EnumType Index, EnumType Mask >
+template< class ContainerType, EnumType Index, EnumType Mask, bool DisableStaticAsserts >
 inline typename StaticLayoutBase< Derived, DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container )
 {
-	return static_cast< Derived * >( this )->template _channelAtIndex< Derived::template MaskedChannelIndex< Index, Mask >::Value >( container );
+	return static_cast< Derived * >( this )->template _channelAtIndex< Derived::template MaskedChannelIndex< Index, Mask, DisableStaticAsserts >::Value >( container );
 }
 
 template< class Derived, class DataType >
-template< class ContainerType, EnumType Index, EnumType Mask >
+template< class ContainerType, EnumType Index, EnumType Mask, bool DisableStaticAsserts >
 inline typename StaticLayoutBase< Derived, DataType >::ConstReferenceType StaticLayoutBase< Derived, DataType >::channelAtIndex( const ContainerType &container ) const
 {
-	return static_cast< const Derived * >( this )->template _channelAtIndex< Derived::template MaskedChannelIndex< Index, Mask >::Value >( container );
+	return static_cast< const Derived * >( this )->template _channelAtIndex< Derived::template MaskedChannelIndex< Index, Mask, DisableStaticAsserts >::Value >( container );
 }
 
 template< class Derived, class DataType >
@@ -152,7 +160,7 @@ struct StaticLayoutBase< Derived, DataType >::MaskedChannelIndex
 		};
 
 		GANDER_IMAGE_STATIC_ASSERT( Index != 0xF || DisableStaticAsserts, CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-		GANDER_IMAGE_STATIC_ASSERT( Derived::NumberOfChannels <= 4, THIS_FUNCTION_DOES_NOT_SUPPORT_MORE_THAN_FOUR_CHANNELS__PLEASE_EXTEND_IT_OR_OVERLOAD_IT_TO_ADD_SUPPORT_FOR_MORE )
+		GANDER_IMAGE_STATIC_ASSERT( Derived::NumberOfChannels <= 4, THIS_FUNCTION_DOES_NOT_SUPPORT_MORE_THAN_FOUR_CHANNELS__PLEASE_EXTEND_IT_OR_OVERLOAD_IT_TO_ADD_SUPPORT_FOR_MORE );
 
 	public :
 
