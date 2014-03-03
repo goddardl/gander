@@ -47,99 +47,14 @@
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
-struct AreEqual
-{
-	typedef bool ReturnType;
-	template< class T, class S >
-	ReturnType operator () ( T t, S s )
-	{
-		std::cerr << s << " == " << t << " = " << ( t == s ) << std::endl;
-		return ( t == s );
-	}
-};
-
-template< typename Op >
-struct NoAggregation
-{
-	typedef typename Op::ReturnType ReturnType;
-	inline void append( typename Op::ReturnType ){};
-	inline ReturnType value() const { return ReturnType(); };
-};
-
-template< typename Op >
-struct AndAccumulate
-{
-	typedef typename Op::ReturnType ReturnType;
-	
-	inline AndAccumulate() : m_value( ~ReturnType(0) ) {}
-
-	inline void append( typename Op::ReturnType value ){ m_value &= value; }
-
-	inline ReturnType value() const { return m_value; };
-
-	ReturnType m_value;
-};
-
-template< typename Pixel1, class Pixel2, class Op, class Aggregator, Gander::EnumType FullMask, Gander::EnumType StaticMask, Gander::EnumType PartialMask > struct ForEachRecurse;
-
-template< typename Pixel1, class Pixel2, class Op, class Aggregator, Gander::EnumType FullMask, Gander::EnumType StaticMask > struct ForEachRecurse< Pixel1, Pixel2, Op, Aggregator, FullMask, StaticMask, 0 >
-{
-	inline void operator () ( const Pixel1 &p1, const Pixel2 &p2, Op &op, Aggregator &a )
-	{
-		if( p1.isDynamic() || p2.isDynamic() )
-		{
-			Gander::Image::ChannelSet dynamicChannels( Gander::Image::ChannelMask( FullMask & ( ~StaticMask ) ) ); 
-			dynamicChannels &= p1.channels();
-			dynamicChannels &= p2.channels();
-		
-			//write a loop here which loops over the dynamic channels and applies the op to them. 
-			//Then, write test cases that prove it works...	
-		}
-	};
-};
-	
-template< typename Pixel1, class Pixel2, class Op, class Aggregator, Gander::EnumType FullMask, Gander::EnumType StaticMask, Gander::EnumType PartialMask >
-struct ForEachRecurse
-{
-	enum
-	{
-		Index = Gander::template EnumHelper< PartialMask >::FirstSetBit,
-		NextPartialMask = PartialMask & ( ( ~( Gander::EnumType(0) ) ) << ( Index + 1 ) ),
-		Channel = Index + 1,
-	};
-
-	inline void operator () ( Pixel1 &p1, Pixel2 &p2, Op &op, Aggregator &a )
-	{
-		std::cerr << "Channel " << int( Channel ) << std::endl;
-		a.append( op( p1.template channel< Gander::Image::ChannelDefault( Channel ) >(), p2.template channel< Gander::Image::ChannelDefault( Channel ) >()  ) );
-		ForEachRecurse< Pixel1, Pixel2, Op, Aggregator, FullMask, StaticMask, NextPartialMask >()( p1, p2, op, a );
-	}
-};
-
-template< class Pixel1, class Pixel2, class Op, class Aggregator = NoAggregation< Op > >
-typename Aggregator::ReturnType forEachChannel( Pixel1 &p1, Pixel2 &p2, Op op, Aggregator a = Aggregator() )
-{
-	enum
-	{
-		FullMask = Gander::Image::Mask_All,
-		StaticMask = ( Pixel1::LayoutType::ChannelMask & Pixel2::LayoutType::ChannelMask & FullMask ),
-	};
-	
-	ForEachRecurse< Pixel1, Pixel2, Op, Aggregator, FullMask, StaticMask, StaticMask >()( p1, p2, op, a );
-	
-	return a.value();
-}
+#include "GanderImage/ForEach.h"
+#include "GanderImage/ChannelOps.h"
 
 namespace Gander
 {
 
 namespace Image
 {
-
-template< class Pixel1, class Pixel2 >
-class PixelOp
-{
-};
 
 template< class Derived, class Layout, class Container >
 class PixelBase : public EqualComparisonOperators< Derived >
@@ -158,14 +73,22 @@ class PixelBase : public EqualComparisonOperators< Derived >
 		{
 		}
 
+		template< class T >
+		inline const Derived &operator = ( const T &rhs )
+		{
+			return static_cast< Derived * >( this )->template copyFrom< T >( rhs );
+		}
+		
 		template< EnumType Index > struct LayoutTraits : public Layout::template LayoutTraits< Index > {};
 		template< ChannelDefault C > struct ChannelTraits : public Layout::template ChannelTraits< C > {};
+		template< EnumType Index > struct ChannelTraitsAtIndex : public Layout::template ChannelTraitsAtIndex< Index > {};
 		
 		inline unsigned int numberOfChannels() const { return m_layout.numberOfChannels(); }
 		inline ChannelSet channels() const { return m_layout.channels(); }
 		inline bool isDynamic() const { return m_layout.isDynamic(); }
 		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None ) { m_layout.template addChannels< ContainerType >( c, b ); };
-	
+
+		/// The equalTo method is the implementation of the equality interface.	
 		template< class T >
 		bool equalTo( T const &rhs ) const
 		{
@@ -174,7 +97,21 @@ class PixelBase : public EqualComparisonOperators< Derived >
 				return false;
 			}
 
-			return true;
+			IsEqual op;
+			forEachChannel( *this, rhs, op );
+			return op.value();
+		}
+
+		/// The copyFrom method is the implementation of the assignment operator.		
+		template< class T >
+		inline const Derived & copyFrom( const T &rhs )
+		{
+			GANDER_ASSERT( static_cast< Derived * >( this )->channels() == rhs.channels(),
+				"Cannot copy one pixel to another if they have different channels."
+			);
+			
+			forEachChannel( *this, rhs, Copy() );
+			return *static_cast< const Derived * >( this );
 		}
 
 		template< ChannelDefault C, class ReturnType = typename Type::template ChannelTraits< C >::ReferenceType >
@@ -183,22 +120,58 @@ class PixelBase : public EqualComparisonOperators< Derived >
 			return m_layout.template channel< typename Derived::ContainerType, C >( m_container );
 		}
 
+		template< ChannelDefault C, class ReturnType = typename Type::template ChannelTraits< C >::ConstReferenceType >
+		inline ReturnType channel() const
+		{
+			return m_layout.template channel< typename Derived::ContainerType, C >( m_container );
+		}
+
+		template< EnumType Index, class ReturnType = typename Type::template ChannelTraitsAtIndex< Index >::ReferenceType >
+		inline ReturnType channelAtIndex()
+		{
+			return m_layout.template channelAtIndex< typename Derived::ContainerType, Index >( m_container );
+		}
+
+		template< EnumType Index, class ReturnType = typename Type::template ChannelTraitsAtIndex< Index >::ConstReferenceType >
+		inline ReturnType channelAtIndex() const
+		{
+			return m_layout.template channelAtIndex< typename Derived::ContainerType, Index >( m_container );
+		}
+
 	protected :
 		
 		LayoutType m_layout;
 		ContainerType m_container;
-		
+
+		template< class, class, class > friend class PixelBase;
+		template< class > friend class Pixel;
+		template< class > friend class PixelAccessor;
 };
 
 template< class Layout >
 struct Pixel : public PixelBase< Pixel< Layout >, Layout, typename Layout::ChannelContainerType >
 {
+	private :
+
+		typedef PixelBase< Pixel< Layout >, Layout, typename Layout::ChannelContainerType > BaseType;
+
 	public :	
 
 		typedef typename Layout::ChannelContainerType ContainerType;
 		typedef Layout LayoutType;
 		typedef Pixel< Layout > Type;
 
+		template< class T >
+		inline const Pixel &operator = ( const T &rhs )
+		{
+			return BaseType::template copyFrom< T >( rhs );
+		}
+	
+	private :
+		
+		template< class, class, class > friend class PixelBase;
+		template< class > friend class Pixel;
+		template< class > friend class PixelAccessor;
 };
 
 template< class Layout >
@@ -217,6 +190,22 @@ struct PixelAccessor : public PixelBase< PixelAccessor< Layout >, Layout, typena
 		inline unsigned int numberOfChannelPointers() const { return BaseType::m_layout.numberOfChannelPointers(); };
 		inline ChannelSet requiredChannels() const { return BaseType::m_layout.requiredChannels(); };
 
+		inline void setChannelPointer( Channel channel, void *pointer )
+		{
+			return BaseType::m_layout.template setChannelPointer< ContainerType >( BaseType::m_container, channel, pointer );
+		}
+		
+		template< class T >
+		inline const PixelAccessor & operator = ( const T &rhs )
+		{
+			return BaseType::template copyFrom< T >( rhs );
+		}
+		
+	private :
+
+		template< class, class, class > friend class PixelBase;
+		template< class > friend class Pixel;
+		template< class > friend class PixelAccessor;
 };
 
 }; // namespace Image

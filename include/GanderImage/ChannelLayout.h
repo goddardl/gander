@@ -79,6 +79,7 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		typedef typename BaseType::StorageType StorageType;
 		typedef typename BaseType::PointerType PointerType;
 		typedef typename BaseType::ReferenceType ReferenceType;
+		typedef typename BaseType::ConstReferenceType ConstReferenceType;
 		typedef Detail::ChannelContainerWrapper< Type, Gander::template Tuple< StorageType, NumberOfChannels, false > > ChannelContainerType;
 		typedef Detail::ChannelPointerContainerWrapper< Type, Gander::template Tuple< PointerType, NumberOfChannelPointers, false > > ChannelPointerContainerType;
 
@@ -90,6 +91,7 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 			typedef typename LayoutType::StorageType StorageType;
 			typedef typename LayoutType::PointerType PointerType;
 			typedef typename LayoutType::ReferenceType ReferenceType;
+			typedef typename LayoutType::ConstReferenceType ConstReferenceType;
 			typedef typename LayoutType::ChannelContainerType ChannelContainerType;
 			typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
 			
@@ -122,17 +124,29 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		template< ChannelDefault C >
 		inline ReferenceType _channel( ChannelContainerType &container );
 		
+		template< ChannelDefault C >
+		inline ConstReferenceType _channel( const ChannelContainerType &container ) const;
+		
 		/// Returns a reference to the given channel from the container which is specified by the "C" template argument.
 		template< ChannelDefault C >
 		inline ReferenceType _channel( ChannelPointerContainerType &container );
+		
+		template< ChannelDefault C >
+		inline ConstReferenceType _channel( const ChannelPointerContainerType &container ) const;
 
 		/// Returns a reference to the channel found at the given index into the number of channels in the layout from the container.
 		template< EnumType Index >
 		inline ReferenceType _channelAtIndex( ChannelContainerType &container );
 		
+		template< EnumType Index >
+		inline ConstReferenceType _channelAtIndex( const ChannelContainerType &container ) const;
+		
 		/// Returns a reference to the channel found at the given index into the number of channels in the layout from the container.
 		template< EnumType Index >
 		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container );
+		
+		template< EnumType Index >
+		inline ConstReferenceType _channelAtIndex( const ChannelPointerContainerType &container ) const;
 
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.

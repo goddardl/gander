@@ -171,6 +171,7 @@ struct CompoundLayoutRecurseBase : public LayoutBase< Derived >
 			typedef typename LayoutType::StorageType StorageType;
 			typedef typename LayoutType::PointerType PointerType;
 			typedef typename LayoutType::ReferenceType ReferenceType;
+			typedef typename LayoutType::ConstReferenceType ConstReferenceType;
 			typedef typename LayoutType::ChannelContainerType ChannelContainerType;
 			typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
 		};
@@ -248,6 +249,7 @@ struct CompoundLayoutRecurseBase : public LayoutBase< Derived >
 				typedef typename LayoutType::StorageType StorageType;
 				typedef typename LayoutType::PointerType PointerType;
 				typedef typename LayoutType::ReferenceType ReferenceType;
+				typedef typename LayoutType::ConstReferenceType ConstReferenceType;
 				typedef typename LayoutType::ChannelContainerType ChannelContainerType;
 				typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
 				
@@ -310,6 +312,15 @@ struct CompoundLayoutRecurse< Derived, false, None, None, None, None, None, None
 
 			static typename BaseType::template LayoutTraits< Index, DisableStaticAsserts > l; // We never get here but we still have to return something to keep the compiler happy.
 			return ( ReturnType & ) l;
+		}
+		
+		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
+		inline const ReturnType &child() const
+		{
+			GANDER_ASSERT( 0, "The requested layout does not exist at the given index" );
+
+			static typename BaseType::template LayoutTraits< Index, DisableStaticAsserts > l; // We never get here but we still have to return something to keep the compiler happy.
+			return ( const ReturnType & ) l;
 		}
 		
 		/// Returns the number of channels that this layout represents.
@@ -385,6 +396,18 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 			return ( ReturnType & ) m_dynamicLayout;
 		}
 		
+		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
+		inline const ReturnType &child() const
+		{
+			GANDER_IMAGE_STATIC_ASSERT(
+				( std::is_same< ReturnType, T0 >::value || DisableStaticAsserts ), THE_REQUESTED_LAYOUT_AT_THE_GIVEN_INDEX_DOES_NOT_EXIST
+			);
+
+			GANDER_ASSERT( (  std::is_same< ReturnType, T0 >::value ), "Incorrect return type specified." );
+
+			return ( const ReturnType & ) m_dynamicLayout;
+		}
+		
 		T0 m_dynamicLayout;
 };
 
@@ -439,6 +462,19 @@ struct CompoundLayoutRecurse : public CompoundLayoutRecurse< Derived, IS_DYNAMIC
 			}
 		}
 
+		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
+		inline const ReturnType &child() const
+		{
+			if( std::is_same< ReturnType, T0 >::value )
+			{
+				return ( const ReturnType & ) m_layout;
+			}
+			else
+			{
+				return ( const ReturnType & ) BaseType::template child< Index, DisableStaticAsserts, ReturnType >();
+			}
+		}
+
 		T0 m_layout;
 };
 
@@ -484,6 +520,32 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 			return BaseType::template child< Index, DisableStaticAsserts, typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >();
 		}
 		
+		template< unsigned Index, bool DisableStaticAsserts = true >
+		inline const typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType &child() const
+		{
+			return BaseType::template child< Index, DisableStaticAsserts, typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >();
+		}
+		
+		template<
+			ChannelDefault C,
+			bool DisableStaticAsserts = false,
+			class ConstReferenceType = typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::ConstReferenceType
+		>
+		inline ConstReferenceType channel( const ChannelPointerContainerType &container ) const
+		{
+			typedef typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType LayoutType;	
+			typedef typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType::ChannelPointerContainerType ContainerType;	
+			
+			enum
+			{
+				ChildIndex = CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutIndex,
+			};
+			
+			GANDER_ASSERT( ( std::is_same< ConstReferenceType, typename LayoutType::ConstReferenceType >::value ), "Incorrect return type specified." );
+	
+			return ( ConstReferenceType & ) child< ChildIndex, true >().template channel< ContainerType, C >( container.template child< ChildIndex >() );
+		}
+
 		template<
 			ChannelDefault C,
 			bool DisableStaticAsserts = false,
@@ -491,7 +553,6 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 		>
 		inline ReferenceType channel( ChannelPointerContainerType &container )
 		{
-
 			typedef typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType LayoutType;	
 			typedef typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType::ChannelPointerContainerType ContainerType;	
 			
@@ -503,6 +564,28 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 			GANDER_ASSERT( ( std::is_same< ReferenceType, typename LayoutType::ReferenceType >::value ), "Incorrect return type specified." );
 	
 			return ( ReferenceType & ) child< ChildIndex, true >().template channel< ContainerType, C >( container.template child< ChildIndex >() );
+		}
+		
+		template<
+			EnumType Index,
+			EnumType Mask = Mask_All,
+			bool DisableStaticAsserts = false,
+			class ConstReferenceType = typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::ConstReferenceType
+		>
+		inline ConstReferenceType channelAtIndex( const ChannelPointerContainerType &container ) const
+		{
+			typedef typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutType LayoutType;	
+			typedef typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutType::ChannelPointerContainerType ContainerType;	
+			
+			enum
+			{
+				ChildIndex = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutIndex,
+				ChannelIndexInLayout = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::ChannelIndexInLayout,
+			};
+			
+			GANDER_ASSERT( ( std::is_same< ConstReferenceType, typename LayoutType::ConstReferenceType >::value ), "Incorrect return type specified." );
+	
+			return ( ConstReferenceType & ) child< ChildIndex, true >().template channelAtIndex< ContainerType, ChannelIndexInLayout, Mask >( container.template child< ChildIndex >() );
 		}
 		
 		template<
@@ -527,7 +610,6 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 			return ( ReferenceType & ) child< ChildIndex, true >().template channelAtIndex< ContainerType, ChannelIndexInLayout, Mask >( container.template child< ChildIndex >() );
 		}
 	
-		
 		template<
 			ChannelDefault C,
 			bool DisableStaticAsserts = false,
@@ -547,6 +629,27 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 			GANDER_ASSERT( ( std::is_same< ReferenceType, typename LayoutType::ReferenceType >::value ), "Incorrect return type specified." );
 	
 			return ( ReferenceType & ) child< ChildIndex, true >().template channel< ContainerType, C >( container.template child< ChildIndex >() );
+		}
+		
+		template<
+			ChannelDefault C,
+			bool DisableStaticAsserts = false,
+			class ConstReferenceType = typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::ConstReferenceType
+		>
+		inline ConstReferenceType channel( const ChannelContainerType &container ) const
+		{
+
+			typedef typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType LayoutType;	
+			typedef typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType::ChannelContainerType ContainerType;	
+			
+			enum
+			{
+				ChildIndex = CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutIndex,
+			};
+			
+			GANDER_ASSERT( ( std::is_same< ConstReferenceType, typename LayoutType::ConstReferenceType >::value ), "Incorrect return type specified." );
+	
+			return ( ConstReferenceType & ) child< ChildIndex, true >().template channel< ContainerType, C >( container.template child< ChildIndex >() );
 		}
 		
 		template<
@@ -570,7 +673,95 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 	
 			return ( ReferenceType & ) child< ChildIndex, true >().template channelAtIndex< ContainerType, ChannelIndexInLayout, Mask >( container.template child< ChildIndex >() );
 		}
+		
+		template<
+			EnumType Index,
+			EnumType Mask = Mask_All,
+			bool DisableStaticAsserts = false,
+			class ConstReferenceType = typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::ConstReferenceType
+		>
+		inline ConstReferenceType channelAtIndex( const ChannelContainerType &container ) const
+		{
+			typedef typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutType LayoutType;	
+			typedef typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutType::ChannelContainerType ContainerType;	
+			
+			enum
+			{
+				ChildIndex = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutIndex,
+				ChannelIndexInLayout = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::ChannelIndexInLayout,
+			};
+			
+			GANDER_ASSERT( ( std::is_same< ConstReferenceType, typename LayoutType::ConstReferenceType >::value ), "Incorrect return type specified." );
 	
+			return ( ConstReferenceType & ) child< ChildIndex, true >().template channelAtIndex< ContainerType, ChannelIndexInLayout, Mask >( container.template child< ChildIndex >() );
+		}
+	
+		template<
+			class ContainerType, 
+			ChannelDefault C,
+			bool DisableStaticAsserts = false,
+			class ReferenceType = typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::ReferenceType
+		>
+		inline ReferenceType channel( ContainerType &container )
+		{
+			return this->template channel< C, DisableStaticAsserts, ReferenceType >( container );
+		}
+		
+		template<
+			class ContainerType, 
+			EnumType Index,
+			EnumType Mask = Mask_All,
+			bool DisableStaticAsserts = false,
+			class ReferenceType = typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::ReferenceType
+		>
+		inline ReferenceType channelAtIndex( ContainerType &container )
+		{
+			return this->template channelAtIndex< Index, DisableStaticAsserts, ReferenceType >( container );
+		}
+		
+		template<
+			class ContainerType, 
+			ChannelDefault C,
+			bool DisableStaticAsserts = false,
+			class ConstReferenceType = typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::ConstReferenceType
+		>
+		inline ConstReferenceType channel( const ContainerType &container ) const
+		{
+			return this->template channel< C, DisableStaticAsserts, ConstReferenceType >( container );
+		}
+		
+		template<
+			class ContainerType, 
+			EnumType Index,
+			EnumType Mask = Mask_All,
+			bool DisableStaticAsserts = false,
+			class ConstReferenceType = typename BaseType::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::ConstReferenceType
+		>
+		inline ConstReferenceType channelAtIndex( const ContainerType &container ) const
+		{
+			return this->template channelAtIndex< Index, DisableStaticAsserts, ConstReferenceType >( container );
+		}
+
+		///\ todo See the comments below. 
+		/*
+		 * This hack could be used to remove the ammount of duplicated code by reuiring that only the const versions of the channel() methods need to be implemented.
+		 * However, it is quite nasty and I am not sure about it yet....
+		 *
+		 *
+		template<
+			class ContainerType, 
+			ChannelDefault C,
+			bool DisableStaticAsserts = false,
+			class ReferenceType = typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::ReferenceType
+		>
+		inline ReferenceType channel( ContainerType &container )
+		{
+			return const_cast<ReferenceType>(
+				static_cast< const Type * >( this )->template channel< C, DisableStaticAsserts, typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::ConstReferenceType >( container )
+			);
+		}
+		*/
+		
 		inline void setChannelPointer( ChannelPointerContainerType &container, Channel channel, void *pointer )
 		{
 			GANDER_ASSERT(
@@ -585,7 +776,7 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 				case( 2 ) :
 					setChannelPointer< ChannelDefault( 2 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 2 ), false >::PointerType& >( pointer ) ); break;
 				case( 3 ) :
-					setChannelPointer< ChannelDefault( 3 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 3), false >::PointerType& >( pointer ) ); break;
+					setChannelPointer< ChannelDefault( 3 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 3 ), false >::PointerType& >( pointer ) ); break;
 				case( 4 ) :
 					setChannelPointer< ChannelDefault( 4 ) >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 4 ), false >::PointerType& >( pointer ) ); break;
 				case( 5 ) :

@@ -53,7 +53,21 @@ inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ReferenceType Bro
 
 template< class T, ChannelBrothers B >
 template< ChannelDefault C >
+inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channel( const ChannelPointerContainerType &container ) const
+{
+	return *( container[0] + BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value );
+}
+
+template< class T, ChannelBrothers B >
+template< ChannelDefault C >
 inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channel( ChannelContainerType &container )
+{
+	return container[ BrotherTraits<B>::template BrotherIndexToChannelIndex< BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value >::Value ];
+}
+
+template< class T, ChannelBrothers B >
+template< ChannelDefault C >
+inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channel( const ChannelContainerType &container ) const
 {
 	return container[ BrotherTraits<B>::template BrotherIndexToChannelIndex< BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value >::Value ];
 }
@@ -67,7 +81,22 @@ inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ReferenceType Bro
 
 template< class T, ChannelBrothers B >
 template< EnumType Index >
+inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channelAtIndex( const ChannelPointerContainerType &container ) const
+{
+	return *( container[0] + BrotherTraits<B>::template ChannelIndexToBrotherIndex< Index >::Value );
+}
+
+
+template< class T, ChannelBrothers B >
+template< EnumType Index >
 inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channelAtIndex( ChannelContainerType &container )
+{
+	return container[ Index ];
+}
+
+template< class T, ChannelBrothers B >
+template< EnumType Index >
+inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channelAtIndex( const ChannelContainerType &container ) const
 {
 	return container[ Index ];
 }

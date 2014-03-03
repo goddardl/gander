@@ -68,6 +68,7 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 		typedef typename BaseType::StorageType StorageType;
 		typedef typename BaseType::PointerType PointerType;
 		typedef typename BaseType::ReferenceType ReferenceType;
+		typedef typename BaseType::ConstReferenceType ConstReferenceType;
 		typedef Detail::ChannelContainerWrapper< Type, Gander::template Tuple< StorageType, BaseType::NumberOfChannels, true > > ChannelContainerType;
 		typedef Detail::ChannelPointerContainerWrapper< Type, Gander::template Tuple< PointerType, BaseType::NumberOfChannelPointers, true > > ChannelPointerContainerType;
 		
@@ -79,6 +80,7 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 			typedef typename LayoutType::StorageType StorageType;
 			typedef typename LayoutType::PointerType PointerType;
 			typedef typename LayoutType::ReferenceType ReferenceType;
+			typedef typename LayoutType::ConstReferenceType ConstReferenceType;
 			typedef typename LayoutType::ChannelContainerType ChannelContainerType;
 			typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
 
@@ -133,15 +135,19 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 
 		/// Returns a reference to the given channel from the container.
 		inline ReferenceType _channel( ChannelContainerType &container, Channel c );
+		inline ConstReferenceType _channel( const ChannelContainerType &container, Channel c ) const;
 		
 		/// Returns a reference to the given channel from the container.
 		inline ReferenceType _channel( ChannelPointerContainerType &container, Channel c );
+		inline ConstReferenceType _channel( const ChannelPointerContainerType &container, Channel c ) const;
 
 		/// Returns a reference to the channel found at the given index into the number of channels in the layout from the container.
 		inline ReferenceType _channelAtIndex( ChannelContainerType &container, unsigned int index );
+		inline ConstReferenceType _channelAtIndex( const ChannelContainerType &container, unsigned int index ) const;
 		
 		/// Returns a reference to the channel found at the given index into the number of channels in the layout from the container.
 		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container, unsigned int index );
+		inline ConstReferenceType _channelAtIndex( const ChannelPointerContainerType &container, unsigned int index ) const;
 		
 		/// Sets the value of the pointer to the given channel in the container.
 		/// Pointers can only be set for channels that are returned from the requiredChannels() method. By setting pointers

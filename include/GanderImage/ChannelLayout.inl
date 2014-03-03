@@ -47,7 +47,21 @@ inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ReferenceType Chan
 
 template< class T, ChannelDefault S >
 template< ChannelDefault C >
+inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ConstReferenceType ChannelLayout< T, S >::_channel( const ChannelContainerType &container ) const
+{
+	return container[0];
+}
+
+template< class T, ChannelDefault S >
+template< ChannelDefault C >
 inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channel( ChannelPointerContainerType &container )
+{
+	return *container[0];
+}
+
+template< class T, ChannelDefault S >
+template< ChannelDefault C >
+inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ConstReferenceType ChannelLayout< T, S >::_channel( const ChannelPointerContainerType &container ) const
 {
 	return *container[0];
 }
@@ -61,7 +75,21 @@ inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ReferenceType Chan
 
 template< class T, ChannelDefault S >
 template< EnumType Index >
+inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ConstReferenceType ChannelLayout< T, S >::_channelAtIndex( const ChannelContainerType &container ) const
+{
+	return container[0];
+}
+
+template< class T, ChannelDefault S >
+template< EnumType Index >
 inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channelAtIndex( ChannelPointerContainerType &container )
+{
+	return *container[0];
+}
+
+template< class T, ChannelDefault S >
+template< EnumType Index >
+inline typename StaticLayoutBase< ChannelLayout< T, S >, T >:: ConstReferenceType ChannelLayout< T, S >::_channelAtIndex( const ChannelPointerContainerType &container ) const
 {
 	return *container[0];
 }

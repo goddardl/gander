@@ -64,6 +64,7 @@ template< EnumType ID, ChannelDefault S > struct TestLayout
 	typedef typename Gander::template TypeTraits< float >::StorageType StorageType;
 	typedef typename Gander::template TypeTraits< float >::PointerType PointerType;
 	typedef typename Gander::template TypeTraits< float >::ReferenceType ReferenceType;
+	typedef typename Gander::template TypeTraits< float >::ConstReferenceType ConstReferenceType;
 	typedef Gander::template Tuple< StorageType, NumberOfChannels, false > ChannelContainerType;
 	typedef Gander::template Tuple< PointerType, NumberOfChannelPointers, false > ChannelPointerContainerType;
 		
@@ -75,6 +76,7 @@ template< EnumType ID, ChannelDefault S > struct TestLayout
 		typedef typename LayoutType::ChannelType ChannelType;
 		typedef typename LayoutType::PointerType PointerType;
 		typedef typename LayoutType::ReferenceType ReferenceType;
+		typedef typename LayoutType::ConstReferenceType ConstReferenceType;
 	};
 };
 

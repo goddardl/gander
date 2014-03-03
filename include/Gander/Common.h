@@ -84,10 +84,11 @@ namespace Gander
 template< class Q >
 struct TypeTraits
 {
-	typedef Q Type;				// The data type that is stored in memory.
-	typedef Q StorageType;		// The data type that is used to store Type.
-	typedef Q& ReferenceType;	// The data type that is used to act as a reference to Type.
-	typedef Q* PointerType;		// The data type that is used to act as a pointer to Type.
+	typedef Q Type;						// The data type that is stored in memory.
+	typedef Q StorageType;				// The data type that is used to store Type.
+	typedef Q& ReferenceType;			// The data type that is used to act as a reference to Type.
+	typedef const Q & ConstReferenceType;	// The data type that is used to act as a reference to a const Type.
+	typedef Q* PointerType;				// The data type that is used to act as a pointer to Type.
 };
 
 template< class T, class S, bool Condition > struct TypeSelector;

@@ -66,6 +66,7 @@ struct DynamicLayoutBase : public LayoutBase< Derived >
 		typedef typename Gander::template TypeTraits< DataType >::StorageType StorageType;
 		typedef typename Gander::template TypeTraits< DataType >::PointerType PointerType;
 		typedef typename Gander::template TypeTraits< DataType >::ReferenceType ReferenceType;
+		typedef typename Gander::template TypeTraits< DataType >::ConstReferenceType ConstReferenceType;
 		
 		enum
 		{

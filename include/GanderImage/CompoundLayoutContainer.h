@@ -95,6 +95,17 @@ struct CompoundLayoutContainerRecurse< CompoundLayout, 0, Container >
 			return r; // Return it.
 		};
 		
+		template< class ReturnType, EnumType Index >
+		inline const ReturnType &child() const
+		{
+			GANDER_ASSERT( Index >= 0 || Index < CompoundLayout::NumberOfLayouts, "Index is out of bounds." );
+
+			// We never get here but we still need to return something to appease the compiler. So...
+			static typename ReturnType::LayoutType layout; // Create an instance of a layout.
+			static ReturnType r( layout ); // Initialize the container with it.
+			return r; // Return it.
+		};
+		
 		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
 		{
 		}
@@ -114,6 +125,7 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 		typedef typename LayoutType::StorageType StorageType;
 		typedef typename LayoutType::PointerType PointerType;
 		typedef typename LayoutType::ReferenceType ReferenceType;
+		typedef typename LayoutType::ConstReferenceType ConstReferenceType;
 	
 		typedef typename LayoutType::ChannelContainerType ChannelContainerType;
 		typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
@@ -157,6 +169,19 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 			}
 		};
 
+		template< class ReturnType, EnumType Index >
+		inline const ReturnType &child() const
+		{
+			if( Index == LayoutIndex )
+			{
+				return ( const ReturnType & ) m_container;
+			}
+			else
+			{
+				return BaseType::template child< ReturnType, Index >();
+			}
+		};
+
 	private :
 
 		ContainerType m_container;
@@ -182,6 +207,21 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 			typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelContainerType,
 			typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelPointerContainerType
 		>::type &child()
+		{
+			typedef typename std::conditional<
+				Container == ChannelContainer, 
+				typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelContainerType,
+				typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelPointerContainerType
+			>::type ReturnType;
+
+			return BaseType::template child< ReturnType, Index >();
+		};
+
+		template< EnumType Index >
+		inline const typename std::conditional< Container == ChannelContainer, 
+			typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelContainerType,
+			typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelPointerContainerType
+		>::type &child() const
 		{
 			typedef typename std::conditional<
 				Container == ChannelContainer, 
@@ -236,6 +276,30 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 			>::type ContainerType;
 
 			return ( ReferenceType & ) layout.template channel< ContainerType, C >( child< ChildIndex >() );
+		}
+	
+		template<
+			ChannelDefault C,
+			bool DisableStaticAsserts = false,
+			class ConstReferenceType = typename CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::ConstReferenceType
+		>
+		inline ConstReferenceType channel( const typename CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutType &layout ) const
+		{
+			typedef typename CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutType LayoutType;	
+			
+			enum
+			{
+				ChildIndex = CompoundLayout::template ChannelTraits< C, DisableStaticAsserts >::LayoutIndex,
+			};
+			
+			GANDER_ASSERT( ( std::is_same< ConstReferenceType, typename LayoutType::ConstReferenceType >::value ), "Incorrect return type specified." );
+	
+			typedef typename std::conditional< Container == ChannelContainer, 
+				typename LayoutType::ChannelContainerType,
+				typename LayoutType::ChannelPointerContainerType
+			>::type ContainerType;
+
+			return ( ConstReferenceType & ) layout.template channel< ContainerType, C >( child< ChildIndex >() );
 		}
 	
 		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )

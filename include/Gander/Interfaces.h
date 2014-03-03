@@ -51,8 +51,11 @@ namespace Gander
 template< typename Derived >
 class EqualComparisonOperators
 {
-	friend inline bool operator == ( Derived const &a, Derived const &b ) { return  a.equalTo(b); }
-	friend inline bool operator != ( Derived const &a, Derived const &b ) { return !a.equalTo(b); }
+	template< class B >
+	friend inline bool operator != ( Derived const &a, B const &b ) { return !a.equalTo(b); }
+
+	template< class B >
+	friend inline bool operator == ( Derived const &a, B const &b ) { return a.equalTo(b); }
 };
 
 /// A class template to define the pre-decrement and post-decrement operators.

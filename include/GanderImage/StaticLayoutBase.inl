@@ -40,9 +40,20 @@ namespace Image
 
 template< class Derived, class DataType >
 template< class ContainerType >
+inline void StaticLayoutBase< Derived, DataType >::setChannelPointer( ContainerType &container, Channel channel, void * pointer )
+{
+	PointerType ptr = static_cast< PointerType >( pointer );
+	this->setChannelPointer( container, channel, ptr );
+}
+
+template< class Derived, class DataType >
+template< class ContainerType >
 inline void StaticLayoutBase< Derived, DataType >::setChannelPointer( ContainerType &container, Channel channel, PointerType pointer )
 {
-	return static_cast< Derived * >( this )->_setChannelPointer( container, channel, pointer );
+	GANDER_ASSERT( static_cast< Derived * >( this )->requiredChannels().contains( channel ) && pointer != NULL,
+		"Channel pointers can only be set for channels that are in the ChannelSet returned by requiredChannels()"
+	);
+	static_cast< Derived * >( this )->_setChannelPointer( container, channel, pointer );
 }
 
 template< class Derived, class DataType >
@@ -51,12 +62,26 @@ inline typename StaticLayoutBase< Derived, DataType >::ReferenceType StaticLayou
 {
 	return static_cast< Derived * >( this )->template _channel< C >( container );
 }
+
+template< class Derived, class DataType >
+template< class ContainerType, ChannelDefault C >
+inline typename StaticLayoutBase< Derived, DataType >::ConstReferenceType StaticLayoutBase< Derived, DataType >::channel( const ContainerType &container ) const
+{
+	return static_cast< const Derived * >( this )->template _channel< C >( container );
+}
 		
 template< class Derived, class DataType >
 template< class ContainerType, EnumType Index, EnumType Mask >
 inline typename StaticLayoutBase< Derived, DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container )
 {
 	return static_cast< Derived * >( this )->template _channelAtIndex< Derived::template MaskedChannelIndex< Index, Mask >::Value >( container );
+}
+
+template< class Derived, class DataType >
+template< class ContainerType, EnumType Index, EnumType Mask >
+inline typename StaticLayoutBase< Derived, DataType >::ConstReferenceType StaticLayoutBase< Derived, DataType >::channelAtIndex( const ContainerType &container ) const
+{
+	return static_cast< const Derived * >( this )->template _channelAtIndex< Derived::template MaskedChannelIndex< Index, Mask >::Value >( container );
 }
 
 template< class Derived, class DataType >

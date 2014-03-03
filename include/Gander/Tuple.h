@@ -61,8 +61,9 @@ struct Tuple< T, NumberOfElements, false >
 	public :
 
 		typedef T StorageType;
-		typedef T &ReferenceType;
-		typedef T *PointerType;
+		typedef StorageType &ReferenceType;
+		typedef const StorageType &ConstReferenceType;
+		typedef StorageType *PointerType;
 	
 		/// iterator Type Declarations 	
 		typedef const StorageType * const_iterator;
@@ -78,7 +79,7 @@ struct Tuple< T, NumberOfElements, false >
 		}
 	
 		inline ReferenceType operator[] ( unsigned int i ) { return m_data[i]; };
-		inline const ReferenceType operator[] ( unsigned int i ) const { return m_data[i]; };
+		inline ConstReferenceType operator[] ( unsigned int i ) const { return m_data[i]; };
 
 		inline const_iterator begin() const
 		{
@@ -134,8 +135,9 @@ struct Tuple< T, NumberOfElements, true >
 	public :
 	
 		typedef T StorageType;
-		typedef T &ReferenceType;
-		typedef T *PointerType;
+		typedef StorageType &ReferenceType;
+		typedef const StorageType &ConstReferenceType;
+		typedef StorageType *PointerType;
 
 		/// iterator Type Declarations 	
 		typedef typename std::vector< StorageType >::const_iterator const_iterator;
@@ -151,7 +153,7 @@ struct Tuple< T, NumberOfElements, true >
 		{}
 
 		inline ReferenceType operator[] ( unsigned int i ) { return m_data[i]; };
-		inline const ReferenceType operator[] ( unsigned int i ) const { return m_data[i]; };
+		inline ConstReferenceType operator[] ( unsigned int i ) const { return m_data[i]; };
 		
 		inline unsigned int size() const
 		{

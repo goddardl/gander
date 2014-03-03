@@ -38,6 +38,7 @@
 #include "GanderImage/DynamicLayout.h"
 #include "GanderImage/ChannelLayout.h"
 #include "GanderImage/BrothersLayout.h"
+#include "GanderImage/CompoundLayout.h"
 #include "GanderImageTest/PixelTest.h"
 
 #include "boost/test/floating_point_comparison.hpp"
@@ -57,6 +58,34 @@ namespace ImageTest
 
 struct PixelTest
 {
+
+	void testPixelWithCompoundLayout()
+	{
+		typedef BrothersLayout< float, Brothers_BGRA > Layout1;
+		typedef ChannelLayout< float, Chan_Z > Layout2;
+		typedef BrothersLayout< int, Brothers_VU > Layout3;
+		typedef CompoundLayout< Layout1, Layout2, Layout3 > CompoundLayout;
+
+		typedef Gander::Image::Pixel< CompoundLayout > Pixel;
+		typedef Gander::Image::PixelAccessor< CompoundLayout > PixelAccessor;
+		
+		Pixel pixel;
+		pixel.channel<Chan_Red>() = 1.;
+		pixel.channel<Chan_Green>() = 2.;
+		pixel.channel<Chan_Blue>() = 3.;
+		pixel.channel<Chan_Alpha>() = 4.;
+		pixel.channel<Chan_Z>() = 5.;
+		pixel.channel<Chan_U>() = 6;
+		pixel.channel<Chan_V>() = 7;
+		
+		Pixel pixel2( pixel );
+
+		// These the comparison operators.
+		BOOST_CHECK( pixel == pixel2 );
+		pixel.channel<Chan_Z>() = 20.;
+		BOOST_CHECK( pixel != pixel2 );
+	}
+
 	void testPixelInterface()
 	{
 		typedef BrothersLayout< float, Brothers_BGRA > Layout;
@@ -86,17 +115,43 @@ struct PixelTest
 		BOOST_CHECK( ( std::is_same< Pixel::ChannelTraits< Chan_Green >::LayoutType, Layout >::value ) );
 		BOOST_CHECK( ( std::is_same< Pixel::ChannelTraits< Chan_Blue >::LayoutType, Layout >::value ) );
 		BOOST_CHECK( ( std::is_same< Pixel::ChannelTraits< Chan_Alpha >::LayoutType, Layout >::value ) );
+
+		BOOST_CHECK_EQUAL( pixel.channel<Chan_Red>(), 1. );
+		BOOST_CHECK_EQUAL( pixel.channel<Chan_Green>(), 2. );
+		BOOST_CHECK_EQUAL( pixel.channel<Chan_Blue>(), 3. );
+		BOOST_CHECK_EQUAL( pixel.channel<Chan_Alpha>(), 4. );
+		
+		// Create a PixelAccessor with the same values as the pixel.
+		float bgra[4] = { 3., 2., 1., 4. };
+		PixelAccessor pixelAccessor;
+		BOOST_CHECK_EQUAL( pixelAccessor.channels(), ChannelSet( Mask_RGBA ) );
+		BOOST_CHECK_EQUAL( pixelAccessor.requiredChannels(), ChannelSet( Mask_Blue ) );
+		BOOST_CHECK_THROW( pixelAccessor.setChannelPointer( Chan_Red, &bgra[0] ), std::runtime_error );
+		BOOST_CHECK_THROW( pixelAccessor.setChannelPointer( Chan_Blue, 0 ), std::runtime_error );
+		
+		pixelAccessor.setChannelPointer( Chan_Blue, &bgra[0] );
+		BOOST_CHECK_EQUAL( pixelAccessor.channel<Chan_Red>(), 1. );
+		BOOST_CHECK_EQUAL( pixelAccessor.channel<Chan_Green>(), 2. );
+		BOOST_CHECK_EQUAL( pixelAccessor.channel<Chan_Blue>(), 3. );
+		BOOST_CHECK_EQUAL( pixelAccessor.channel<Chan_Alpha>(), 4. );
+		
+		// Test the equality operator.
 		BOOST_CHECK( pixel == pixel2 );
+		pixel2.channel<Chan_Green>() = 7.;
+		BOOST_CHECK( pixel != pixel2 );
+		BOOST_CHECK( pixel == pixelAccessor );
+		BOOST_CHECK( pixel2 != pixelAccessor );
 
-		std::cerr << forEachChannel( pixel, pixel2, AreEqual(), AndAccumulate<AreEqual>() ) << std::endl;
-/*
-		todo:
+		// Test the assignment operator of both the Pixel class and the PixelAccessor class.
+		pixel = pixel2;
+		BOOST_CHECK( pixel == pixel2 );
+		BOOST_CHECK( pixel != pixelAccessor );
 
-		Make the struct that loops over the channels work for dynamic layouts too.
-		Sort out the op structure. Perhaps the base class can be the iterator and the Channel ops derive from it?
-		Add the pixel comparison to the pixel class using a AreEqual op.
-		Add a runtime channel() method to the compoundLayout and make the return type a template parameter which is set to the first layouts ReferenceType by default.
-*/
+		pixelAccessor = pixel;
+		BOOST_CHECK( pixelAccessor == pixel2 );
+		BOOST_CHECK( pixelAccessor == pixel );
+		BOOST_CHECK( pixelAccessor.channel<Chan_Green>() == 7. );
+		BOOST_CHECK( bgra[1] == 7. );
 	}
 };
 
@@ -106,6 +161,7 @@ struct PixelTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<PixelTest> instance( new PixelTest() );
 		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelInterface, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelWithCompoundLayout, instance ) );
 	}
 };
 
