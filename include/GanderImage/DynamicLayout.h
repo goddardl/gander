@@ -113,17 +113,17 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 		inline unsigned int numberOfChannelPointers() const;
 		//@}
 	
+	private :
+
+		friend class DynamicLayoutBase< DynamicLayout< T >, T >;
+		friend class LayoutBase< DynamicLayout< T > >;
+	
 		/// Inserts a new channel into the container and also adds the channel to the Layout, logging all pertenant information.
 		template< class ContainerType >
 		void _addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b = Brothers_None );
 
 		/// Adds the channel to the Layout and logs all pertenant information.
 		void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None );
-	
-	private :
-
-		friend class DynamicLayoutBase< DynamicLayout< T >, T >;
-		friend class LayoutBase< DynamicLayout< T > >;
 		
 		/// Returns a ChannelSet of the channels that pointers are required for in order
 		/// to access all of the channels in this layout.

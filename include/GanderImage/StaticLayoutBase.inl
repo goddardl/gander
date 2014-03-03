@@ -60,10 +60,6 @@ template< class Derived, class DataType >
 template< class ContainerType, ChannelDefault C, bool DisableStaticAsserts >
 inline typename StaticLayoutBase< Derived, DataType >::ReferenceType StaticLayoutBase< Derived, DataType >::channel( ContainerType &container )
 {
-	GANDER_IMAGE_STATIC_ASSERT(
-		( ( ( Derived::ChannelMask & ChannelToMask<C>::Value ) != 0 ) || Derived::IsDynamic || ( C == Chan_None ) || ( DisableStaticAsserts ) ),
-		CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT
-	);
 	return static_cast< Derived * >( this )->template _channel< C >( container );
 }
 
@@ -71,10 +67,6 @@ template< class Derived, class DataType >
 template< class ContainerType, ChannelDefault C, bool DisableStaticAsserts >
 inline typename StaticLayoutBase< Derived, DataType >::ConstReferenceType StaticLayoutBase< Derived, DataType >::channel( const ContainerType &container ) const
 {
-	GANDER_IMAGE_STATIC_ASSERT(
-		( ( ( Derived::ChannelMask & ChannelToMask<C>::Value ) != 0 ) || Derived::IsDynamic || ( C == Chan_None ) || ( DisableStaticAsserts ) ),
-		CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT
-	);
 	return static_cast< const Derived * >( this )->template _channel< C >( container );
 }
 		

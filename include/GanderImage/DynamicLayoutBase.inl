@@ -113,7 +113,6 @@ inline typename DynamicLayoutBase< Derived, DataType >::ReferenceType DynamicLay
 	return static_cast< Derived * >( this )->_channel( container, channel );
 }
 
-
 template< class Derived, class DataType >
 template< class ContainerType >
 void DynamicLayoutBase< Derived, DataType >::addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b )

@@ -48,11 +48,6 @@ namespace Image
 namespace Detail
 {
 
-template< class Pixel1, class Pixel2, class Op >
-void ForEachOpAtRuntime1( const Pixel1 &p1, const Pixel2 &p2, Op &op, Channel channel )
-{
-}
-
 template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gander::EnumType StaticMask, Gander::EnumType PartialMask > struct ForEachRecurse;
 
 template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gander::EnumType StaticMask > struct ForEachRecurse< Pixel1, Pixel2, Op, FullMask, StaticMask, 0 >
@@ -68,7 +63,6 @@ template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gande
 			GANDER_ASSERT( 0, "Dynamic channels are not full supported yet. Seet the todo in Gander::Image::ForEachRecurse." );
 			for( ChannelSet::const_iterator it( dynamicChannels.begin() ); it != dynamicChannels.end(); ++it )
 			{
-				/*
 				switch( *it )
 				{
 					case( 1 ) : op( p1.template channel< ChannelDefault( 1 ) >(), p2.template channel< ChannelDefault( 1 ) >() ); break;
@@ -83,7 +77,6 @@ template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gande
 					case( 10 ) : op( p1.template channel< ChannelDefault( 10 ) >(), p2.template channel< ChannelDefault( 10 ) >() ); break;
 					default : GANDER_ASSERT( 0, "Channel does not exist in the LayoutContainer." ); break;
 				}
-				*/
 			}
 		}
 	};
@@ -99,7 +92,6 @@ template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gande
 			GANDER_ASSERT( 0, "Dynamic channels are not full supported yet. Seet the todo in Gander::Image::ForEachRecurse." );
 			for( ChannelSet::const_iterator it( dynamicChannels.begin() ); it != dynamicChannels.end(); ++it )
 			{
-				/*
 				switch( *it )
 				{
 					case( 1 ) : op( p1.template channel< ChannelDefault( 1 ) >(), p2.template channel< ChannelDefault( 1 ) >() ); break;
@@ -114,7 +106,6 @@ template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gande
 					case( 10 ) : op( p1.template channel< ChannelDefault( 10 ) >(), p2.template channel< ChannelDefault( 10 ) >() ); break;
 					default : GANDER_ASSERT( 0, "Channel does not exist in the LayoutContainer." ); break;
 				}
-				*/
 			}
 		}
 	};

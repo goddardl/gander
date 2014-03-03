@@ -58,6 +58,27 @@ namespace ImageTest
 
 struct PixelTest
 {
+	void testPixelWithDynamicCompoundLayout()
+	{
+		typedef BrothersLayout< float, Brothers_BGRA > Layout1;
+		typedef ChannelLayout< float, Chan_Z > Layout2;
+		typedef DynamicLayout< int > Layout3;
+		typedef CompoundLayout< Layout1, Layout2, Layout3 > CompoundLayout;
+		
+		typedef Gander::Image::Pixel< CompoundLayout > Pixel;
+		typedef Gander::Image::PixelAccessor< CompoundLayout > PixelAccessor;
+		
+		Pixel pixel;
+		pixel.channel<Chan_Red>() = 1.;
+		pixel.channel<Chan_Green>() = 2.;
+		pixel.channel<Chan_Blue>() = 3.;
+		pixel.channel<Chan_Alpha>() = 4.;
+		pixel.channel<Chan_Z>() = 5.;
+		BOOST_CHECK_EQUAL( pixel.channels(), ChannelSet( Mask_RGBA | Mask_Z ) );
+
+		pixel.addChannels( Mask_UV );
+		BOOST_CHECK_EQUAL( pixel.channels(), ChannelSet( Mask_RGBA | Mask_Z | Mask_UV ) );
+	}
 
 	void testPixelWithCompoundLayout()
 	{
@@ -137,10 +158,6 @@ struct PixelTest
 		BOOST_CHECK( pixelAccessor == pixel2 );
 		BOOST_CHECK( pixelAccessor.channel<Chan_Z>() == 20. );
 		BOOST_CHECK( z == 20. );
-
-		Get the ForEachChannels struct working with dynamic channels and write a thorough set of tests to prove it. Do tests with compound layouts with dynamic channels etc.
-		There are alot of switch statements around, is there a way that they can be handled in one place? Perhaps a macro?
-
 	}
 
 	void testPixelInterface()
@@ -227,6 +244,7 @@ struct PixelTestSuite : public boost::unit_test::test_suite
 		boost::shared_ptr<PixelTest> instance( new PixelTest() );
 		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelInterface, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelWithCompoundLayout, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelWithDynamicCompoundLayout, instance ) );
 	}
 };
 

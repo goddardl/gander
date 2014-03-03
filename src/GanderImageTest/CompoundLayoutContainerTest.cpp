@@ -61,55 +61,20 @@ struct CompoundLayoutContainerTest
 {
 	void testCompoundLayoutContainer()
 	{
-		typedef Gander::Image::CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< int, Chan_Z >, ChannelLayout< int, Chan_V > > L1;
-		L1 compoundLayout;
-		Gander::Image::Detail::CompoundLayoutContainer< L1, Gander::Image::Detail::ChannelContainer > cc( compoundLayout );
+		typedef Gander::Image::CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< int, Chan_Z >, ChannelLayout< int, Chan_V > > CompoundLayout;
+		typedef Gander::Image::Detail::CompoundLayoutContainer< CompoundLayout, Gander::Image::Detail::ChannelContainer > CompoundLayoutContainer;
+		
+		CompoundLayout compoundLayout;
+		CompoundLayoutContainer cc( compoundLayout );
 
+		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ContainerTraitsAtIndex<0>::ContainerType, BrothersLayout< float, Brothers_BGRA >::ChannelContainerType >::value ) );
+		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ContainerTraitsAtIndex<1>::ContainerType, ChannelLayout< int, Chan_Z >::ChannelContainerType >::value ) );
+		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ContainerTraitsAtIndex<2>::ContainerType, ChannelLayout< int, Chan_V >::ChannelContainerType >::value ) );
 		BOOST_CHECK( ( compoundLayout.child<0>() == BrothersLayout< float, Brothers_BGRA >() ) );
 		BOOST_CHECK( ( compoundLayout.child<1>() == ChannelLayout< int, Chan_Z >() ) );
 		BOOST_CHECK( ( compoundLayout.child<2>() == ChannelLayout< int, Chan_V >() ) );
 
-		cc.channel< Chan_Blue >( compoundLayout.child<0>() ) = 3.;
-		cc.channel< Chan_Green >( compoundLayout.child<0>() ) = 2.;
-		cc.channel< Chan_Red >( compoundLayout.child<0>() ) = 1.;
-		cc.channel< Chan_Alpha >( compoundLayout.child<0>() ) = 4.;
-		cc.channel< Chan_Z >( compoundLayout.child<1>() ) = 5;
-		cc.channel< Chan_V >( compoundLayout.child<2>() ) = 6;
-
 		BOOST_CHECK_EQUAL( cc.size(), compoundLayout.channels().size() );		
-		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Red >( compoundLayout.child<0>() ) ), 1. );
-		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Green >( compoundLayout.child<0>() ) ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Blue >( compoundLayout.child<0>() ) ), 3. );
-		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Alpha >( compoundLayout.child<0>() ) ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.channel< Chan_Z >( compoundLayout.child<1>() ) ), 5 );
-		BOOST_CHECK_EQUAL( ( cc.channel< Chan_V >( compoundLayout.child<2>() ) ), 6 );
-
-//		Get the compound layout to use the CompoundLayoutContainer and make sure the interface matches that of the other containers and layouts.
-//		Write a thorough set of tests including dynamic layouts and popinters.
-	
-/*		
-		BOOST_CHECK_EQUAL( ( cc.channel< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_Green ) ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.channel< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_Alpha ) ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.channel< int, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_V ) ), 6 );
-		BOOST_CHECK_THROW( ( cc.channel< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( Chan_V ) ), std::runtime_error );
-		
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 0 >( compoundLayout ) ), 3. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 1 >( compoundLayout ) ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 2 >( compoundLayout ) ), 1. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 3 >( compoundLayout ) ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 4 >( compoundLayout ) ), 5 );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 5 >( compoundLayout ) ), 6 );
-		
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 0, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( compoundLayout ) ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 1, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( compoundLayout ) ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< 2, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( compoundLayout ) ), 6 );
-	
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 0 ) ), 2. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 1 ) ), 4. );
-		BOOST_CHECK_EQUAL( ( cc.channelAtIndex< int, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 2 ) ), 6 );
-		BOOST_CHECK_THROW( ( cc.channelAtIndex< float, ChannelMask( CombineMasks< Mask_Green, Mask_V, Mask_Alpha >::Value ) >( 2 ) ), std::runtime_error );
-		
-		*/
 	}
 };
 

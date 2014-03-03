@@ -80,13 +80,13 @@ class PixelBase : public EqualComparisonOperators< Derived >
 		}
 		
 		template< EnumType Index > struct LayoutTraits : public Layout::template LayoutTraits< Index > {};
-		template< ChannelDefault C > struct ChannelTraits : public Layout::template ChannelTraits< C > {};
+		template< ChannelDefault C, bool DisableStaticAsserts = false > struct ChannelTraits : public Layout::template ChannelTraits< C, DisableStaticAsserts > {};
 		template< EnumType Index > struct ChannelTraitsAtIndex : public Layout::template ChannelTraitsAtIndex< Index > {};
 		
 		inline unsigned int numberOfChannels() const { return m_layout.numberOfChannels(); }
 		inline ChannelSet channels() const { return m_layout.channels(); }
 		inline bool isDynamic() const { return m_layout.isDynamic(); }
-		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None ) { m_layout.template addChannels< ContainerType >( c, b ); };
+		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None ) { m_layout.template addChannels< ContainerType >( m_container, c, b ); };
 
 		/// The equalTo method is the implementation of the equality interface.	
 		template< class T >
@@ -114,16 +114,16 @@ class PixelBase : public EqualComparisonOperators< Derived >
 			return *static_cast< const Derived * >( this );
 		}
 
-		template< ChannelDefault C, class ReturnType = typename Type::template ChannelTraits< C >::ReferenceType >
+		template< ChannelDefault C, class ReturnType = typename Type::template ChannelTraits< C, true >::ReferenceType >
 		inline ReturnType channel()
 		{
-			return m_layout.template channel< typename Derived::ContainerType, C >( m_container );
+			return m_layout.template channel< typename Derived::ContainerType, C, true >( m_container );
 		}
 
-		template< ChannelDefault C, class ReturnType = typename Type::template ChannelTraits< C >::ConstReferenceType >
+		template< ChannelDefault C, class ReturnType = typename Type::template ChannelTraits< C, true >::ConstReferenceType >
 		inline ReturnType channel() const
 		{
-			return m_layout.template channel< typename Derived::ContainerType, C >( m_container );
+			return m_layout.template channel< typename Derived::ContainerType, C, true >( m_container );
 		}
 
 		template< EnumType Index, class ReturnType = typename Type::template ChannelTraitsAtIndex< Index >::ReferenceType >

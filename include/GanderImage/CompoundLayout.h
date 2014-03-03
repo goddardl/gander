@@ -376,12 +376,6 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 		}
 		//@}
 	
-		/// Adds the channel to the Layout and logs all pertenant information.
-		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			m_dynamicLayout.addChannels( c, b );
-		}
-
 	protected :	
 
 		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
@@ -803,6 +797,33 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 					setChannelPointer< ChannelDefault( 10 ), true >( container, reinterpret_cast< typename BaseType::template ChannelTraits< ChannelDefault( 10 ), true >::PointerType& >( pointer ) );
 					break;
 				default : GANDER_ASSERT( 0, "Channel does not exist in the CompoundLayout." ); break;
+			}
+		}
+
+		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			if( IsDynamic )
+			{
+				child< NumberOfLayouts-1, true >().addChannels( c, b );
+			}
+			else
+			{
+				GANDER_ASSERT( 0, "Channels can only be added at a CompoundLayout that contains a DynamicLayout." );
+			}
+		}
+	
+		template< class ContainerType >	
+		inline void addChannels( ContainerType &container, ChannelSet c, ChannelBrothers b = Brothers_None )
+		{
+			if( IsDynamic )
+			{
+				child< NumberOfLayouts-1, true >().template addChannels< typename ContainerType::template ContainerTraitsAtIndex< NumberOfLayouts - 1 >::ContainerType >(
+					container.template child< NumberOfLayouts - 1 >(), c, b
+				);
+			}
+			else
+			{
+				GANDER_ASSERT( 0, "Channels can only be added at a CompoundLayout that contains a DynamicLayout." );
 			}
 		}
 

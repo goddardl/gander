@@ -80,7 +80,7 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		typedef Detail::ChannelContainerWrapper< Type, Gander::template Tuple< StorageType, NumberOfChannels, false > > ChannelContainerType;
 		typedef Detail::ChannelPointerContainerWrapper< Type, Gander::template Tuple< PointerType, NumberOfChannelPointers, false > > ChannelPointerContainerType;
 
-		template< ChannelDefault C = Chan_None >
+		template< ChannelDefault C = Chan_None, bool DisableStaticAsserts = false >
 		struct ChannelTraits
 		{
 			typedef Type LayoutType;
