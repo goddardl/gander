@@ -192,7 +192,7 @@ struct PixelAccessor : public PixelBase< PixelAccessor< Layout >, Layout, typena
 
 		inline void setChannelPointer( Channel channel, void *pointer )
 		{
-			return BaseType::m_layout.template setChannelPointer< ContainerType >( BaseType::m_container, channel, pointer );
+			BaseType::m_layout.template setChannelPointer< ContainerType >( BaseType::m_container, channel, pointer );
 		}
 		
 		template< class T >
