@@ -198,7 +198,7 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 	public :
 		
 		template< EnumType Index >
-		struct ContainerTraitsAtIndex
+		struct ChildTraitsAtIndex
 		{
 			typedef typename std::conditional< Container == ChannelContainer, 
 				typename CompoundLayout::template LayoutTraits< Index, true >::LayoutType::ChannelContainerType,
@@ -212,15 +212,15 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 		}
 		
 		template< EnumType Index >
-		inline typename ContainerTraitsAtIndex< Index >::ContainerType &child()
+		inline typename ChildTraitsAtIndex< Index >::ContainerType &child()
 		{
-			return BaseType::template child< typename ContainerTraitsAtIndex< Index >::ContainerType, Index >();
+			return BaseType::template child< typename ChildTraitsAtIndex< Index >::ContainerType, Index >();
 		};
 
 		template< EnumType Index >
-		inline const typename ContainerTraitsAtIndex< Index >::ContainerType &child() const
+		inline const typename ChildTraitsAtIndex< Index >::ContainerType &child() const
 		{
-			return BaseType::template child< typename ContainerTraitsAtIndex< Index >::ContainerType, Index >();
+			return BaseType::template child< typename ChildTraitsAtIndex< Index >::ContainerType, Index >();
 		};
 
 		inline unsigned int size() const

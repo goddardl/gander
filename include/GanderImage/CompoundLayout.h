@@ -817,7 +817,7 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 		{
 			if( IsDynamic )
 			{
-				child< NumberOfLayouts-1, true >().template addChannels< typename ContainerType::template ContainerTraitsAtIndex< NumberOfLayouts - 1 >::ContainerType >(
+				child< NumberOfLayouts-1, true >().template addChannels< typename ContainerType::template ChildTraitsAtIndex< NumberOfLayouts - 1 >::ContainerType >(
 					container.template child< NumberOfLayouts - 1 >(), c, b
 				);
 			}

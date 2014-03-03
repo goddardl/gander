@@ -67,9 +67,9 @@ struct CompoundLayoutContainerTest
 		CompoundLayout compoundLayout;
 		CompoundLayoutContainer cc( compoundLayout );
 
-		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ContainerTraitsAtIndex<0>::ContainerType, BrothersLayout< float, Brothers_BGRA >::ChannelContainerType >::value ) );
-		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ContainerTraitsAtIndex<1>::ContainerType, ChannelLayout< int, Chan_Z >::ChannelContainerType >::value ) );
-		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ContainerTraitsAtIndex<2>::ContainerType, ChannelLayout< int, Chan_V >::ChannelContainerType >::value ) );
+		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ChildTraitsAtIndex<0>::ContainerType, BrothersLayout< float, Brothers_BGRA >::ChannelContainerType >::value ) );
+		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ChildTraitsAtIndex<1>::ContainerType, ChannelLayout< int, Chan_Z >::ChannelContainerType >::value ) );
+		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ChildTraitsAtIndex<2>::ContainerType, ChannelLayout< int, Chan_V >::ChannelContainerType >::value ) );
 		BOOST_CHECK( ( compoundLayout.child<0>() == BrothersLayout< float, Brothers_BGRA >() ) );
 		BOOST_CHECK( ( compoundLayout.child<1>() == ChannelLayout< int, Chan_Z >() ) );
 		BOOST_CHECK( ( compoundLayout.child<2>() == ChannelLayout< int, Chan_V >() ) );
