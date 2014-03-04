@@ -74,10 +74,44 @@ struct PixelTest
 		pixel.channel<Chan_Blue>() = 3.;
 		pixel.channel<Chan_Alpha>() = 4.;
 		pixel.channel<Chan_Z>() = 5.;
-		BOOST_CHECK_EQUAL( pixel.channels(), ChannelSet( Mask_RGBA | Mask_Z ) );
 
+		Pixel pixel2( pixel );
+		BOOST_CHECK( pixel == pixel2 );
+		
+		float bgra[4] = { 3., 2., 1., 4. };	
+		float z = 5.;
+		PixelAccessor pixelAccessor;
+		BOOST_CHECK_EQUAL( pixelAccessor.channels(), ChannelSet( Mask_RGBA | Mask_Z ) );
+		BOOST_CHECK_EQUAL( pixelAccessor.requiredChannels(), ChannelSet( Mask_Blue | Mask_Z ) );
+		
+		BOOST_CHECK_THROW( pixelAccessor.setChannelPointer( Chan_Red, &bgra[0] ), std::runtime_error );
+		BOOST_CHECK_THROW( pixelAccessor.setChannelPointer( Chan_Blue, 0 ), std::runtime_error );
+		pixelAccessor.setChannelPointer( Chan_Blue, &bgra[0] );
+		pixelAccessor.setChannelPointer( Chan_Z, &z );
+		
+		BOOST_CHECK( pixel == pixelAccessor );
+	
 		pixel.addChannels( Mask_UV );
+		pixel.channel<Chan_U>() = 6;
+		pixel.channel<Chan_V>() = 7;
+		
 		BOOST_CHECK_EQUAL( pixel.channels(), ChannelSet( Mask_RGBA | Mask_Z | Mask_UV ) );
+		BOOST_CHECK( pixel != pixel2 );
+		BOOST_CHECK( pixel != pixelAccessor );
+
+		Pixel pixel3( pixel2 );
+		BOOST_CHECK( pixel3 == pixel2 );
+		
+		int uv[2] = { 6, 7 };
+		pixelAccessor.addChannels( Mask_UV );
+		pixelAccessor.setChannelPointer( Chan_U, &uv[0] );
+		pixelAccessor.setChannelPointer( Chan_V, &uv[1] );
+
+		BOOST_CHECK_EQUAL( pixel.channels(), ChannelSet( Mask_RGBA | Mask_Z | Mask_UV ) );
+		BOOST_CHECK_EQUAL( pixelAccessor.requiredChannels(), ChannelSet( Mask_Blue | Mask_Z | Mask_UV ) );
+		BOOST_CHECK( pixel == pixelAccessor );
+
+		Add more tests that check that dynamic channels are handled correctly by ForEach
 	}
 
 	void testPixelWithCompoundLayout()

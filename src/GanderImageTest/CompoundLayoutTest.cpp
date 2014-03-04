@@ -420,6 +420,15 @@ struct CompoundLayoutTest
 		BOOST_CHECK_EQUAL( l2.channels(), ChannelSet( Mask_RGB | Mask_Alpha | Mask_Z | Mask_V | Mask_U | Mask_Mask | Mask_Backward ) );
 		BOOST_CHECK_EQUAL( l2 != l, true );
 		BOOST_CHECK_EQUAL( l2 == l, false );
+
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Red >::LayoutType, BrothersLayout<float, Brothers_RGB> >::value ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Green >::LayoutType, BrothersLayout<float, Brothers_RGB> >::value ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Blue >::LayoutType, BrothersLayout<float, Brothers_RGB> >::value ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Alpha >::LayoutType, ChannelLayout<float, Chan_Alpha> >::value ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Z >::LayoutType, ChannelLayout<float, Chan_Z> >::value ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_V >::LayoutType, BrothersLayout<float, Brothers_VU> >::value ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_U >::LayoutType, BrothersLayout<float, Brothers_VU> >::value ) );
+		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Mask >::LayoutType, DynamicLayout<float> >::value ) );
 	}
 };
 

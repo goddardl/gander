@@ -75,6 +75,13 @@ inline unsigned int DynamicLayoutBase< Derived, DataType >::maskedChannelIndex( 
 
 template< class Derived, class DataType >
 template< class ContainerType, EnumType Index, EnumType Mask >
+inline typename DynamicLayoutBase< Derived, DataType >::ConstReferenceType DynamicLayoutBase< Derived, DataType >::channelAtIndex( const ContainerType &container ) const
+{
+	return channelAtIndex< ContainerType, Mask >( container, Index );
+}
+
+template< class Derived, class DataType >
+template< class ContainerType, EnumType Index, EnumType Mask >
 inline typename DynamicLayoutBase< Derived, DataType >::ReferenceType DynamicLayoutBase< Derived, DataType >::channelAtIndex( ContainerType &container )
 {
 	return channelAtIndex< ContainerType, Mask >( container, Index );
@@ -91,6 +98,26 @@ inline typename DynamicLayoutBase< Derived, DataType >::ReferenceType DynamicLay
 
 	GANDER_ASSERT( index < static_cast< Derived * >( this )->channels().size(), "Channel is not represented by this layout." );
 	return static_cast< Derived * >( this )->_channelAtIndex( container, maskedChannelIndex< ChannelMask( Mask ) >( index ) );
+}
+
+template< class Derived, class DataType >
+template< class ContainerType, EnumType Mask >
+inline typename DynamicLayoutBase< Derived, DataType >::ConstReferenceType DynamicLayoutBase< Derived, DataType >::channelAtIndex( const ContainerType &container, unsigned int index ) const
+{
+	GANDER_ASSERT(
+			( container.size() == static_cast< const Derived * >( this )->channels().size() ),
+			"Container has a different number of elements to the Layout's number of channels."
+			);
+
+	GANDER_ASSERT( index < static_cast< const Derived * >( this )->channels().size(), "Channel is not represented by this layout." );
+	return static_cast< const Derived * >( this )->_channelAtIndex( container, maskedChannelIndex< ChannelMask( Mask ) >( index ) );
+}
+
+template< class Derived, class DataType >
+template< class ContainerType, ChannelDefault C >
+inline typename DynamicLayoutBase< Derived, DataType >::ConstReferenceType DynamicLayoutBase< Derived, DataType >::channel( const ContainerType &container ) const
+{
+	return channel< ContainerType >( container, Channel( C ) );
 }
 
 template< class Derived, class DataType >
@@ -111,6 +138,19 @@ inline typename DynamicLayoutBase< Derived, DataType >::ReferenceType DynamicLay
 
 	GANDER_ASSERT( static_cast< Derived * >( this )->channels().contains( channel ), "Channel is not represented by this layout." );
 	return static_cast< Derived * >( this )->_channel( container, channel );
+}
+
+template< class Derived, class DataType >
+template< class ContainerType >
+inline typename DynamicLayoutBase< Derived, DataType >::ConstReferenceType DynamicLayoutBase< Derived, DataType >::channel( const ContainerType &container, Channel channel ) const
+{
+	GANDER_ASSERT(
+			( container.size() == static_cast< const Derived * >( this )->channels().size() ),
+			"Container has a different number of elements to the Layout's number of channels."
+			);
+
+	GANDER_ASSERT( static_cast< const Derived * >( this )->channels().contains( channel ), "Channel is not represented by this layout." );
+	return static_cast< const Derived * >( this )->_channel( container, channel );
 }
 
 template< class Derived, class DataType >

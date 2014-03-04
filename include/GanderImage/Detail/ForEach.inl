@@ -60,7 +60,6 @@ template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gande
 			dynamicChannels &= p1.channels();
 			dynamicChannels &= p2.channels();
 
-			GANDER_ASSERT( 0, "Dynamic channels are not full supported yet. Seet the todo in Gander::Image::ForEachRecurse." );
 			for( ChannelSet::const_iterator it( dynamicChannels.begin() ); it != dynamicChannels.end(); ++it )
 			{
 				switch( *it )
@@ -89,7 +88,6 @@ template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gande
 			dynamicChannels &= p1.channels();
 			dynamicChannels &= p2.channels();
 
-			GANDER_ASSERT( 0, "Dynamic channels are not full supported yet. Seet the todo in Gander::Image::ForEachRecurse." );
 			for( ChannelSet::const_iterator it( dynamicChannels.begin() ); it != dynamicChannels.end(); ++it )
 			{
 				switch( *it )
