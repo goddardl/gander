@@ -34,11 +34,6 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "GanderImage/Pixel.h"
-#include "GanderImage/DynamicLayout.h"
-#include "GanderImage/ChannelLayout.h"
-#include "GanderImage/BrothersLayout.h"
-#include "GanderImage/CompoundLayout.h"
 #include "GanderImageTest/PixelTest.h"
 
 #include "boost/test/floating_point_comparison.hpp"
@@ -58,6 +53,148 @@ namespace ImageTest
 
 struct PixelTest
 {
+
+	void testManyDynamicPixels()
+	{
+		typedef CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< float, Chan_Z >, BrothersLayout< float, Brothers_VU >, ChannelLayout< float, Chan_Backward > > CompoundLayout1;
+		typedef CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< float, Chan_Z >, BrothersLayout< float, Brothers_VU >, DynamicLayout< float > > CompoundLayout2;
+		typedef CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< float, Chan_Z >, ChannelLayout< float, Chan_U >, DynamicLayout< float > > CompoundLayout3;
+		typedef CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< float, Chan_Z >, DynamicLayout< float > > CompoundLayout4;
+		typedef CompoundLayout< BrothersLayout< float, Brothers_BGRA >, DynamicLayout< float > > CompoundLayout5;
+		typedef CompoundLayout< BrothersLayout< float, Brothers_RGB >, DynamicLayout< float > > CompoundLayout6;
+
+		Gander::Image::Pixel< CompoundLayout1 > pixel1;
+		Detail::initPixel( pixel1 );
+		
+		Gander::Image::Pixel< CompoundLayout2 > pixel2;
+		pixel2.addChannels( Mask_Backward );
+		Detail::initPixel( pixel2 );
+
+		Gander::Image::Pixel< CompoundLayout3 > pixel3;
+		pixel3.addChannels( Mask_Backward | Mask_V );
+		Detail::initPixel( pixel3 );
+		
+		Gander::Image::Pixel< CompoundLayout4 > pixel4;
+		pixel4.addChannels( Mask_Backward | Mask_UV );
+		Detail::initPixel( pixel4 );
+
+		Gander::Image::Pixel< CompoundLayout5 > pixel5;
+		pixel5.addChannels( Mask_Backward | Mask_UV | Mask_Z );
+		Detail::initPixel( pixel5 );
+		
+		Gander::Image::Pixel< CompoundLayout6 > pixel6;
+		pixel6.addChannels( Mask_Backward | Mask_UV | Mask_Z | Mask_Alpha );
+		Detail::initPixel( pixel6 );
+	
+		float bgra[4] = { 3., 2., 1., 4. };	
+		float z = 5.;
+		float vu[2] = { 7., 6. };	
+		float backward = 8.;
+		float rgb[3] = { 1., 2., 3. };	
+		Gander::Image::PixelAccessor< CompoundLayout1 > pixelAccessor1;
+		pixelAccessor1.setChannelPointer( Chan_Blue, &bgra[0] );
+		pixelAccessor1.setChannelPointer( Chan_Z, &z );
+		pixelAccessor1.setChannelPointer( Chan_V, &vu[0] );
+		pixelAccessor1.setChannelPointer( Chan_Backward, &backward );
+		
+		Gander::Image::PixelAccessor< CompoundLayout2 > pixelAccessor2;
+		pixelAccessor2.addChannels( Mask_Backward );
+		pixelAccessor2.setChannelPointer( Chan_Blue, &bgra[0] );
+		pixelAccessor2.setChannelPointer( Chan_Z, &z );
+		pixelAccessor2.setChannelPointer( Chan_V, &vu[0] );
+		pixelAccessor2.setChannelPointer( Chan_Backward, &backward );
+
+		Gander::Image::PixelAccessor< CompoundLayout3 > pixelAccessor3;
+		pixelAccessor3.addChannels( Mask_Backward | Mask_V );
+		pixelAccessor3.setChannelPointer( Chan_Blue, &bgra[0] );
+		pixelAccessor3.setChannelPointer( Chan_Z, &z );
+		pixelAccessor3.setChannelPointer( Chan_U, &vu[1] );
+		pixelAccessor3.setChannelPointer( Chan_V, &vu[0] );
+		pixelAccessor3.setChannelPointer( Chan_Backward, &backward );
+		
+		Gander::Image::PixelAccessor< CompoundLayout4 > pixelAccessor4;
+		pixelAccessor4.addChannels( Mask_Backward | Mask_UV );
+		pixelAccessor4.setChannelPointer( Chan_Blue, &bgra[0] );
+		pixelAccessor4.setChannelPointer( Chan_Z, &z );
+		pixelAccessor4.setChannelPointer( Chan_U, &vu[1] );
+		pixelAccessor4.setChannelPointer( Chan_V, &vu[0] );
+		pixelAccessor4.setChannelPointer( Chan_Backward, &backward );
+
+		Gander::Image::PixelAccessor< CompoundLayout5 > pixelAccessor5;
+		pixelAccessor5.addChannels( Mask_Backward | Mask_UV | Mask_Z );
+		pixelAccessor5.setChannelPointer( Chan_Blue, &bgra[0] );
+		pixelAccessor5.setChannelPointer( Chan_Z, &z );
+		pixelAccessor5.setChannelPointer( Chan_U, &vu[1] );
+		pixelAccessor5.setChannelPointer( Chan_V, &vu[0] );
+		pixelAccessor5.setChannelPointer( Chan_Backward, &backward );
+		
+		Gander::Image::PixelAccessor< CompoundLayout6 > pixelAccessor6;
+		pixelAccessor6.addChannels( Mask_Backward | Mask_UV | Mask_Z | Mask_Alpha );
+		pixelAccessor6.setChannelPointer( Chan_Red, &rgb[0] );
+		pixelAccessor6.setChannelPointer( Chan_Alpha, &bgra[3] );
+		pixelAccessor6.setChannelPointer( Chan_Z, &z );
+		pixelAccessor6.setChannelPointer( Chan_U, &vu[1] );
+		pixelAccessor6.setChannelPointer( Chan_V, &vu[0] );
+		pixelAccessor6.setChannelPointer( Chan_Backward, &backward );
+		
+		BOOST_CHECK( pixel1 == pixel2 );
+		BOOST_CHECK( pixel1 == pixel3 );
+		BOOST_CHECK( pixel1 == pixel4 );
+		BOOST_CHECK( pixel1 == pixel5 );
+		BOOST_CHECK( pixel1 == pixel6 );
+		BOOST_CHECK( pixel2 == pixel3 );
+		BOOST_CHECK( pixel2 == pixel4 );
+		BOOST_CHECK( pixel2 == pixel5 );
+		BOOST_CHECK( pixel2 == pixel6 );
+		BOOST_CHECK( pixel3 == pixel4 );
+		BOOST_CHECK( pixel3 == pixel5 );
+		BOOST_CHECK( pixel3 == pixel6 );
+		BOOST_CHECK( pixel4 == pixel5 );
+		BOOST_CHECK( pixel4 == pixel6 );
+		BOOST_CHECK( pixel5 == pixel6 );
+		
+		BOOST_CHECK( pixelAccessor1 == pixelAccessor2 );
+		BOOST_CHECK( pixelAccessor1 == pixelAccessor3 );
+		BOOST_CHECK( pixelAccessor1 == pixelAccessor4 );
+		BOOST_CHECK( pixelAccessor1 == pixelAccessor5 );
+		BOOST_CHECK( pixelAccessor1 == pixelAccessor6 );
+		BOOST_CHECK( pixelAccessor2 == pixelAccessor3 );
+		BOOST_CHECK( pixelAccessor2 == pixelAccessor4 );
+		BOOST_CHECK( pixelAccessor2 == pixelAccessor5 );
+		BOOST_CHECK( pixelAccessor2 == pixelAccessor6 );
+		BOOST_CHECK( pixelAccessor3 == pixelAccessor4 );
+		BOOST_CHECK( pixelAccessor3 == pixelAccessor5 );
+		BOOST_CHECK( pixelAccessor3 == pixelAccessor6 );
+		BOOST_CHECK( pixelAccessor4 == pixelAccessor5 );
+		BOOST_CHECK( pixelAccessor4 == pixelAccessor6 );
+		BOOST_CHECK( pixelAccessor5 == pixelAccessor6 );
+		
+		BOOST_CHECK( pixel1 == pixelAccessor2 );
+		BOOST_CHECK( pixel1 == pixelAccessor3 );
+		BOOST_CHECK( pixel1 == pixelAccessor4 );
+		BOOST_CHECK( pixel1 == pixelAccessor5 );
+		BOOST_CHECK( pixel1 == pixelAccessor6 );
+		BOOST_CHECK( pixel2 == pixelAccessor3 );
+		BOOST_CHECK( pixel2 == pixelAccessor4 );
+		BOOST_CHECK( pixel2 == pixelAccessor5 );
+		BOOST_CHECK( pixel2 == pixelAccessor6 );
+		BOOST_CHECK( pixel3 == pixelAccessor4 );
+		BOOST_CHECK( pixel3 == pixelAccessor5 );
+		BOOST_CHECK( pixel3 == pixelAccessor6 );
+		BOOST_CHECK( pixel4 == pixelAccessor5 );
+		BOOST_CHECK( pixel4 == pixelAccessor6 );
+		BOOST_CHECK( pixel5 == pixelAccessor6 );
+
+		pixel1.channel< Chan_U >() = 10.;
+		BOOST_CHECK( pixel1 == pixel1 );
+		BOOST_CHECK( pixel1 != pixel2 );
+		BOOST_CHECK( pixel1 != pixelAccessor1 );
+		BOOST_CHECK( pixel1 != pixelAccessor2 );
+		BOOST_CHECK( pixel1 != pixelAccessor6 );
+		pixelAccessor6 = pixel1;
+		BOOST_CHECK( pixel1 == pixelAccessor6 );
+	}
+
 	void testPixelWithDynamicCompoundLayout()
 	{
 		typedef BrothersLayout< float, Brothers_BGRA > Layout1;
@@ -110,8 +247,6 @@ struct PixelTest
 		BOOST_CHECK_EQUAL( pixel.channels(), ChannelSet( Mask_RGBA | Mask_Z | Mask_UV ) );
 		BOOST_CHECK_EQUAL( pixelAccessor.requiredChannels(), ChannelSet( Mask_Blue | Mask_Z | Mask_UV ) );
 		BOOST_CHECK( pixel == pixelAccessor );
-
-		Add more tests that check that dynamic channels are handled correctly by ForEach
 	}
 
 	void testPixelWithCompoundLayout()
@@ -279,6 +414,7 @@ struct PixelTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelInterface, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelWithCompoundLayout, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelWithDynamicCompoundLayout, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelTest::testManyDynamicPixels, instance ) );
 	}
 };
 
