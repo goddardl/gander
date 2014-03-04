@@ -85,6 +85,11 @@ void DynamicLayout<T>::_addChannels( ContainerType &container, ChannelSet c, Cha
 			( boost::format( "DynamicLayout: Channels \"%s\" cannot be added as another set of ChannelBrothers represents it." ) % c ).str()
 			);
 
+	GANDER_ASSERT(
+			( m_channels.intersection( c ).size() == 0 ),
+			( boost::format( "DynamicLayout: Channels \"%s\" cannot be added as some of the channels are already represented by the layout." ) % c ).str()
+			);
+
 	// Get a set of the current channels and the unique new ones.
 	ChannelSet currentChannels( channels() );
 	ChannelSet newChannels( c - currentChannels );
@@ -114,6 +119,11 @@ void DynamicLayout<T>::_addChannels( ChannelSet c, ChannelBrothers b )
 	GANDER_ASSERT(
 			( !m_allBrothers.contains( c ) ),
 			( boost::format( "DynamicLayout: Channels \"%s\" cannot be added as another set of ChannelBrothers represents it." ) % c ).str()
+			);
+
+	GANDER_ASSERT(
+			( m_channels.intersection( c ).size() == 0 ),
+			( boost::format( "DynamicLayout: Channels \"%s\" cannot be added as some of the channels are already represented by the layout." ) % c ).str()
 			);
 
 	int8u step = 1;

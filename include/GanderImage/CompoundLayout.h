@@ -804,6 +804,11 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 		{
 			if( IsDynamic )
 			{
+				GANDER_ASSERT(
+					( BaseType::channels().intersection( c ).size() == 0 ),
+					( boost::format( "CompoundLayout: Channels \"%s\" cannot be added as some of the channels are already represented by the layout." ) % c ).str()
+				);
+
 				child< NumberOfLayouts-1, true >().addChannels( c, b );
 			}
 			else
@@ -817,6 +822,11 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 		{
 			if( IsDynamic )
 			{
+				GANDER_ASSERT(
+					( BaseType::channels().intersection( c ).size() == 0 ),
+					( boost::format( "CompoundLayout: Channels \"%s\" cannot be added as some of the channels are already represented by the layout." ) % c ).str()
+				);
+				
 				child< NumberOfLayouts-1, true >().template addChannels< typename ContainerType::template ChildTraitsAtIndex< NumberOfLayouts - 1 >::ContainerType >(
 					container.template child< NumberOfLayouts - 1 >(), c, b
 				);

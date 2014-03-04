@@ -193,6 +193,8 @@ struct PixelTest
 		BOOST_CHECK( pixel1 != pixelAccessor6 );
 		pixelAccessor6 = pixel1;
 		BOOST_CHECK( pixel1 == pixelAccessor6 );
+		
+		BOOST_CHECK_THROW( pixelAccessor5.addChannels( Chan_Blue ), std::runtime_error );
 	}
 
 	void testPixelWithDynamicCompoundLayout()
