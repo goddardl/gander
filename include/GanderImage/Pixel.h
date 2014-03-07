@@ -221,13 +221,6 @@ struct PixelIterator : protected PixelAccessor< Layout >, public IncrementOperat
 		typedef Layout LayoutType;
 		typedef PixelIterator< Layout > Type;
 
-		using BaseType::channels;
-		using BaseType::requiredChannels;
-		using BaseType::numberOfChannelPointers;
-		using BaseType::numberOfChannels;
-		using BaseType::setChannelPointer;
-		using BaseType::addChannels;
-
 		inline const PixelAccessor< Layout > &operator * () const
 		{
 			return *static_cast< const PixelAccessor< Layout > * >( this );

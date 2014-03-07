@@ -58,20 +58,20 @@ struct PixelTest
 	{
 		PixelIterator< CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > > it;
 		
-		it.addChannels( Mask_U, Brothers_VU );
-		it.addChannels( Mask_Z );
+		it->addChannels( Mask_U, Brothers_VU );
+		it->addChannels( Mask_Z );
 
-		BOOST_CHECK_EQUAL( it.channels(), ChannelSet( Mask_RGBA | Mask_U | Mask_Z ) );
-		BOOST_CHECK_EQUAL( it.requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha | Mask_Z | Mask_U ) );
+		BOOST_CHECK_EQUAL( it->channels(), ChannelSet( Mask_RGBA | Mask_U | Mask_Z ) );
+		BOOST_CHECK_EQUAL( it->requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha | Mask_Z | Mask_U ) );
 	
 		float bgr[6] = { 3., 2., 1., 6., 5., 4. };
 		float alpha[2] = { 7., 8. };
 		float vu[4] = { 10., 9., 12., 11. };
 		float z[2] = { 13., 14. };
-		it.setChannelPointer( Chan_Blue, &bgr[0] );	
-		it.setChannelPointer( Chan_Alpha, &alpha );	
-		it.setChannelPointer( Chan_Z, &z );	
-		it.setChannelPointer( Chan_U, &vu[1] );	
+		it->setChannelPointer( Chan_Blue, &bgr[0] );	
+		it->setChannelPointer( Chan_Alpha, &alpha );	
+		it->setChannelPointer( Chan_Z, &z );	
+		it->setChannelPointer( Chan_U, &vu[1] );	
 
 		BOOST_CHECK_EQUAL( it->channel<Chan_Red>(), 1. );
 		BOOST_CHECK_EQUAL( (*it).channel<Chan_Green>(), 2. );
