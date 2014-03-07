@@ -107,6 +107,12 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 			};
 		};
 
+		/// Increments all channel pointers in the container by v.
+		inline void increment( ChannelPointerContainerType &container, int v );
+		
+		/// Decrements all channel pointers in the container by v.
+		inline void decrement( ChannelPointerContainerType &container, int v );
+		
 		using BaseType::contains;
 
 	private :

@@ -39,6 +39,26 @@ namespace Image
 {
 
 template< class T, ChannelDefault S >
+inline void ChannelLayout< T, S >::increment( ChannelPointerContainerType &container, int v )
+{
+	typename ChannelPointerContainerType::iterator it( container.begin() );
+	for( ; it != container.end(); ++it )
+	{
+		*it += v;
+	}
+}
+
+template< class T, ChannelDefault S >
+inline void ChannelLayout< T, S >::decrement( ChannelPointerContainerType &container, int v )
+{
+	typename ChannelPointerContainerType::iterator it( container.begin() );
+	for( ; it != container.end(); ++it )
+	{
+		*it -= v;
+	}
+}
+
+template< class T, ChannelDefault S >
 template< ChannelDefault C >
 inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channel( ChannelContainerType &container )
 {

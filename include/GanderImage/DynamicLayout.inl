@@ -39,6 +39,26 @@ namespace Image
 {
 
 template< class T >
+inline void DynamicLayout< T >::increment( ChannelPointerContainerType &container, int v )
+{
+	unsigned int size = container.size();
+	for( unsigned int i = 0; i < size; ++i )
+	{
+		container[i] += m_steps[i];
+	}
+}
+
+template< class T >
+inline void DynamicLayout< T >::decrement( ChannelPointerContainerType &container, int v )
+{
+	unsigned int size = container.size();
+	for( unsigned int i = 0; i < size; ++i )
+	{
+		container[i] -= m_steps[i];
+	}
+}
+
+template< class T >
 inline ChannelSet DynamicLayout<T>::channels() const
 {
 	return m_channels;

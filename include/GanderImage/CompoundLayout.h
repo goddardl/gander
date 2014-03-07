@@ -180,7 +180,7 @@ struct CompoundLayoutRecurseBase : public LayoutBase< Derived >
 
 		enum
 		{
-			NumberOfLayouts = 0,
+			Iteration = 0,
 			NumberOfChannels = 0,
 			NumberOfChannelPointers = 0,
 			ChannelMask = 0,
@@ -303,6 +303,18 @@ struct CompoundLayoutRecurse< Derived, false, None, None, None, None, None, None
 			IsDynamic = false,
 		};
 
+		/// Increments all channel pointers in the container by v.
+		template< class CompoundChannelPointerContainer >
+		inline void increment( CompoundChannelPointerContainer &container, int v )
+		{
+		}
+		
+		/// Decrements all channel pointers in the container by v.
+		template< class CompoundChannelPointerContainer >
+		inline void decrement( CompoundChannelPointerContainer &container, int v )
+		{
+		}
+
 	protected :
 		
 		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
@@ -343,7 +355,7 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 
 		enum
 		{
-			NumberOfLayouts = BaseType::NumberOfLayouts + 1,
+			Iteration = BaseType::Iteration + 1,
 			IsDynamic = true,
 		};
 
@@ -376,6 +388,20 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 		}
 		//@}
 	
+		/// Increments all channel pointers in the container by v.
+		template< class CompoundChannelPointerContainer >
+		inline void increment( CompoundChannelPointerContainer &container, int v )
+		{
+			m_dynamicLayout.increment( container.template child< CompoundChannelPointerContainer::LayoutType::NumberOfLayouts - Iteration >(), v );
+		}
+		
+		/// Decrements all channel pointers in the container by v.
+		template< class CompoundChannelPointerContainer >
+		inline void decrement( CompoundChannelPointerContainer &container, int v )
+		{
+			m_dynamicLayout.decrement( container.template child< CompoundChannelPointerContainer::LayoutType::NumberOfLayouts - Iteration >(), v );
+		}
+
 	protected :	
 
 		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
@@ -423,11 +449,11 @@ struct CompoundLayoutRecurse : public CompoundLayoutRecurse< Derived, IS_DYNAMIC
 		enum
 		{
 			IsDynamic = BaseType::IsDynamic,
-			NumberOfLayouts = BaseType::NumberOfLayouts + 1,
+			Iteration = BaseType::Iteration + 1,
 			NumberOfChannels = BaseType::NumberOfChannels + T0::NumberOfChannels,
 			ChannelMask = BaseType::ChannelMask + T0::ChannelMask,
 			NumberOfChannelPointers = BaseType::NumberOfChannelPointers + T0::NumberOfChannelPointers,
-			IsCompound = NumberOfLayouts > 1,
+			IsCompound = Iteration > 1,
 		};
 
 		// Assert that the template arguments have been supplied with the Pixels representing channels ordered
@@ -442,6 +468,22 @@ struct CompoundLayoutRecurse : public CompoundLayoutRecurse< Derived, IS_DYNAMIC
 
 		// Assert that the any dynamic layouts are the last argument.			
 		GANDER_IMAGE_STATIC_ASSERT( !T0::IsDynamic, ONLY_ONE_DYNAMIC_LAYOUT_MUST_BE_SPECIFED_AS_THE_LAST_TEMPLATE_ARGUMENT );
+
+		/// Increments all channel pointers in the container by v.
+		template< class CompoundChannelPointerContainer >
+		inline void increment( CompoundChannelPointerContainer &container, int v )
+		{
+			m_layout.increment( container.template child< CompoundChannelPointerContainer::LayoutType::NumberOfLayouts - Iteration >(), v );
+			BaseType::template increment< CompoundChannelPointerContainer >( container, v );
+		}
+		
+		/// Decrements all channel pointers in the container by v.
+		template< class CompoundChannelPointerContainer >
+		inline void decrement( CompoundChannelPointerContainer &container, int v )
+		{
+			m_layout.decrement( container.template child< CompoundChannelPointerContainer::LayoutType::NumberOfLayouts - Iteration >(), v );
+			BaseType::template decrement< CompoundChannelPointerContainer >( container, v );
+		}
 
 		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
 		inline ReturnType &child()
@@ -497,7 +539,7 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 	enum
 	{
 		NumberOfChannelPointers = BaseType::NumberOfChannelPointers,
-		NumberOfLayouts = BaseType::NumberOfLayouts,
+		NumberOfLayouts = BaseType::Iteration,
 		NumberOfChannels = BaseType::NumberOfChannels,
 		ChannelMask = BaseType::ChannelMask,
 		IsDynamic = BaseType::IsDynamic
@@ -508,6 +550,18 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 		typedef typename Gander::Image::Detail::CompoundLayoutContainer< Type, Gander::Image::Detail::ChannelContainer >  ChannelContainerType;
 		typedef typename Gander::Image::Detail::CompoundLayoutContainer< Type, Gander::Image::Detail::ChannelPointerContainer >  ChannelPointerContainerType;
 
+		/// Increments all channel pointers in the container by v.
+		inline void increment( ChannelPointerContainerType &container, int v )
+		{
+			BaseType::template increment< ChannelPointerContainerType >( container, v );
+		}
+		
+		/// Decrements all channel pointers in the container by v.
+		inline void decrement( ChannelPointerContainerType &container, int v )
+		{
+			BaseType::template decrement< ChannelPointerContainerType >( container, v );
+		}
+		
 		template< unsigned Index, bool DisableStaticAsserts = true >
 		inline typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType &child()
 		{

@@ -54,6 +54,54 @@ namespace ImageTest
 struct PixelTest
 {
 
+	void testPixelIterator()
+	{
+		PixelIterator< CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > > it;
+		
+		it.addChannels( Mask_U, Brothers_VU );
+		it.addChannels( Mask_Z );
+
+		BOOST_CHECK_EQUAL( it.channels(), ChannelSet( Mask_RGBA | Mask_U | Mask_Z ) );
+		BOOST_CHECK_EQUAL( it.requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha | Mask_Z | Mask_U ) );
+	
+		float bgr[6] = { 3., 2., 1., 6., 5., 4. };
+		float alpha[2] = { 7., 8. };
+		float vu[4] = { 10., 9., 12., 11. };
+		float z[2] = { 13., 14. };
+		it.setChannelPointer( Chan_Blue, &bgr[0] );	
+		it.setChannelPointer( Chan_Alpha, &alpha );	
+		it.setChannelPointer( Chan_Z, &z );	
+		it.setChannelPointer( Chan_U, &vu[1] );	
+
+		BOOST_CHECK_EQUAL( it->channel<Chan_Red>(), 1. );
+		BOOST_CHECK_EQUAL( (*it).channel<Chan_Green>(), 2. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Blue>(), 3. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Alpha>(), 7. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Z>(), 13. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_U>(), 9. );
+
+		it->channel<Chan_Green>() = 0.;
+		BOOST_CHECK_EQUAL( it->channel<Chan_Green>(), 0. );
+		(*it).channel<Chan_Green>() = 2.;
+		BOOST_CHECK_EQUAL( it->channel<Chan_Green>(), 2. );
+
+		it++;
+		BOOST_CHECK_EQUAL( it->channel<Chan_Red>(), 4. );
+		BOOST_CHECK_EQUAL( (*it).channel<Chan_Green>(), 5. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Blue>(), 6. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Alpha>(), 8. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Z>(), 14. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_U>(), 11. );
+
+		--it;
+		BOOST_CHECK_EQUAL( it->channel<Chan_Red>(), 1. );
+		BOOST_CHECK_EQUAL( (*it).channel<Chan_Green>(), 2. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Blue>(), 3. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Alpha>(), 7. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Z>(), 13. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_U>(), 9. );
+	}
+
 	void testManyDynamicPixels()
 	{
 		typedef CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< float, Chan_Z >, BrothersLayout< float, Brothers_VU >, ChannelLayout< float, Chan_Backward > > CompoundLayout1;
@@ -414,6 +462,7 @@ struct PixelTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<PixelTest> instance( new PixelTest() );
 		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelInterface, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelIterator, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelWithCompoundLayout, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelTest::testPixelWithDynamicCompoundLayout, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelTest::testManyDynamicPixels, instance ) );

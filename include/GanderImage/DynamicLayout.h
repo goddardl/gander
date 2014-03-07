@@ -112,7 +112,13 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 		/// in order to access all of the channels that this layout represents.
 		inline unsigned int numberOfChannelPointers() const;
 		//@}
-	
+
+		/// Increments all channel pointers in the container by v.
+		inline void increment( ChannelPointerContainerType &container, int v );
+		
+		/// Decrements all channel pointers in the container by v.
+		inline void decrement( ChannelPointerContainerType &container, int v );
+
 	private :
 
 		friend class DynamicLayoutBase< DynamicLayout< T >, T >;
@@ -154,7 +160,6 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 		/// for every channel in the requiredChannels() set, the layout can provide access through the channel() and channelAtIndex()
 		/// methods for every channel represented by the layout.
 		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer );
-
 
 		/// The channels that this format represents.
 		ChannelSet m_channels;

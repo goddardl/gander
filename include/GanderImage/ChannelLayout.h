@@ -112,6 +112,12 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 				ChannelIndexInLayout = Index,
 			};
 		};
+
+		/// Increments all channel pointers in the container by v.
+		inline void increment( ChannelPointerContainerType &container, int v );
+		
+		/// Decrements all channel pointers in the container by v.
+		inline void decrement( ChannelPointerContainerType &container, int v );
 		
 		using BaseType::contains;
 
@@ -119,7 +125,7 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 
 		friend class StaticLayoutBase< ChannelLayout< T, S >, T >;	
 		friend class LayoutBase< ChannelLayout< T, S > >;	
-	
+
 		/// Returns a reference to the given channel from the container which is specified by the "C" template argument.
 		template< ChannelDefault C >
 		inline ReferenceType _channel( ChannelContainerType &container );

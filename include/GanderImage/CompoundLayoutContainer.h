@@ -196,7 +196,9 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 		typedef typename Gander::Image::Detail::CompoundLayoutContainerRecurse< CompoundLayout, CompoundLayout::NumberOfLayouts, Container > BaseType;
 
 	public :
-		
+	
+		typedef CompoundLayout LayoutType;
+			
 		template< EnumType Index >
 		struct ChildTraitsAtIndex
 		{

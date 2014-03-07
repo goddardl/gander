@@ -39,6 +39,26 @@ namespace Image
 {
 		
 template< class T, ChannelBrothers B >
+inline void BrothersLayout< T, B >::increment( ChannelPointerContainerType &container, int v )
+{
+	typename ChannelPointerContainerType::iterator it( container.begin() );
+	for( ; it != container.end(); ++it )
+	{
+		*it += BrotherTraits<B>::NumberOfBrothers;
+	}
+}
+
+template< class T, ChannelBrothers B >
+inline void BrothersLayout< T, B >::decrement( ChannelPointerContainerType &container, int v )
+{
+	typename ChannelPointerContainerType::iterator it( container.begin() );
+	for( ; it != container.end(); ++it )
+	{
+		*it -= BrotherTraits<B>::NumberOfBrothers;
+	}
+}
+
+template< class T, ChannelBrothers B >
 inline ChannelSet BrothersLayout< T, B >::_requiredChannels() const
 {
 	return ChannelSet( ChannelDefault( BrotherTraits<B>::FirstBrotherInBrothers ) );
@@ -59,7 +79,7 @@ inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ConstReferenceTyp
 }
 
 template< class T, ChannelBrothers B >
-template< ChannelDefault C >
+	template< ChannelDefault C >
 inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channel( ChannelContainerType &container )
 {
 	return container[ BrotherTraits<B>::template BrotherIndexToChannelIndex< BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value >::Value ];

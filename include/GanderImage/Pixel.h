@@ -208,6 +208,72 @@ struct PixelAccessor : public PixelBase< PixelAccessor< Layout >, Layout, typena
 		template< class > friend class PixelAccessor;
 };
 
+template< class Layout >
+struct PixelIterator : protected PixelAccessor< Layout >, public IncrementOperators< PixelIterator< Layout > >, DecrementOperators< PixelIterator< Layout > >
+{
+	private :
+		
+		typedef PixelAccessor< Layout > BaseType;
+
+	public :	
+		
+		typedef typename BaseType::ContainerType ContainerType;
+		typedef Layout LayoutType;
+		typedef PixelIterator< Layout > Type;
+
+		using BaseType::channels;
+		using BaseType::requiredChannels;
+		using BaseType::numberOfChannelPointers;
+		using BaseType::numberOfChannels;
+		using BaseType::setChannelPointer;
+		using BaseType::addChannels;
+
+		inline const PixelAccessor< Layout > &operator * () const
+		{
+			return *static_cast< const PixelAccessor< Layout > * >( this );
+		}
+
+		inline const PixelAccessor< Layout > *operator -> () const
+		{
+			return static_cast< const PixelAccessor< Layout > * >( this );
+		}
+
+		inline PixelAccessor< Layout > &operator * ()
+		{
+			return *static_cast< PixelAccessor< Layout > * >( this );
+		}
+
+		inline PixelAccessor< Layout > *operator -> ()
+		{
+			return static_cast< PixelAccessor< Layout > * >( this );
+		}
+
+		template< class T >
+		inline const PixelIterator & operator = ( const T &rhs )
+		{
+			return BaseType::template copyFrom< T >( rhs );
+		}
+		
+		inline Type &increment( int v )
+		{
+			BaseType::m_layout.increment( BaseType::m_container, v );
+			return *this;
+		}
+
+		inline Type &decrement( int v )
+		{
+			BaseType::m_layout.decrement( BaseType::m_container, v );
+			return *this;
+		}
+
+	private :
+
+		template< class, class, class > friend class PixelBase;
+		template< class > friend class Pixel;
+		template< class > friend class PixelAccessor;
+		template< class > friend class PixelIterator;
+};
+
 }; // namespace Image
 
 }; // namespace Gander
