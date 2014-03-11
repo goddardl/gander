@@ -209,7 +209,11 @@ struct PixelAccessor : public PixelBase< PixelAccessor< Layout >, Layout, typena
 };
 
 template< class Layout >
-class PixelIterator : protected PixelAccessor< Layout >, public IncrementOperators< PixelIterator< Layout > >, DecrementOperators< PixelIterator< Layout > >
+class PixelIterator :
+	protected PixelAccessor< Layout >,
+	public IncrementOperators< PixelIterator< Layout > >,
+	public DecrementOperators< PixelIterator< Layout > >,
+	public IntegerArithmeticOperators< PixelIterator< Layout > >
 {
 	private :
 		

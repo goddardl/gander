@@ -79,6 +79,7 @@ struct RowTest
 		BOOST_CHECK_EQUAL( row.width(), 2 );
 		BOOST_CHECK( row.getStart() == it );
 		BOOST_CHECK( row.begin() == it );
+		BOOST_CHECK( row.end() == it + 2 );
 	}
 };
 
