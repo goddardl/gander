@@ -63,12 +63,13 @@ namespace Detail
 template< class Layout, class Container >
 struct ChannelPointerContainerWrapper : public Container
 {
-	typedef Layout LayoutType;
+	public :
+		typedef Layout LayoutType;
 
-	ChannelPointerContainerWrapper( const Layout &layout ) :
-		Container( layout.numberOfChannelPointers() )
-	{
-	}
+		ChannelPointerContainerWrapper( const Layout &layout ) :
+			Container( layout.numberOfChannelPointers() )
+		{
+		}
 };
 
 /// This simple little struct is used to mask the default constructor on the container class
@@ -76,12 +77,14 @@ struct ChannelPointerContainerWrapper : public Container
 template< class Layout, class Container >
 struct ChannelContainerWrapper : public Container
 {
-	typedef Layout LayoutType;
+	public :
 	
-	ChannelContainerWrapper( const Layout &layout ) :
-		Container( layout.numberOfChannels() )
-	{
-	}
+		typedef Layout LayoutType;
+
+		ChannelContainerWrapper( const Layout &layout ) :
+			Container( layout.numberOfChannels() )
+		{
+		}
 };
 
 }; // namespace Detail

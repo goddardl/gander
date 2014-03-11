@@ -56,7 +56,8 @@ struct PixelTest
 
 	void testPixelIterator()
 	{
-		PixelIterator< CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > > it;
+		typedef PixelIterator< CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > > PixelIterator;
+		PixelIterator it;
 		
 		it->addChannels( Mask_U, Brothers_VU );
 		it->addChannels( Mask_Z );
@@ -100,6 +101,13 @@ struct PixelTest
 		BOOST_CHECK_EQUAL( it->channel<Chan_Alpha>(), 7. );
 		BOOST_CHECK_EQUAL( it->channel<Chan_Z>(), 13. );
 		BOOST_CHECK_EQUAL( it->channel<Chan_U>(), 9. );
+		
+		float bgr2[6] = { 3., 2., 1., 6., 5., 4. };
+		PixelIterator it2( it );
+		BOOST_CHECK( ( it == it2 ) );
+		it2->setChannelPointer( Chan_Blue, &bgr2[0] );	
+		BOOST_CHECK( ( it != it2 ) );
+
 	}
 
 	void testManyDynamicPixels()

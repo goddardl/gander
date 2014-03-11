@@ -31,60 +31,72 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
 #include <iostream>
+#include <cstdlib>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
-
-#include "GanderImageTest/ChannelTest.h"
-#include "GanderImageTest/ChannelBrothersTest.h"
-#include "GanderImageTest/PPMTest.h"
-#include "GanderImageTest/OpTest.h"
-#include "GanderImageTest/ChannelPtrContainerTest.h"
-#include "GanderImageTest/CompoundLayoutTest.h"
-#include "GanderImageTest/CompoundLayoutContainerTest.h"
-#include "GanderImageTest/ChannelLayoutTest.h"
-#include "GanderImageTest/BrothersLayoutTest.h"
-#include "GanderImageTest/DynamicLayoutTest.h"
-#include "GanderImageTest/PixelTest.h"
 #include "GanderImageTest/RowTest.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+#include "GanderImage/Row.h"
+
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
 
 using namespace Gander;
+using namespace Gander::Image;
 using namespace Gander::ImageTest;
+using namespace boost;
+using namespace boost::unit_test;
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander Image unit test" );
 
-	try
-	{
-		addPPMTest(test);
-		addChannelTest(test);
-		addChannelBrothersTest(test);
-		addChannelLayoutTest(test);
-		addBrothersLayoutTest(test);
-		addDynamicLayoutTest(test);
-		addCompoundLayoutTest(test);
-		addCompoundLayoutContainerTest(test);
-		addOpTest(test);
-		addPixelTest(test);
-		addRowTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+namespace ImageTest
+{
 
-	return test;
+struct RowTest
+{
+
+	void testRowIterators()
+	{
+		typedef CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > Layout;
+		Row< Layout >::PixelIterator it;
+		
+		it->addChannels( Mask_U, Brothers_VU );
+		it->addChannels( Mask_Z );
+
+		float bgr[6] = { 3., 2., 1., 6., 5., 4. };
+		float alpha[2] = { 7., 8. };
+		float vu[4] = { 10., 9., 12., 11. };
+		float z[2] = { 13., 14. };
+		it->setChannelPointer( Chan_Blue, &bgr[0] );	
+		it->setChannelPointer( Chan_Alpha, &alpha );	
+		it->setChannelPointer( Chan_Z, &z );	
+		it->setChannelPointer( Chan_U, &vu[1] );	
+
+		Row< Layout > row( 2 );
+		row.setStart( it );
+
+		BOOST_CHECK_EQUAL( row.width(), 2 );
+		BOOST_CHECK( row.getStart() == it );
+		BOOST_CHECK( row.begin() == it );
+	}
+};
+
+struct RowTestSuite : public boost::unit_test::test_suite
+{
+	RowTestSuite() : boost::unit_test::test_suite( "RowTestSuite" )
+	{
+		boost::shared_ptr<RowTest> instance( new RowTest() );
+		add( BOOST_CLASS_TEST_CASE( &RowTest::testRowIterators, instance ) );
+	}
+};
+
+void addRowTest( boost::unit_test::test_suite *test )
+{
+	test->add( new RowTestSuite() );
 }
+
+} // namespace ImageTest
+
+} // namespace Gander
 

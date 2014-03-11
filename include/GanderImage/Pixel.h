@@ -209,7 +209,7 @@ struct PixelAccessor : public PixelBase< PixelAccessor< Layout >, Layout, typena
 };
 
 template< class Layout >
-struct PixelIterator : protected PixelAccessor< Layout >, public IncrementOperators< PixelIterator< Layout > >, DecrementOperators< PixelIterator< Layout > >
+class PixelIterator : protected PixelAccessor< Layout >, public IncrementOperators< PixelIterator< Layout > >, DecrementOperators< PixelIterator< Layout > >
 {
 	private :
 		
@@ -257,6 +257,16 @@ struct PixelIterator : protected PixelAccessor< Layout >, public IncrementOperat
 		{
 			BaseType::m_layout.decrement( BaseType::m_container, v );
 			return *this;
+		}
+
+		inline bool operator == ( const Type &rhs ) const
+		{
+			return &BaseType::template channelAtIndex<0>() == &rhs.template channelAtIndex<0>();
+		}
+
+		inline bool operator != ( const Type &rhs ) const
+		{
+			return &BaseType::template channelAtIndex<0>() != &rhs.template channelAtIndex<0>();
 		}
 
 	private :
