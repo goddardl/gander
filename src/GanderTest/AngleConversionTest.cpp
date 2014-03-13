@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,42 +31,52 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
 #include <iostream>
+#include <cstdlib>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
-
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
+#include "Gander/AngleConversion.h"
 #include "GanderTest/AngleConversionTest.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
 
-using namespace GanderTest;
 using namespace Gander;
+using namespace GanderTest;
+using namespace boost;
+using namespace boost::unit_test;
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace GanderTest
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
+struct AngleConversionTest
+{
+	void testDegreesToRadians()
 	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-		addAngleConversionTest(test);
+		BOOST_CHECK_EQUAL( degreesToRadians( 180. ), M_PI );
+		BOOST_CHECK_EQUAL( radiansToDegrees( M_PI ), 180. );
+		BOOST_CHECK_EQUAL( degreesToRadians( -180. ), -M_PI );
+		BOOST_CHECK_EQUAL( radiansToDegrees( -M_PI ), -180. );
+		BOOST_CHECK_EQUAL( degreesToRadians( 45. ), M_PI/4. );
+		BOOST_CHECK_EQUAL( radiansToDegrees( M_PI/4. ), 45. );
+		BOOST_CHECK_EQUAL( degreesToRadians( 360. ), M_PI*2. );
+		BOOST_CHECK_EQUAL( radiansToDegrees( M_PI*2. ), 360. );
+		BOOST_CHECK_EQUAL( degreesToRadians( 720. ), M_PI*4. );
 	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+};
 
-	return test;
+struct AngleConversionTestSuite : public boost::unit_test::test_suite
+{
+	AngleConversionTestSuite() : boost::unit_test::test_suite( "AngleConversionTestSuite" )
+	{
+		boost::shared_ptr<AngleConversionTest> instance( new AngleConversionTest() );
+		add( BOOST_CLASS_TEST_CASE( &AngleConversionTest::testDegreesToRadians, instance ) );
+	}
+};
+
+void addAngleConversionTest( boost::unit_test::test_suite *test )
+{
+	test->add( new AngleConversionTestSuite( ) );
 }
+
+} // namespace GanderTest
+

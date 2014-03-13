@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,42 +31,26 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+#ifndef __GANDER_ANGLECONVERSION_H__
+#define __GANDER_ANGLECONVERSION_H__
 
-#include <iostream>
+#include <math.h>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
-
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/AngleConversionTest.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace GanderTest;
-using namespace Gander;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-		addAngleConversionTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
-
-	return test;
+template< typename T >
+inline T degreesToRadians( T d )
+{
+	return ( d / T( 180. ) ) * T( M_PI );
 }
+
+template< typename T >
+inline T radiansToDegrees( T r )
+{
+	return r * ( T( 180. ) / T( M_PI ) );
+}
+
+}; // namespace Gander
+
+#endif
