@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,38 +31,30 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_TESTTOOLSTEST_H__
-#define __GANDERTEST_TESTTOOLSTEST_H__
+#ifndef __GANDER_ARECLOSE_H__
+#define __GANDER_ARECLOSE_H__
 
 #include <vector>
 #include <stdlib.h>
 
-#include "boost/test/unit_test.hpp"
-
-namespace GanderTest
+namespace Gander
 {
 
-/// Returns a random angle in radians between -PI and PI.
-/// @param from The minimum angle in radians.
-/// @param to The maximum angle in radians.
-/// @return A random angle between from and to in radians.
-double randomAngle( double from = -M_PI, double to = M_PI )
+/// Compares two Eigen classes and returns true if they equal within a tolerance.
+/// The tolerance values are positive, typically very small numbers.
+/// The relative difference (rtol * abs(b)) and the absolute difference atol are
+/// added together to compare against the absolute difference between a and b.
+template< typename DerivedA, typename DerivedB >
+bool areClose(
+	const Eigen::DenseBase<DerivedA>& a,
+	const Eigen::DenseBase<DerivedB>& b,
+	const typename DerivedA::RealScalar& rtol = Eigen::NumTraits<typename DerivedA::RealScalar>::dummy_precision(),
+	const typename DerivedA::RealScalar& atol = Eigen::NumTraits<typename DerivedA::RealScalar>::epsilon()
+	)
 {
-	if( to < from )
-	{
-		double t = from;
-		from = to;
-		to = t;
-	}
-
-	if( to == from )
-	{
-		return to;
-	}
-
-	return ( rand() % ( int( fabs( to - from ) ) ) + from );
+	return ( ( a.derived() - b.derived() ).array().abs() <= ( atol + rtol * b.derived().array().abs()) ).all();
 }
 
-}; // namespace GanderTest
+}; // namespace Gander
 
-#endif // __GANDERTEST_TESTTOOLSTEST_H__
+#endif // __GANDER_ARECLOSE_H__
