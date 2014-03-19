@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,38 +31,25 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_TESTTOOLSTEST_H__
-#define __GANDERTEST_TESTTOOLSTEST_H__
+#ifndef __GANDER_DECOMPOSERQ3x3_H__
+#define __GANDER_DECOMPOSERQ3x3_H__
 
 #include <vector>
-#include <stdlib.h>
 
-#include "boost/test/unit_test.hpp"
+#include "Gander/Math.h"
 
-namespace GanderTest
+namespace Gander
 {
 
-/// Returns a random number between the given range.
-/// @param from The minimum value.
-/// @param to The maximum value.
-/// @return A random number between from and to.
-double randomNumber( double from = 0., double to = 1. )
-{
-	if( to < from )
-	{
-		double t = from;
-		from = to;
-		to = t;
-	}
+/// Performs RQ factorisation on a 3x3 matrix using Givens rotations.
+/// @param M The matrix to decompose.
+/// @param R The returned lower Triangular matrix.
+/// @param Q The returned orthogonal matrix.
+/// @param Qx The X Givens rotation.
+/// @param Qx The Y Givens rotation.
+/// @param Qx The Z Givens rotation.
+void givensDecomposeRQ3x3( const Eigen::Matrix3d &M, Eigen::Matrix3d &R, Eigen::Matrix3d &Q, Eigen::Matrix3d &Qx, Eigen::Matrix3d &Qy, Eigen::Matrix3d &Qz );
 
-	if( to == from )
-	{
-		return to;
-	}
+}; // namespace Gander
 
-	return ( rand() % ( int( fabs( to - from ) ) ) + from );
-}
-
-}; // namespace GanderTest
-
-#endif // __GANDERTEST_TESTTOOLSTEST_H__
+#endif

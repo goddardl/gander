@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,8 @@
 #include <cstdlib>
 
 #include "Gander/Math.h"
+#include "Gander/AreClose.h"
+#include "Gander/AngleConversion.h"
 
 #include "GanderTest/TestTools.h"
 
@@ -51,6 +53,7 @@ using namespace boost;
 using namespace boost::unit_test;
 using namespace Eigen;
 using namespace GanderTest;
+using namespace Gander;
 
 namespace EigenTest
 {
@@ -65,16 +68,31 @@ struct GeometryTest
 		{
 			Matrix3d rx, ry, rz;
 			
-			double angle[3] = { randomAngle( 0, M_PI ), randomAngle( 0, M_PI ), randomAngle( 0, M_PI) };
-			rx = AngleAxisd( angle[0], Vector3d::UnitX() );
-			ry = AngleAxisd( angle[1], Vector3d::UnitY() );
-			rz = AngleAxisd( angle[2], Vector3d::UnitZ() );
+			Eigen::Vector3d xyz( degreesToRadians( randomNumber( 0, 89.99 ) ), degreesToRadians( randomNumber( 0, 89.99 ) ), degreesToRadians( randomNumber( 0, 89.99 ) ) );
+			rx = AngleAxisd( xyz[0], Vector3d::UnitX() );
+			ry = AngleAxisd( xyz[1], Vector3d::UnitY() );
+			rz = AngleAxisd( xyz[2], Vector3d::UnitZ() );
 			
-			// Check that we can extract the angle of rotation from the rotation matrix and assert that it
-			// is the same as the angle we used to create the matrix.
-			BOOST_CHECK_CLOSE( angle[0], AngleAxisd().fromRotationMatrix( rx ).angle(), 10e-8 );
-			BOOST_CHECK_CLOSE( angle[1], AngleAxisd().fromRotationMatrix( ry ).angle(), 10e-8 );
-			BOOST_CHECK_CLOSE( angle[2], AngleAxisd().fromRotationMatrix( rz ).angle(), 10e-8 );
+			// Check that we can extract the xyz of rotation from the rotation matrix and assert that it
+			// is the same as the xyz we used to create the matrix.
+			BOOST_CHECK_CLOSE( xyz[0], AngleAxisd().fromRotationMatrix( rx ).angle(), 10e-8 );
+			BOOST_CHECK_CLOSE( xyz[1], AngleAxisd().fromRotationMatrix( ry ).angle(), 10e-8 );
+			BOOST_CHECK_CLOSE( xyz[2], AngleAxisd().fromRotationMatrix( rz ).angle(), 10e-8 );
+	
+			Eigen::Matrix3d rotation;
+			rotation = rz * ry * rx;
+
+			// Test the extraction of Euler angles and the construction of a rotation matrix.	
+			Eigen::Vector3d zyx;
+			zyx = rotation.eulerAngles( 2, 1, 0 ); // Extract the xyzs in zyx order into a vector, ordered respectively.
+			
+			Eigen::Matrix3d newRotation;
+			newRotation = Eigen::AngleAxisd( zyx[0], Eigen::Vector3d::UnitZ() )
+				* Eigen::AngleAxisd( zyx[1], Eigen::Vector3d::UnitY() )
+				* Eigen::AngleAxisd( zyx[2], Eigen::Vector3d::UnitX() );
+			
+			BOOST_CHECK( areClose( newRotation, rotation, 10e-10, 10e-10 ) );
+			BOOST_CHECK( areClose( ( Eigen::Vector3d() << zyx[2], zyx[1], zyx[0] ).finished(), xyz, 10e-6, 10e-6 ) );
 		}
 	}
 };

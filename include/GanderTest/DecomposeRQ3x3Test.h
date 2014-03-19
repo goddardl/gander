@@ -31,38 +31,20 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_TESTTOOLSTEST_H__
-#define __GANDERTEST_TESTTOOLSTEST_H__
+#ifndef __GANDERTEST_DECOMPOSERQ3x3TEST_H__
+#define __GANDERTEST_DECOMPOSERQ3x3TEST_H__
 
 #include <vector>
-#include <stdlib.h>
 
+#include "unsupported/Eigen/NonLinearOptimization"
+#include "Gander/ErrorFunctions.h"
 #include "boost/test/unit_test.hpp"
 
 namespace GanderTest
 {
 
-/// Returns a random number between the given range.
-/// @param from The minimum value.
-/// @param to The maximum value.
-/// @return A random number between from and to.
-double randomNumber( double from = 0., double to = 1. )
-{
-	if( to < from )
-	{
-		double t = from;
-		from = to;
-		to = t;
-	}
-
-	if( to == from )
-	{
-		return to;
-	}
-
-	return ( rand() % ( int( fabs( to - from ) ) ) + from );
-}
+void addDecomposeRQ3x3Test( boost::unit_test::test_suite *test );
 
 }; // namespace GanderTest
 
-#endif // __GANDERTEST_TESTTOOLSTEST_H__
+#endif // __GANDERTEST_DECOMPOSERQ3x3TEST_H__
