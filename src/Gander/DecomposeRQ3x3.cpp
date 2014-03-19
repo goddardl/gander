@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "Gander/DecomposeRQ3x3.h"
+#include "Gander/AreClose.h"
 
 #include "boost/assert.hpp"
 
@@ -164,6 +165,18 @@ void givensDecomposeRQ3x3( const Eigen::Matrix3d &A, Eigen::Matrix3d &R, Eigen::
 
 	// Calulate the orthogonal matrix.
 	Q = Qx.transpose() * Qy.transpose() * Qz.transpose();
+
+	// Validate the result and if fails then attempt to extract euler rotations from Q and rebuild R.
+	if( !areClose( Q*R, A, 10e-10, 10e-10 ) )
+	{
+		Eigen::Vector3d zyx = Q.eulerAngles( 2, 1, 0 );
+
+		Q = Eigen::AngleAxisd( zyx[0], Eigen::Vector3d::UnitZ() )
+			* Eigen::AngleAxisd( zyx[1], Eigen::Vector3d::UnitY() )
+			* Eigen::AngleAxisd( zyx[2], Eigen::Vector3d::UnitX() );
+
+		R = Q.transpose() * A;
+	}
 }
 
 }; // namespace Gander
