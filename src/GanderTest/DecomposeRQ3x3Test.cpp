@@ -82,12 +82,12 @@ void decomposeTest( const Eigen::Vector3d &xyz, const Eigen::Matrix3d &C )
 
 	// Decompose into euler angles and check the values against
 	// the angles initially used to create the rotation matrix.	
-	Eigen::Vector3d angles = Q.eulerAngles( 2, 1, 0 ); // Extract the angles in zyx order into a vector, ordered respectively.
+	Eigen::Vector3d zyx = Q.eulerAngles( 2, 1, 0 ); // Extract the angles in zyx order into a vector, ordered respectively.
 
 	Eigen::Matrix3d newRotation;
-	newRotation = Eigen::AngleAxisd( angles[0], Eigen::Vector3d::UnitZ() )
-		* Eigen::AngleAxisd( angles[1], Eigen::Vector3d::UnitY() )
-		* Eigen::AngleAxisd( angles[2], Eigen::Vector3d::UnitX() );
+	newRotation = Eigen::AngleAxisd( zyx[0], Eigen::Vector3d::UnitZ() )
+		* Eigen::AngleAxisd( zyx[1], Eigen::Vector3d::UnitY() )
+		* Eigen::AngleAxisd( zyx[2], Eigen::Vector3d::UnitX() );
 
 	BOOST_CHECK( areClose( Q, newRotation, 10e-10, 10e-10 ) );
 }
@@ -102,6 +102,7 @@ namespace GanderTest
 			{
 				srand(1);
 				
+				// This test produces an incorrect result when the validation check in givensDecomposeRQ3x3 isn't used. 		
 				decomposeTest(
 					( Eigen::Vector3d() << degreesToRadians( -90. ), degreesToRadians( 24.5916 ), degreesToRadians( -90. ) ).finished(),
 					( Eigen::Matrix3d() << 1.94444, 0, 0, 0, 2.1875, 0, 0.0141111, 0.127, 1. ).finished()
@@ -110,7 +111,7 @@ namespace GanderTest
 				for( unsigned int i = 0; i < 100; ++i )
 				{
 					decomposeTest(
-						( Eigen::Vector3d() << randomAngle( -M_PI*.5, M_PI*.5 ), randomAngle( -M_PI*.5, M_PI*.5 ), randomAngle( -M_PI*.5, M_PI*.5 ) ).finished(),
+						( Eigen::Vector3d() << randomNumber( -M_PI*.5, M_PI*.5 ), randomNumber( -M_PI*.5, M_PI*.5 ), randomNumber( -M_PI*.5, M_PI*.5 ) ).finished(),
 						( Eigen::Matrix3d() << 1.94444, 0, 0, 0, 2.1875, 0, 0.0141111, 0.127, 1. ).finished()
 					);
 				}

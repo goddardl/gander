@@ -42,11 +42,11 @@
 namespace GanderTest
 {
 
-/// Returns a random angle in radians between -PI and PI.
-/// @param from The minimum angle in radians.
-/// @param to The maximum angle in radians.
-/// @return A random angle between from and to in radians.
-double randomAngle( double from = -M_PI, double to = M_PI )
+/// Returns a random number between the given range.
+/// @param from The minimum value.
+/// @param to The maximum value.
+/// @return A random number between from and to.
+double randomNumber( double from = 0., double to = 1. )
 {
 	if( to < from )
 	{
