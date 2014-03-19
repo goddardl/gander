@@ -108,11 +108,11 @@ namespace GanderTest
 					( Eigen::Matrix3d() << 1.94444, 0, 0, 0, 2.1875, 0, 0.0141111, 0.127, 1. ).finished()
 				);
 				
-				for( unsigned int i = 0; i < 100; ++i )
+				for( unsigned int i = 0; i < 1000; ++i )
 				{
 					decomposeTest(
 						( Eigen::Vector3d() << randomNumber( -M_PI*.5, M_PI*.5 ), randomNumber( -M_PI*.5, M_PI*.5 ), randomNumber( -M_PI*.5, M_PI*.5 ) ).finished(),
-						( Eigen::Matrix3d() << 1.94444, 0, 0, 0, 2.1875, 0, 0.0141111, 0.127, 1. ).finished()
+						( Eigen::Matrix3d() << randomNumber( 0.1, 3. ), 0, 0, 0, randomNumber( 0.1, 3. ), 0, randomNumber( 0.1, 3. ), randomNumber( 0.1, 3. ), 1. ).finished()
 					);
 				}
 			}
