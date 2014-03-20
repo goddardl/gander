@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,23 +31,27 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_TESTTOOLSTEST_H__
-#define __GANDERTEST_TESTTOOLSTEST_H__
 
-#include <vector>
-#include <stdlib.h>
+#include <iostream>
+#include <cstdlib>
+#include <math.h>
 
-#include "boost/test/unit_test.hpp"
+#include "GanderTest/TestTools.h"
 
-namespace GanderTest
+double GanderTest::randomNumber( double from, double to )
 {
+	if( to < from )
+	{
+		double t = from;
+		from = to;
+		to = t;
+	}
 
-/// Returns a random number between the given range.
-/// @param from The minimum value.
-/// @param to The maximum value.
-/// @return A random number between from and to.
-double randomNumber( double from = 0., double to = 1. );
+	if( to == from )
+	{
+		return to;
+	}
 
-}; // namespace GanderTest
+	return ( rand() % ( int( fabs( to - from ) ) ) + from );
+}
 
-#endif // __GANDERTEST_TESTTOOLSTEST_H__
