@@ -383,6 +383,14 @@ libraries = {
 			],
 		}
 	},
+	"GanderTest" : {
+		"install" : False,
+		"envAppends" : {
+			"LIBS" : [
+				"Gander"
+			],
+		}
+	},
 }
 
 ###############################################################################################
@@ -405,6 +413,7 @@ tests = {
 			"CPPFLAGS" : [
 			],
 			"LIBS" : [
+				"GanderTest",
 				"boost_test_exec_monitor" + boostLibSuffix
 			],
 		},

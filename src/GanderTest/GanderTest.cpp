@@ -46,6 +46,7 @@
 #include "GanderTest/HomographyTest.h"
 #include "GanderTest/AngleConversionTest.h"
 #include "GanderTest/DecomposeRQ3x3Test.h"
+#include "GanderTest/RectifyTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -63,6 +64,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addHomographyTest(test);
 		addAngleConversionTest(test);
 		addDecomposeRQ3x3Test(test);
+		addRectifyTest(test);
 	}
 	catch (std::exception &ex)
 	{
