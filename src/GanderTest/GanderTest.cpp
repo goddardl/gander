@@ -62,9 +62,8 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 	{
 		addLevenbergMarquardtTest(test);
 		addHomographyTest(test);
-		addAngleConversionTest(test);
 		addDecomposeRQ3x3Test(test);
-		addRectifyTest(test);
+		addAngleConversionTest(test);
 	}
 	catch (std::exception &ex)
 	{
