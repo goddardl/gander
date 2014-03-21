@@ -105,6 +105,20 @@ namespace GanderTest
 				Eigen::Vector3d T;
 
 				decomposeProjection( P, C, R, T );
+				
+				std::cerr << P << std::endl << std::endl;
+				std::cerr << C << std::endl << std::endl;
+				std::cerr << R << std::endl << std::endl;
+				std::cerr << T << std::endl << std::endl;
+
+				// Get the optical center.
+				Eigen::Vector3d c1;
+			//	c1 = - ( P.col(2).head(3) ).inverse() * P.row(2);
+			//	std::cerr << c1 << std::endl;
+			
+				I think that the calibration matrix is transposed (represented currently in row-major) when it should have the translation on the right column.
+				Matlab is also column major and so the rectify paper shouldn't need converting.
+
 			}
 			catch ( std::exception &e ) 
 			{

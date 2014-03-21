@@ -163,7 +163,7 @@ void givensDecomposeRQ3x3( const Eigen::Matrix3d &A, Eigen::Matrix3d &R, Eigen::
 		Qx(2,2) *= -1;
 	}
 
-	// Calulate the orthogonal matrix.
+	// Calculate the orthogonal matrix.
 	Q = Qx.transpose() * Qy.transpose() * Qz.transpose();
 
 	// Validate the result and if fails then attempt to extract euler rotations from Q and rebuild R.
