@@ -52,6 +52,6 @@ double Gander::Test::randomNumber( double from, double to )
 		return to;
 	}
 
-	return ( double( rand() ) / RAND_MAX ) * ( from - to ) + from;
+	return ( double( rand() ) / RAND_MAX ) * ( to - from ) + from;
 }
 
