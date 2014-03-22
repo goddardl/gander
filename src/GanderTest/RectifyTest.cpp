@@ -65,7 +65,7 @@ void decomposeProjection( const Eigen::MatrixXd &P, Eigen::Matrix3d &C, Eigen::M
 
 void testProjectionMatrix( Eigen::MatrixXd &P, const Eigen::Vector3d &rxyz, const Eigen::Vector3d &txyz )
 {
-	P.resize( 3, 4 );
+	/// \todo We should assert that the projection matrix is a 3x4 matrix here.
 
 	// Create a rotation matrix using individual rotational components.
 	Eigen::Matrix3d rx;
@@ -81,10 +81,10 @@ void testProjectionMatrix( Eigen::MatrixXd &P, const Eigen::Vector3d &rxyz, cons
 	rotation = rz * ry * rx;
 
 	Eigen::Matrix3d calibration;
-	calibration << 1.94444, 0, 0, 0, 2.1875, 0, 0.0141111, 0.127, 1.;
+	calibration << 2.1875, 0, 0.0141111, 0, 2.1875, 0.127, 0, 0, 1.;
 
 	// Construct the projection matrix.
-	P << rotation * calibration, txyz;
+	P << calibration * rotation, txyz;
 }
 
 namespace GanderTest
@@ -97,8 +97,8 @@ namespace GanderTest
 			{
 				srand(1);
 
-				Eigen::MatrixXd P;
-				testProjectionMatrix( P, Eigen::Vector3d( 0., 10., 5. ), Eigen::Vector3d( 1, 2, 3 ) );
+				Eigen::MatrixXd P( 3, 4 );
+				testProjectionMatrix( P, Eigen::Vector3d( 0., 10., 5. ), Eigen::Vector3d( 0, 0, -1 ) );
 
 				// Decompose the projection matrix into it's basic components.
 				Eigen::Matrix3d C, R;
@@ -106,19 +106,15 @@ namespace GanderTest
 
 				decomposeProjection( P, C, R, T );
 				
-				std::cerr << P << std::endl << std::endl;
-				std::cerr << C << std::endl << std::endl;
-				std::cerr << R << std::endl << std::endl;
-				std::cerr << T << std::endl << std::endl;
-
+				Eigen::Vector3d p( 0, 0, 0 );
+				p = P * p;
+				std::cerr << p << std::endl;
+				
 				// Get the optical center.
 				Eigen::Vector3d c1;
-			//	c1 = - ( P.col(2).head(3) ).inverse() * P.row(2);
-			//	std::cerr << c1 << std::endl;
+				c1 = -R * T;
+				std::cerr << c1 << std::endl;
 			
-				I think that the calibration matrix is transposed (represented currently in row-major) when it should have the translation on the right column.
-				Matlab is also column major and so the rectify paper shouldn't need converting.
-
 			}
 			catch ( std::exception &e ) 
 			{
