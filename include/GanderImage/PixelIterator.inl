@@ -32,61 +32,45 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
-
-#include "GanderImageTest/ChannelTest.h"
-#include "GanderImageTest/ChannelBrothersTest.h"
-#include "GanderImageTest/PPMTest.h"
-#include "GanderImageTest/OpTest.h"
-#include "GanderImageTest/ChannelPtrContainerTest.h"
-#include "GanderImageTest/CompoundLayoutTest.h"
-#include "GanderImageTest/CompoundLayoutContainerTest.h"
-#include "GanderImageTest/ChannelLayoutTest.h"
-#include "GanderImageTest/BrothersLayoutTest.h"
-#include "GanderImageTest/DynamicLayoutTest.h"
-#include "GanderImageTest/PixelTest.h"
-#include "GanderImageTest/PixelIteratorTest.h"
-#include "GanderImageTest/RowTest.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace Gander;
-using namespace Gander::ImageTest;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander Image unit test" );
 
-	try
-	{
-		addPPMTest(test);
-		addChannelTest(test);
-		addChannelBrothersTest(test);
-		addChannelLayoutTest(test);
-		addBrothersLayoutTest(test);
-		addDynamicLayoutTest(test);
-		addCompoundLayoutTest(test);
-		addCompoundLayoutContainerTest(test);
-		addOpTest(test);
-		addPixelTest(test);
-		addPixelIteratorTest(test);
-		addRowTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+namespace Image
+{
 
-	return test;
+template< class Layout >
+template< class RhsLayout >	
+ConstPixelIterator< Layout >::ConstPixelIterator( const ConstPixelIterator< RhsLayout > &it )
+{
+	if( std::template is_same< RhsLayout, Layout >::value )
+	{
+		BaseType::m_layout = it.m_layout;
+	}
+	else if( BaseType::m_layout.isDynamic() && it->channels().contains( BaseType::channels() ) )
+	{
+		ChannelSet missingChannels( it->channels() - BaseType::channels() );
+		if( missingChannels.size() > 0 )
+		{
+			BaseType::addChannels( missingChannels );
+		}
+
+		typedef typename ConstPixelIterator< RhsLayout >::ConstPixelAccessor RhsPixelAccessor;
+		static_cast< ConstPixelAccessor * >( this )->template copyFrom< RhsPixelAccessor >( static_cast< const RhsPixelAccessor & >( it ), true );
+	}
+	else
+	{
+		GANDER_ASSERT( false, "Cannot copy from an iterator that doesn't have the required channels." );
+	}
+};
+
+template< class Layout >
+template< class RhsLayout >	
+ConstPixelIterator< Layout >::ConstPixelIterator( const PixelIterator< RhsLayout > &it )
+{
+	*this = static_cast< const typename Gander::Image::template ConstPixelIterator< RhsLayout > & >( it );
 }
+
+}; // namespace Image
+
+}; // namespace Gander
 

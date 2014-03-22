@@ -57,7 +57,7 @@ namespace Image
 {
 
 template< class Derived, class Layout, class Container >
-class PixelBase : public EqualComparisonOperators< Derived >
+class PixelBase
 {
 	private :
 
@@ -87,26 +87,29 @@ class PixelBase : public EqualComparisonOperators< Derived >
 		inline ChannelSet channels() const { return m_layout.channels(); }
 		inline bool isDynamic() const { return m_layout.isDynamic(); }
 		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None ) { m_layout.template addChannels< ContainerType >( m_container, c, b ); };
-
-		/// The equalTo method is the implementation of the equality interface.	
+		
 		template< class T >
-		bool equalTo( T const &rhs ) const
+		inline bool operator == ( const T &rhs ) const
 		{
-			if( m_layout != rhs.m_layout )
-			{
-				return false;
-			}
-
-			IsEqual op;
-			forEachChannel( *this, rhs, op );
-			return op.value();
+			return this->template equalTo< T >( rhs );
+		}
+		
+		template< class T >
+		inline bool operator != ( const T &rhs ) const
+		{
+			return !this->template equalTo< T >( rhs );
 		}
 
 		/// The copyFrom method is the implementation of the assignment operator.		
 		template< class T >
-		inline const Derived & copyFrom( const T &rhs )
+		inline const Derived & copyFrom( const T &rhs, bool copyAvailableChannels = false )
 		{
-			GANDER_ASSERT( static_cast< Derived * >( this )->channels() == rhs.channels(),
+			if( static_cast< Derived * >( this )->channels() != rhs.channels() )
+			{
+				std::cerr <<static_cast< Derived * >( this )->channels().value() << std::endl;
+				std::cerr << rhs.channels().value() << std::endl;
+			}
+			GANDER_ASSERT( static_cast< Derived * >( this )->channels() == rhs.channels() || copyAvailableChannels,
 				"Cannot copy one pixel to another if they have different channels."
 			);
 			
@@ -139,7 +142,21 @@ class PixelBase : public EqualComparisonOperators< Derived >
 		}
 
 	protected :
-		
+
+		/// The equalTo method is the implementation of the equality interface.	
+		template< class T >
+		bool equalTo( T const &rhs ) const
+		{
+			if( m_layout != rhs.m_layout )
+			{
+				return false;
+			}
+
+			IsEqual op;
+			forEachChannel( *this, rhs, op );
+			return op.value();
+		}
+
 		LayoutType m_layout;
 		ContainerType m_container;
 
@@ -206,79 +223,6 @@ struct PixelAccessor : public PixelBase< PixelAccessor< Layout >, Layout, typena
 		template< class, class, class > friend class PixelBase;
 		template< class > friend class Pixel;
 		template< class > friend class PixelAccessor;
-};
-
-template< class Layout >
-class PixelIterator :
-	protected PixelAccessor< Layout >,
-	public IncrementOperators< PixelIterator< Layout > >,
-	public DecrementOperators< PixelIterator< Layout > >,
-	public IntegerArithmeticOperators< PixelIterator< Layout > >
-{
-	private :
-		
-		typedef PixelAccessor< Layout > BaseType;
-
-	public :	
-		
-		typedef typename BaseType::ContainerType ContainerType;
-		typedef Layout LayoutType;
-		typedef PixelIterator< Layout > Type;
-
-		inline const PixelAccessor< Layout > &operator * () const
-		{
-			return *static_cast< const PixelAccessor< Layout > * >( this );
-		}
-
-		inline const PixelAccessor< Layout > *operator -> () const
-		{
-			return static_cast< const PixelAccessor< Layout > * >( this );
-		}
-
-		inline PixelAccessor< Layout > &operator * ()
-		{
-			return *static_cast< PixelAccessor< Layout > * >( this );
-		}
-
-		inline PixelAccessor< Layout > *operator -> ()
-		{
-			return static_cast< PixelAccessor< Layout > * >( this );
-		}
-
-		template< class T >
-		inline const PixelIterator & operator = ( const T &rhs )
-		{
-			return BaseType::template copyFrom< T >( rhs );
-		}
-		
-		inline Type &increment( int v )
-		{
-			BaseType::m_layout.increment( BaseType::m_container, v );
-			return *this;
-		}
-
-		inline Type &decrement( int v )
-		{
-			BaseType::m_layout.decrement( BaseType::m_container, v );
-			return *this;
-		}
-
-		inline bool operator == ( const Type &rhs ) const
-		{
-			return &BaseType::template channelAtIndex<0>() == &rhs.template channelAtIndex<0>();
-		}
-
-		inline bool operator != ( const Type &rhs ) const
-		{
-			return &BaseType::template channelAtIndex<0>() != &rhs.template channelAtIndex<0>();
-		}
-
-	private :
-
-		template< class, class, class > friend class PixelBase;
-		template< class > friend class Pixel;
-		template< class > friend class PixelAccessor;
-		template< class > friend class PixelIterator;
 };
 
 }; // namespace Image

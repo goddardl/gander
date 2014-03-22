@@ -44,6 +44,7 @@
 
 #include "GanderImage/StaticAssert.h"
 #include "GanderImage/Pixel.h"
+#include "GanderImage/PixelIterator.h"
 
 namespace Gander
 {
@@ -60,21 +61,22 @@ class Row
 		typedef Row< LayoutType > Type;
 		typedef typename Gander::Image::template Pixel< LayoutType > Pixel;
 		typedef typename Gander::Image::template PixelIterator< LayoutType > PixelIterator;
+		typedef typename Gander::Image::template ConstPixelIterator< LayoutType > ConstPixelIterator;
 
 		typedef PixelIterator iterator;
-		typedef const Gander::Image::PixelIterator< LayoutType > const_iterator;
+		typedef ConstPixelIterator const_iterator;
 
 		inline Row( unsigned int width ) :
 			m_width( width )
 		{
 		}
 		
-		inline void setStart( const PixelIterator &it )
+		inline void setStart( const ConstPixelIterator &it )
 		{
 			m_start = it;
 		}
 
-		inline const PixelIterator &getStart() const
+		inline const const_iterator &getStart() const
 		{
 			return m_start;
 		}
@@ -94,12 +96,12 @@ class Row
 			return m_start.numberOfChannels();
 		}
 
-		const_iterator &begin() const
+		const const_iterator &begin() const
 		{
 			return m_start;
 		}
 
-		const_iterator &end() const
+		const const_iterator &end() const
 		{
 			return iterator( m_start ).increment( m_width );
 		}
@@ -123,7 +125,7 @@ class Row
 			m_width( width )
 		{}
 
-		PixelIterator m_start;
+		const_iterator m_start;
 		unsigned int m_width;
 
 };

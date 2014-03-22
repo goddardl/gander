@@ -76,4 +76,4 @@ void addPixelTest( boost::unit_test::test_suite *test );
 
 }; // namespace Gander
 
-#endif // __GANDERTEST_PIXELBASETEST_H__
+#endif // __GANDERTEST_PIXELTEST_H__
