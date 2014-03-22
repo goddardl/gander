@@ -70,15 +70,15 @@ void decomposeTest( const Eigen::Vector3d &xyz, const Eigen::Matrix3d &C )
 
 	// Combine the calibration and rotation matrix.
 	Eigen::Matrix3d A;
-	A = rotation * C;
+	A = C * rotation;
 
 	// Decompose using Givens RQ decomposition.
 	Eigen::Matrix3d R, Q, Qx, Qy, Qz;
 	givensDecomposeRQ3x3( A, R, Q, Qx, Qy, Qz );
-
-	BOOST_CHECK( areClose( Q, rotation, 10e-10, 10e-10 ) );
-	BOOST_CHECK( areClose( R, C, 10e-10, 10e-10 ) );
-	BOOST_CHECK( areClose( A, Q*R, 10e-10, 10e-10 ) );
+	
+	BOOST_CHECK( areClose( Q, rotation, 10e-8, 10e-8 ) );
+	BOOST_CHECK( areClose( R, C, 10e-8, 10e-8 ) );
+	BOOST_CHECK( areClose( A, R*Q, 10e-8, 10e-8 ) );
 
 	// Decompose into euler angles and check the values against
 	// the angles initially used to create the rotation matrix.	
@@ -89,7 +89,7 @@ void decomposeTest( const Eigen::Vector3d &xyz, const Eigen::Matrix3d &C )
 		* Eigen::AngleAxisd( zyx[1], Eigen::Vector3d::UnitY() )
 		* Eigen::AngleAxisd( zyx[2], Eigen::Vector3d::UnitX() );
 
-	BOOST_CHECK( areClose( Q, newRotation, 10e-10, 10e-10 ) );
+	BOOST_CHECK( areClose( Q, newRotation, 10e-8, 10e-8 ) );
 }
 
 namespace Gander
@@ -105,17 +105,11 @@ namespace Test
 			{
 				srand(1);
 				
-				// This test produces an incorrect result when the validation check in givensDecomposeRQ3x3 isn't used. 		
-				decomposeTest(
-					( Eigen::Vector3d() << degreesToRadians( -90. ), degreesToRadians( 24.5916 ), degreesToRadians( -90. ) ).finished(),
-					( Eigen::Matrix3d() << 1.94444, 0, 0, 0, 2.1875, 0, 0.0141111, 0.127, 1. ).finished()
-				);
-				
-				for( unsigned int i = 0; i < 1000; ++i )
+				for( unsigned int i = 0; i < 5000; ++i )
 				{
 					decomposeTest(
 						( Eigen::Vector3d() << randomNumber( -M_PI*.5, M_PI*.5 ), randomNumber( -M_PI*.5, M_PI*.5 ), randomNumber( -M_PI*.5, M_PI*.5 ) ).finished(),
-						( Eigen::Matrix3d() << randomNumber( 0.1, 3. ), 0, 0, 0, randomNumber( 0.1, 3. ), 0, randomNumber( 0.1, 3. ), randomNumber( 0.1, 3. ), 1. ).finished()
+						( Eigen::Matrix3d() << randomNumber( 0.1, 3. ), 0, randomNumber( 0.1, 3. ), 0, randomNumber( 0.1, 3. ), randomNumber( 0.1, 3. ), 0., 0., 1. ).finished()
 					);
 				}
 			}

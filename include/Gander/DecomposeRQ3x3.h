@@ -43,7 +43,7 @@ namespace Gander
 
 /// Performs RQ factorisation on a 3x3 matrix using Givens rotations.
 /// @param M The matrix to decompose.
-/// @param R The returned lower Triangular matrix.
+/// @param R The returned upper Triangular matrix.
 /// @param Q The returned orthogonal matrix.
 /// @param Qx The X Givens rotation.
 /// @param Qx The Y Givens rotation.
