@@ -1,15 +1,9 @@
 TODO:
 
-Continue implementing the Pixel and PixelAccessor classes. 
+Change the PixelAccessor and PixelIterator classes addChannels() method to also accept a pointer to the channel data. Move the old addChannels method into a private scope to stop it's use.
+Finish implementing the addChannels() method on the Image class.
+Get the Image class to use a data window.
+Write tests for the above.
+Add row access to the Images data. The isValid method should be checked before any row is created.
 
-Add the increment and decrement methods to the layout classes and the pixelAccessor.
 
-Implement the const versions of the channel and channelAtIndex methods for the DynamicLayout and the CompoundLayout.
-
-Write a full set of tests for the pixel and pixelAccessor.
-
-Implement the MaskLayout class which simply takes a Pixel type as a template argument and holds a reference to it. It then just implements the channel() methods but also passes a mask to their template
-argument.
-
-Write a basic Image class that takes a layout as a template argument. It should have a data window and a display window. It should hold ane PixelAccessor class that will point to the start of the
-data. At channelPointer method should allow the values in the pixel accessor to be set.
