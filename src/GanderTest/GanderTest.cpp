@@ -46,7 +46,6 @@
 #include "GanderTest/HomographyTest.h"
 #include "GanderTest/AngleConversionTest.h"
 #include "GanderTest/DecomposeRQ3x3Test.h"
-#include "GanderTest/RectifyTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
