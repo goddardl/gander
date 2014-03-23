@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,63 +31,49 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
 #include <iostream>
+#include <cstdlib>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
-
-#include "GanderImageTest/ChannelTest.h"
-#include "GanderImageTest/ChannelBrothersTest.h"
-#include "GanderImageTest/PPMTest.h"
-#include "GanderImageTest/OpTest.h"
-#include "GanderImageTest/CompoundLayoutTest.h"
-#include "GanderImageTest/CompoundLayoutContainerTest.h"
-#include "GanderImageTest/ChannelLayoutTest.h"
-#include "GanderImageTest/BrothersLayoutTest.h"
-#include "GanderImageTest/DynamicLayoutTest.h"
-#include "GanderImageTest/PixelTest.h"
-#include "GanderImageTest/PixelIteratorTest.h"
-#include "GanderImageTest/RowTest.h"
+#include "GanderImage/Image.h"
 #include "GanderImageTest/ImageTest.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+#include "boost/test/floating_point_comparison.hpp"
+#include "boost/test/test_tools.hpp"
 
 using namespace Gander;
+using namespace Gander::Image;
 using namespace Gander::ImageTest;
+using namespace boost;
+using namespace boost::unit_test;
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander Image unit test" );
 
-	try
-	{
-		addPPMTest(test);
-		addChannelTest(test);
-		addChannelBrothersTest(test);
-		addChannelLayoutTest(test);
-		addBrothersLayoutTest(test);
-		addDynamicLayoutTest(test);
-		addCompoundLayoutTest(test);
-		addCompoundLayoutContainerTest(test);
-		addOpTest(test);
-		addPixelTest(test);
-		addPixelIteratorTest(test);
-		addRowTest(test);
-		addImageTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+namespace ImageTest
+{
 
-	return test;
+struct ImageTest
+{
+	void testImageConstructor()
+	{
+	}
+};
+
+struct ImageTestSuite : public boost::unit_test::test_suite
+{
+	ImageTestSuite() : boost::unit_test::test_suite( "ImageTestSuite" )
+	{
+		boost::shared_ptr<ImageTest> instance( new ImageTest() );
+		add( BOOST_CLASS_TEST_CASE( &ImageTest::testImageConstructor, instance ) );
+	}
+};
+
+void addImageTest( boost::unit_test::test_suite *test )
+{
+	test->add( new ImageTestSuite() );
 }
+
+} // namespace ImageTest
+
+} // namespace Gander
 
