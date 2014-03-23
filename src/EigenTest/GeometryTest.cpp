@@ -52,7 +52,7 @@ using namespace EigenTest;
 using namespace boost;
 using namespace boost::unit_test;
 using namespace Eigen;
-using namespace GanderTest;
+using namespace Gander::Test;
 using namespace Gander;
 
 namespace EigenTest
@@ -84,7 +84,7 @@ struct GeometryTest
 
 			// Test the extraction of Euler angles and the construction of a rotation matrix.	
 			Eigen::Vector3d zyx;
-			zyx = rotation.eulerAngles( 2, 1, 0 ); // Extract the xyzs in zyx order into a vector, ordered respectively.
+			zyx = rotation.eulerAngles( 2, 1, 0 ); // Extract the angles in zyx order into a vector, ordered respectively.
 			
 			Eigen::Matrix3d newRotation;
 			newRotation = Eigen::AngleAxisd( zyx[0], Eigen::Vector3d::UnitZ() )

@@ -41,11 +41,14 @@
 #include "boost/test/test_tools.hpp"
 
 using namespace Gander;
-using namespace GanderTest;
+using namespace Gander::Test;
 using namespace boost;
 using namespace boost::unit_test;
 
-namespace GanderTest
+namespace Gander
+{
+
+namespace Test
 {
 
 struct AngleConversionTest
@@ -78,5 +81,7 @@ void addAngleConversionTest( boost::unit_test::test_suite *test )
 	test->add( new AngleConversionTestSuite( ) );
 }
 
-} // namespace GanderTest
+} // namespace Gander
+
+} // namespace Test
 

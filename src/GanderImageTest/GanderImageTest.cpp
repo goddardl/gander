@@ -46,7 +46,6 @@
 #include "GanderImageTest/ChannelBrothersTest.h"
 #include "GanderImageTest/PPMTest.h"
 #include "GanderImageTest/OpTest.h"
-#include "GanderImageTest/ChannelPtrContainerTest.h"
 #include "GanderImageTest/CompoundLayoutTest.h"
 #include "GanderImageTest/CompoundLayoutContainerTest.h"
 #include "GanderImageTest/ChannelLayoutTest.h"
