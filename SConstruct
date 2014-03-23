@@ -71,7 +71,7 @@ options.Add(
 options.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-fPIC", "-pipe", "-Wall", "-Werror", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
+	[ "-fPIC", "-pipe", "-Wall", "-Werror", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-funroll-loops", "-std=gnu++0x" ]
 )
 
 options.Add(
@@ -387,7 +387,14 @@ libraries = {
 		"install" : False,
 		"envAppends" : {
 			"LIBS" : [
-				"Gander"
+			"Gander"
+			],
+		}
+	},
+	"GanderImage" : {
+		"install" : True,
+		"envAppends" : {
+			"LIBS" : [
 			],
 		}
 	},
@@ -414,6 +421,18 @@ tests = {
 			],
 			"LIBS" : [
 				"GanderTest",
+				"boost_test_exec_monitor" + boostLibSuffix
+			],
+		},
+	},
+	"GanderImageTest" : {
+		"envAppends" : {
+			"CPPFLAGS" : [
+				#"-DBOOST_TEST_DYN_LINK=1",
+			],
+			"LIBS" : [
+				"Gander",
+				"GanderImage",
 				"boost_test_exec_monitor" + boostLibSuffix
 			],
 		},

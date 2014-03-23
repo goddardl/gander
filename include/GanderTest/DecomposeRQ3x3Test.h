@@ -40,11 +40,16 @@
 #include "Gander/ErrorFunctions.h"
 #include "boost/test/unit_test.hpp"
 
-namespace GanderTest
+namespace Gander
+{
+
+namespace Test
 {
 
 void addDecomposeRQ3x3Test( boost::unit_test::test_suite *test );
 
-}; // namespace GanderTest
+}; // namespace Test
+
+}; // namespace Gander
 
 #endif // __GANDERTEST_DECOMPOSERQ3x3TEST_H__

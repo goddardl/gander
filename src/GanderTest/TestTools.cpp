@@ -38,7 +38,7 @@
 
 #include "GanderTest/TestTools.h"
 
-double GanderTest::randomNumber( double from, double to )
+double Gander::Test::randomNumber( double from, double to )
 {
 	if( to < from )
 	{

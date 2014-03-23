@@ -1,0 +1,9 @@
+TODO:
+
+Change the PixelAccessor and PixelIterator classes addChannels() method to also accept a pointer to the channel data. Move the old addChannels method into a private scope to stop it's use.
+Finish implementing the addChannels() method on the Image class.
+Get the Image class to use a data window.
+Write tests for the above.
+Add row access to the Images data. The isValid method should be checked before any row is created.
+
+

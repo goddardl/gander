@@ -39,7 +39,10 @@
 
 #include "boost/test/unit_test.hpp"
 
-namespace GanderTest
+namespace Gander
+{
+
+namespace Test
 {
 
 /// Returns a random number between the given range.
@@ -48,6 +51,8 @@ namespace GanderTest
 /// @return A random number between from and to.
 double randomNumber( double from = 0., double to = 1. );
 
-}; // namespace GanderTest
+}; // namespace Test
+
+}; // namespace Gander
 
 #endif // __GANDERTEST_TESTTOOLSTEST_H__

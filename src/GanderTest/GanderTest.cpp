@@ -31,7 +31,6 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
 #include <iostream>
 
 #include "boost/test/test_tools.hpp"
@@ -46,12 +45,17 @@
 #include "GanderTest/HomographyTest.h"
 #include "GanderTest/AngleConversionTest.h"
 #include "GanderTest/DecomposeRQ3x3Test.h"
+#include "GanderTest/CommonTest.h"
+#include "GanderTest/EnumHelperTest.h"
+#include "GanderTest/BitTwiddlerTest.h"
+#include "GanderTest/TupleTest.h"
+#include "GanderTest/InterfacesTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
 
-using namespace GanderTest;
 using namespace Gander;
+using namespace Gander::Test;
 
 test_suite* init_unit_test_suite( int argc, char* argv[] )
 {
@@ -63,6 +67,11 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addHomographyTest(test);
 		addDecomposeRQ3x3Test(test);
 		addAngleConversionTest(test);
+		addCommonTest(test);
+		addEnumHelperTest(test);
+		addBitTwiddlerTest(test);
+		addTupleTest(test);
+		addInterfacesTest(test);
 	}
 	catch (std::exception &ex)
 	{

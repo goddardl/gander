@@ -49,7 +49,7 @@
 #include "boost/test/test_tools.hpp"
 
 using namespace Gander;
-using namespace GanderTest;
+using namespace Gander::Test;
 using namespace boost;
 using namespace boost::unit_test;
 
@@ -92,7 +92,10 @@ void decomposeTest( const Eigen::Vector3d &xyz, const Eigen::Matrix3d &C )
 	BOOST_CHECK( areClose( Q, newRotation, 10e-10, 10e-10 ) );
 }
 
-namespace GanderTest
+namespace Gander
+{
+
+namespace Test
 {
 	struct DecomposeRQ3x3Test
 	{
@@ -138,5 +141,7 @@ namespace GanderTest
 		test->add( new DecomposeRQ3x3TestSuite( ) );
 	}
 
-} // namespace GanderTest
+} // namespace Test
+
+} // namespace Gander
 

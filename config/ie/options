@@ -51,7 +51,7 @@ def getOption( name, default ) :
 cortexMajorVersion = getOption( "CORTEX_MAJOR_VERSION", os.environ["CORTEX_MAJOR_VERSION"] )
 cortexReg = IEEnv.registry["libraries"]["cortex"][cortexMajorVersion].get( IEEnv.platform(), IEEnv.registry["libraries"]["cortex"][cortexMajorVersion] )
 compiler = getOption( "COMPILER", None )
-compilerVersion = getOption( "COMPILER_VERSION", None )
+compilerVersion = getOption( "COMPILER_VERSION", "4.4" )
 targetApp = getOption( "APP", None )
 targetAppVersion = None
 oiioVersion = "1.1.10"
@@ -91,6 +91,7 @@ if targetAppVersion :
 LOCATE_DEPENDENCY_SYSTEMPATH = [
 	os.path.join( IEEnv.Environment.rootPath(), "apps", "OpenImageIO", oiioVersion, IEEnv.platform(), compiler, compilerVersion, "include" ),
 	os.path.join( IEEnv.Environment.rootPath(), "tools", "include", IEEnv.platform(), "boost", targetAppReg.get( "boostVersion", cortexReg["boostVersion"] ) ),
+	"/software/tools/include/eigen/3.2.0/cent6.x86_64/include/Eigen/",
 ]
 
 if targetAppVersion :
@@ -119,7 +120,6 @@ if getOption( "RELEASE", "0" )=="0" :
 
 LOCATE_DEPENDENCY_LIBPATH = [
 	os.path.join( IEEnv.Environment.rootPath(), "tools", "lib", IEEnv.platform(), compiler, compilerVersion ),
-	os.path.join( IEEnv.Environment.rootPath(), "apps", "cortex", cortexMajorVersion, IEEnv.platform(), "base", "lib", compiler, compilerVersion ),
 ]
 
 if targetAppVersion :

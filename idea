@@ -1,0 +1,8 @@
+Each layout has a AccessorContainer and a ChannelContainer type declaration. The accessor container provides access to channels via pointers and the channel container holds channels.
+Each of these classes must provide access to the channels by index and by channel. They also need to implement the common methods: channels(), numberOfChannels() etc.
+The accessor container also needs to provide a way of incrementing and decrementing the pointers as well as implementing the requiredChannels method along with the methods for setting the pointers.
+
+Write an Instantiation class that instances either the AccessorContainers or the ChannelContainers. Implement a method called template<ContainerType, LayoutIndex> container() that returns a reference to 
+the desired container at the given layout index. 
+The Pixel class and a PixelAccessor class are built on the Instantiation class and use the layout information to access the containers. The Pixel class just provides access to the containers channel()
+and channelAtIndex method and the PixelAccessor class derives from it and adds the setPointer, increment and decrement methods.
