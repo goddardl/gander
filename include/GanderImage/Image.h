@@ -67,7 +67,7 @@ class Image
 
 		inline bool isValid() const
 		{
-			return m_pixelAccessor.requiredChannels() == m_availableChannels();
+			return m_pixelAccessor.requiredChannels() == m_availableChannels;
 		}
 
 		inline unsigned int numberOfChannels() const { return m_pixelAccessor.numberOfChannels(); }
@@ -75,19 +75,28 @@ class Image
 		inline bool isDynamic() const { return m_pixelAccessor.isDynamic(); }
 		inline unsigned int numberOfChannelPointers() const { return m_pixelAccessor.numberOfChannelPointers(); };
 		inline ChannelSet requiredChannels() const { return m_pixelAccessor.requiredChannels(); };
+		inline unsigned int width() const { return m_width; };
+		inline unsigned int height() const { return m_height; };
 
-		/// Replaces the contents of a channel with a new one. If the channel does not exist then it is created.	
-		/// @param channel The channel to create or assign to.
+		/// Adds a new channel to the image if the layout is dynamic.
+		/// @param channel The channel to add to the image.
+		void addChannels( ChannelSet channels, ChannelBrothers brothers = Brothers_None )
+		{
+			if( !m_pixelAccessor.channels().contains( channels ) )
+			{
+				m_pixelAccessor.addChannels( channels, brothers );
+			}
+		}
+
+		/// Sets the channel pointer that represents a particular channel.
 		/// @param buf A pointer to the channel data.
 		/// @param stride The distance in bytes between the first element in a row and the first in the next.
 		/// If the stride is negative then the image is flipped vertically.
-		void addChannel( Channel channel, void *buf, size_t stride )
+		void setChannelPointer( Channel channel, void *buf, size_t stride )
 		{
-			unsigned int index = 0;	
-			
 			if( stride < 0 ) 
 			{ 
-				buf = buf - ( static_cast<size_t>( m_height ) - 1 ) * stride;
+				buf = reinterpret_cast< unsigned char * >( buf ) - ( static_cast<size_t>( m_height ) - 1 ) * stride;
 			}
 
 			if( requiredChannels().contains( channel ) )
@@ -104,16 +113,12 @@ class Image
 					unsigned int index = m_availableChannels.index( channel );
 					m_strides.insert( m_strides.begin() + index, stride );
 				}
-			}
-			else if( isDynamic() )
-			{
-//				here we should add the new channel.
-//				m_pixelAccessor.addChannel();
-//				index = m_channels.index( channel );
+				
+				m_pixelAccessor.setChannelPointer( channel, buf );
 			}
 			else
 			{
-				GANDER_ASSERT( false, "This image does not have a dynamic layout and can't have channels added." );
+				GANDER_ASSERT( false, "This image does not contain the requested channel in it's layout. If the layout is dynamic, add the channel before trying to set it's pointer." );
 			}
 		}
 

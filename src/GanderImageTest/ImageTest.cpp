@@ -35,6 +35,10 @@
 #include <cstdlib>
 
 #include "GanderImage/Image.h"
+#include "GanderImage/BrothersLayout.h"
+#include "GanderImage/Channel.h"
+#include "GanderImage/ChannelBrothers.h"
+
 #include "GanderImageTest/ImageTest.h"
 
 #include "boost/test/floating_point_comparison.hpp"
@@ -56,6 +60,34 @@ struct ImageTest
 {
 	void testImageConstructor()
 	{
+		// Create 2x2 image of RGB values.
+		float rgb[2][2][3] = {
+			{ { 0., 1., 2. }, { 3., 4., 5. } },
+			{ { 6., 7., 8. }, { 9., 10., 11. } },
+		};
+			
+		// Just check that the array has been initialized correctly.
+		BOOST_CHECK_EQUAL( rgb[0][0][0], 0. );
+		BOOST_CHECK_EQUAL( rgb[0][1][1], 4. );
+		BOOST_CHECK_EQUAL( rgb[1][1][2], 11. );
+
+		// Create an image with interleaved RGB channels.
+		typedef BrothersLayout< float, Brothers_RGB > Layout;
+		Gander::Image::Image< Layout > image( 2, 2 );
+		
+		// The image should not be valid until we attach the channel data.
+		BOOST_CHECK( !image.isValid() );
+		
+		// Check the image attributes.
+		BOOST_CHECK_EQUAL( image.channels(), Mask_RGB );
+		BOOST_CHECK_EQUAL( image.width(), 2 );
+		BOOST_CHECK_EQUAL( image.height(), 2 );
+		BOOST_CHECK_EQUAL( image.requiredChannels(), Chan_Red ); // As the channels are interleaved, only the red one is needed.
+		BOOST_CHECK_EQUAL( image.numberOfChannelPointers(), 1 );
+		BOOST_CHECK_EQUAL( image.isDynamic(), false );
+
+		image.setChannelPointer( Chan_Red, &rgb[0][0][0], 3 * sizeof( float ) * 2 );
+		BOOST_CHECK( image.isValid() );
 	}
 };
 

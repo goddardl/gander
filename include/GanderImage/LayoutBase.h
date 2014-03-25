@@ -129,6 +129,8 @@ struct LayoutBase
 		inline unsigned int numberOfChannelPointers() const;
 		inline ChannelSet channels() const;
 		inline ChannelSet requiredChannels() const;
+		/// Returns the size in bytes of one pixel using this layout.
+		inline size_t sizeOf() const;
 		//@}
 		
 		//! @name Compound methods.
