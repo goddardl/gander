@@ -41,7 +41,7 @@
 namespace Gander
 {
 
-/// A base class for the standard Eigen::LevenbergMarquardt style funtor.
+/// A base class for the standard Eigen::LevenbergMarquardt style functor.
 /// Derived classes should implement the following two methods:
 ///
 /// The error function at x to be returned in fvec. The vector x should be of length
@@ -110,7 +110,7 @@ public:
 				fJac( i, parameter ) = ( stepErr(i) - fErr(i) ) * reciprocal;
 			}
 
-			// Restore the steped parameter.
+			// Restore the stepped parameter.
 			v( parameter ) = x( parameter );
 		}
 		return 0;
