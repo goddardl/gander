@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Image Engine. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,10 +34,17 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <cstdlib>
 
+#include "Gander/Math.h"
+#include "Gander/CurveSolver.h"
+#include "Gander/LinearCurveFn.h"
 #include "Gander/PointArray.h"
 
-#include "GanderTest/LevenbergMarquardtTest.h"
+#include "GanderTest/CurveFittingTest.h"
+
+#include "Eigen/Geometry"
+
 #include "boost/test/floating_point_comparison.hpp"
 #include "boost/test/test_tools.hpp"
 
@@ -51,61 +59,28 @@ namespace Gander
 namespace Test
 {
 
-namespace Detail
-{
-
-/// A simple error function that fits a line of form y = a*x + b to a set of points.
-class CurveLeastSquaresFn : public Gander::ErrorFn
-{
-
-public:
-
-	CurveLeastSquaresFn( const DoublePoint2DArray &points ) :
-		Gander::ErrorFn( points.size(), 2 ),
-		m_points( points )
-	{}
-
-	int operator()( const Eigen::VectorXd &x, Eigen::VectorXd &fvec ) const
-	{
-		for(unsigned int i = 0; i < m_points.size(); ++i)
-		{
-			double y = x(0) * m_points[i](0) + x(1);
-			fvec(i) = ( y - m_points[i](1) ) * ( y - m_points[i](1) );
-		}
-		return 0;
-	}
-	
-private :
-
-	const DoublePoint2DArray &m_points;
-
-};
-
-}; // namespace Detail
-
-struct LevenbergMarquardtTest
+struct CurveFittingTest
 {
 
 	/// Returns a set of points which are modeled on: y = a*x + b but include some noise.
-	void generatePoints( DoublePoint2DArray &points, double a, double b )
+	void generateLinearCurvePoints( DoublePoint2DArray &points, double a, double b )
 	{
+		LinearCurve2DFn< double > curve;
+		curve.A() = a;
+		curve.B() = b;
+
 		points.clear();
 		for( unsigned int i = 0; i < 50; ++i )
 		{
 			double x = static_cast<double>(i);
 			Eigen::Vector2d point;
 			point(0) = x;
-			point(1) = a * x + b + drand48() / 10.0f;
+			point(1) = curve( x ) + drand48() / 10.0f;
 			points.push_back( point );
 		}
 	}
 
-	/// A simple test case that fits a line with a function y = a*x + b
-	/// to a set of points scattered along y = 2*x + 5 with some noise.
-	/// It demonstrates the solving of parameters a and b. 
-	/// This test code is based on an example by David Doria:
-	/// https://github.com/daviddoria/Examples/blob/master/c%2B%2B/Eigen/LevenbergMarquardt/CurveFitting.cpp
-	void testCurveFitting()
+	void testLinearCurveFitting()
 	{
 		try
 		{
@@ -114,23 +89,14 @@ struct LevenbergMarquardtTest
 				for( int b = 1; b < 10; b += 2 )
 				{
 					DoublePoint2DArray points;
-					generatePoints( points, a, b ); // y = a*x + b (with noise).
+					generateLinearCurvePoints( points, a, b ); // y = a*x + b (with 10% noise).
 
-					Detail::CurveLeastSquaresFn functor( points );
-					ForwardDifferenceJacobian<Detail::CurveLeastSquaresFn> fn( functor );
-					Eigen::LevenbergMarquardt<ForwardDifferenceJacobian<Detail::CurveLeastSquaresFn>, double> lm( fn );
-
-					Eigen::VectorXd x(2);
-					x.fill(1.0f);
-
-					lm.parameters.ftol = 1e-6; // Error tolerance
-					lm.parameters.xtol = 1e-6; // Parameter tolerance
-					lm.parameters.maxfev = 1000; // Max iterations
-					lm.minimize(x);
+					double A = 0, B = 0;
+					Gander::fitLinearCurve2D( A, B, points );
 
 					// The error should be within 1 decimal place as the noise is +-.1	
-					BOOST_CHECK_CLOSE_FRACTION( double(a), x(0), 1e-1 );
-					BOOST_CHECK_CLOSE_FRACTION( double(b), x(1), 1e-1 );
+					BOOST_CHECK_CLOSE_FRACTION( A, a, 1e-1 );
+					BOOST_CHECK_CLOSE_FRACTION( B, b, 1e-1 );
 				}
 			}
 		}
@@ -140,24 +106,24 @@ struct LevenbergMarquardtTest
 			BOOST_CHECK( !"Exception thrown during LevenbergMarquardtTest." );
 		}
 	}
+
 };
 
-struct LevenbergMarquardtTestSuite : public boost::unit_test::test_suite
+struct CurveFittingTestSuite : public boost::unit_test::test_suite
 {
-
-	LevenbergMarquardtTestSuite() : boost::unit_test::test_suite( "LevenbergMarquardtTestSuite" )
+	CurveFittingTestSuite() : boost::unit_test::test_suite( "CurveFittingTestSuite" )
 	{
-		boost::shared_ptr<LevenbergMarquardtTest> instance( new LevenbergMarquardtTest() );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTest::testCurveFitting, instance ) );
+		boost::shared_ptr<CurveFittingTest> instance( new CurveFittingTest() );
+		add( BOOST_CLASS_TEST_CASE( &CurveFittingTest::testLinearCurveFitting, instance ) );
 	}
 };
 
-void addLevenbergMarquardtTest( boost::unit_test::test_suite *test )
+void addCurveFittingTest( boost::unit_test::test_suite *test )
 {
-	test->add( new LevenbergMarquardtTestSuite( ) );
+	test->add( new CurveFittingTestSuite( ) );
 }
 
-} // namespace Test
+}; // namespace Test
 
-} // namespace Gander
+}; // namespace Gander
 
