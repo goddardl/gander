@@ -46,10 +46,10 @@ namespace Gander
 ///
 /// The error function at x to be returned in fvec. The vector x should be of length
 /// inputs() and the vector fvec of length values(). 
-///		int operator()( const Eigen::VectorXd &x, Eigen::VectorXd &fvec ) const
+///		int operator()( const VectorType &x, VectorType &fvec ) const
 ///
 /// To be defined if automatic differentiation is not being used. 
-/// int df( const Eigen::VectorXd &x, Eigen::MatrixXd &fJac ) const
+/// int df( const VectorType &x, MatrixType &fJac ) const
 ///
 class ErrorFn
 {
@@ -71,38 +71,42 @@ private :
 
 /// A Wrapper class for the Gander::ErrorFn which converts a Least Squares function
 /// to a Least Squares Jacobian function using forward differences.
-template< class LeastSquaresFn >
+template< class LeastSquaresFn, class Real = double >
 class ForwardDifferenceJacobian
 {
 
 public:
 
-	ForwardDifferenceJacobian( LeastSquaresFn &fn, double step = std::numeric_limits<float>::epsilon() )
+	typedef Eigen::Matrix< Real, Eigen::Dynamic, 1 > VectorType;
+	typedef Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > MatrixType;
+	typedef Real RealType;
+	
+	ForwardDifferenceJacobian( LeastSquaresFn &fn, RealType step = std::numeric_limits<float>::epsilon() )
 	:	m_fn( fn ),
 		m_step( step )
 	{}
 
-	int operator()( const Eigen::VectorXd &x, Eigen::VectorXd &fvec ) const
+	int operator()( const VectorType &x, VectorType &fvec ) const
 	{
 		return m_fn( x, fvec );
 	}
 
-	int df( const Eigen::VectorXd &x, Eigen::MatrixXd &fJac ) const
+	int df( const VectorType &x, MatrixType &fJac ) const
 	{
-		Eigen::VectorXd v( inputs() );
+		VectorType v( inputs() );
 		v = x;
 
-		Eigen::VectorXd fErr( values() );
+		VectorType fErr( values() );
 		m_fn( v, fErr );
 
-		const double reciprocal = 1. / m_step;
+		const RealType reciprocal = 1. / m_step;
 		for( unsigned int parameter = 0; parameter < inputs(); ++parameter )
 		{
 			// Increment a parameter by a step.
 			v( parameter ) += m_step;
 
 			// Compute the new error vector.
-			Eigen::VectorXd stepErr( values() );
+			VectorType stepErr( values() );
 			m_fn( v, stepErr );
 
 			for( unsigned int i = 0; i < values(); ++i )
@@ -118,13 +122,13 @@ public:
 
 	inline size_t values() const { return m_fn.values(); }
 	inline size_t inputs() const { return m_fn.inputs(); }
-	inline double getStep() const { return m_step; }
-	inline void setStep( double step ) { m_step = step; }
+	inline RealType getStep() const { return m_step; }
+	inline void setStep( RealType step ) { m_step = step; }
 
 private :
 
 	LeastSquaresFn &m_fn;
-	double m_step;
+	RealType m_step;
 
 };
 

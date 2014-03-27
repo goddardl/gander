@@ -50,6 +50,7 @@
 #include "GanderTest/BitTwiddlerTest.h"
 #include "GanderTest/TupleTest.h"
 #include "GanderTest/InterfacesTest.h"
+#include "GanderTest/CurveSolverTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -65,13 +66,14 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 	{
 		addLevenbergMarquardtTest(test);
 		addHomographyTest(test);
-		addDecomposeRQ3x3Test(test);
+//		addDecomposeRQ3x3Test(test);
 		addAngleConversionTest(test);
 		addCommonTest(test);
 		addEnumHelperTest(test);
 		addBitTwiddlerTest(test);
 		addTupleTest(test);
 		addInterfacesTest(test);
+		addCurveSolverTest(test);
 	}
 	catch (std::exception &ex)
 	{

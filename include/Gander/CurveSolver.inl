@@ -38,29 +38,39 @@ namespace Gander
 template< class CurveFN, class T > 
 void CurveSolver2D< CurveFN, T >::solve()
 {
-	typedef ForwardDifferenceJacobian< Type > FDJacobian;
+	typedef ForwardDifferenceJacobian< Type, T > FDJacobian;
 
-	FDJacobian fn( *this );
+	// Create a copy of the curve function's initial parameters.	
+	typename FnType::VectorType resolvedParameters( m_fn.parameters() );
+
+	// Wrap this class with a an error function for computing the jacobian
+	// needed by the Levenberg Marquardt algorithm.
+	FDJacobian fn( *this, m_step );
+
+	// Create the LM class, set it's values and run it.
 	Eigen::LevenbergMarquardt< FDJacobian > lm( fn );
 
 	lm.parameters.ftol = m_errorTolerance;
 	lm.parameters.xtol = m_parameterTolerance;
 	lm.parameters.maxfev = m_maxIterations;
-	lm.minimize( m_fn.parameters() );
+	lm.minimize( resolvedParameters );
+
+	// Write the parameters back to the curve function.
+	m_fn.parameters() = resolvedParameters;
 }
 		
 template< class CurveFN, class T > 
-int CurveSolver2D< CurveFN, T >::operator()( const ArrayX &x, ArrayX &fvec ) const
+int CurveSolver2D< CurveFN, T >::operator()( const VectorX &x, VectorX &fvec ) const
 {
 	for( unsigned int i = 0; i < m_points.size(); ++i )
 	{
-		T y = m_fn( m_points[i](0) );
+		T y = FnType::compute( m_points[i](0), x );
 		fvec(i) = ( y - m_points[i](1) ) * ( y - m_points[i](1) );
 	}
 	return 0;
 }
 
-
+#include "Gander/LinearCurveFn.h"
 template< class T > 
 void fitLinearCurve2D(
 		T &a,
@@ -73,6 +83,8 @@ void fitLinearCurve2D(
 {
 	CurveSolver2D< LinearCurve2DFn< T >, T > curveSolver( points, maxIterations, errorTolerance, parameterTolerance );
 	curveSolver.solve();
+	a = curveSolver.fn().A();
+	b = curveSolver.fn().B();
 };
 
 }; // namespace Gander

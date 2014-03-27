@@ -41,7 +41,9 @@
 #include "Gander/LinearCurveFn.h"
 #include "Gander/PointArray.h"
 
-#include "GanderTest/CurveFittingTest.h"
+#include "GanderTest/CurveSolverTest.h"
+#include "GanderTest/TestTools.h"
+
 
 #include "Eigen/Geometry"
 
@@ -59,7 +61,7 @@ namespace Gander
 namespace Test
 {
 
-struct CurveFittingTest
+struct CurveSolverTest
 {
 
 	/// Returns a set of points which are modeled on: y = a*x + b but include some noise.
@@ -70,17 +72,18 @@ struct CurveFittingTest
 		curve.B() = b;
 
 		points.clear();
+		points.reserve( 50 );
 		for( unsigned int i = 0; i < 50; ++i )
 		{
-			double x = static_cast<double>(i);
+			double x = static_cast<double>( i );
 			Eigen::Vector2d point;
 			point(0) = x;
-			point(1) = curve( x ) + drand48() / 10.0f;
+			point(1) = curve( x ) + randomNumber( .0, .1 );
 			points.push_back( point );
 		}
 	}
 
-	void testLinearCurveFitting()
+	void testLinearCurveSolver()
 	{
 		try
 		{
@@ -88,6 +91,8 @@ struct CurveFittingTest
 			{
 				for( int b = 1; b < 10; b += 2 )
 				{
+					double a = 2;
+					double b = 5;
 					DoublePoint2DArray points;
 					generateLinearCurvePoints( points, a, b ); // y = a*x + b (with 10% noise).
 
@@ -109,18 +114,18 @@ struct CurveFittingTest
 
 };
 
-struct CurveFittingTestSuite : public boost::unit_test::test_suite
+struct CurveSolverTestSuite : public boost::unit_test::test_suite
 {
-	CurveFittingTestSuite() : boost::unit_test::test_suite( "CurveFittingTestSuite" )
+	CurveSolverTestSuite() : boost::unit_test::test_suite( "CurveSolverTestSuite" )
 	{
-		boost::shared_ptr<CurveFittingTest> instance( new CurveFittingTest() );
-		add( BOOST_CLASS_TEST_CASE( &CurveFittingTest::testLinearCurveFitting, instance ) );
+		boost::shared_ptr<CurveSolverTest> instance( new CurveSolverTest() );
+		add( BOOST_CLASS_TEST_CASE( &CurveSolverTest::testLinearCurveSolver, instance ) );
 	}
 };
 
-void addCurveFittingTest( boost::unit_test::test_suite *test )
+void addCurveSolverTest( boost::unit_test::test_suite *test )
 {
-	test->add( new CurveFittingTestSuite( ) );
+	test->add( new CurveSolverTestSuite( ) );
 }
 
 }; // namespace Test
