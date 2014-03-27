@@ -46,34 +46,39 @@ namespace Gander
 
 /// LinearCurve2DFn
 /// Implements a simple linear curve using the function Y = A*X + B.
-template< class T, class ArrayType = Eigen::Matrix< T, Eigen::Dynamic, 1 > >
-class LinearCurve2DFn : public CurveFn< T, ArrayType >
+template< class Real, class Vector = Eigen::Matrix< Real, Eigen::Dynamic, 1 > >
+class LinearCurve2DFn : public CurveFn< LinearCurve2DFn< Real, Vector >, Real, Vector >
 {
-		typedef CurveFn< T, ArrayType > BaseType;
+		typedef CurveFn< LinearCurve2DFn< Real, Vector >, Real, Vector > BaseType;
 
 	public :
+		
+		typedef LinearCurve2DFn< Real, Vector > Type;
+		typedef Real RealType;
+		typedef Vector VectorType;
 
 		/// The default constructor should initialize the parameters by calling
 		/// BaseType::init() and then setting their values.
-		inline LinearCurve2DFn() { BaseType::init(); A() = 1.; B() = 1.; }
+		inline LinearCurve2DFn() { A() = 1.; B() = 1.; }
 
-		/// The () operator returns the result of function using the current parameters. 
+		/// The static compute method returns the result of the curve function using
+		/// the given parameters.
 		/// This is the implementation of y = a*x + b.
-		inline T operator()( T x ) const
+		static inline RealType compute( RealType x, const VectorType &parameters )
 		{
-			return A() * x + B();
+			return parameters(0) * x + parameters(1);
 		}
 
 		/// Defines the number of parameters. In this case, there are 2: A and B.
-		virtual int numberOfParameters() const { return 2; };
+		static int numberOfParameters() { return 2; };
 
 		/// Returns the current value of parameter A.
-		inline T &A() { return CurveFn< T >::parameter(0); }
-		inline const T &A() const { return CurveFn< T >::parameter(0); }
+		inline RealType &A() { return BaseType::parameter(0); }
+		inline const RealType &A() const { return BaseType::parameter(0); }
 
 		/// Returns the current value of parameter B.
-		inline T &B() { return CurveFn< T >::parameter(1); }
-		inline const T &B() const { return CurveFn< T >::parameter(1); }
+		inline RealType &B() { return BaseType::parameter(1); }
+		inline const RealType &B() const { return BaseType::parameter(1); }
 };
 
 }; // namespace Gander

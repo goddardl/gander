@@ -51,22 +51,26 @@ namespace Gander
 /// Provides a mechanism for fitting a curve with a known function to a set of 2D points.
 /// The CurveSolver2D class accepts a CurveFn as a template argument
 /// along with the type of the 2D points to be solved.
-template< class CurveFN, class T = double > 
+template< class CurveFN, class Real = double > 
 class CurveSolver2D : public Gander::ErrorFn
 {
 
 	public:
 
-		typedef CurveSolver2D< CurveFN, T > Type;
-		typedef std::vector< Eigen::Matrix< T, 2, 1 >, Eigen::aligned_allocator< Eigen::Matrix< T, 2, 1 > > > Point2DArray;
-		typedef Eigen::Matrix< T, Eigen::Dynamic, 1 > ArrayX;
+		typedef Real RealType;
+		typedef CurveFN FnType;
+		typedef CurveSolver2D< CurveFN, Real > Type;
+
+		typedef std::vector< Eigen::Matrix< Real, 2, 1 >, Eigen::aligned_allocator< Eigen::Matrix< Real, 2, 1 > > > Point2DArray;
+		typedef Eigen::Matrix< Real, Eigen::Dynamic, 1 > VectorX;
 
 		CurveSolver2D( const Point2DArray &points, int maxIterations = 1000, double errorTolerance = 10e-6, double parameterTolerance = 10e-6 ) :
-			Gander::ErrorFn( points.size(), 2 ),
+			Gander::ErrorFn( points.size(), m_fn.numberOfParameters() ),
 			m_points( points ),
 			m_maxIterations( maxIterations ),
 			m_errorTolerance( errorTolerance ),
-			m_parameterTolerance( parameterTolerance )
+			m_parameterTolerance( parameterTolerance ),
+			m_step( std::numeric_limits<float>::epsilon() )
 		{}
 
 		//! @name Parameter Accessors
@@ -86,6 +90,10 @@ class CurveSolver2D : public Gander::ErrorFn
 		inline const double &parameterTolerance() const { return m_parameterTolerance; };
 		inline double &parameterTolerance() { return m_parameterTolerance; };
 
+		/// The step (epsilon) value that the minimiser should use.
+		inline const double &step() const { return m_step; };
+		inline double &step() { return m_step; };
+
 		/// Returns the CurveFn class that is fitted to the set of data points.
 		inline const CurveFN &fn() const { return m_fn; }
 		inline CurveFN &fn() { return m_fn; }
@@ -98,7 +106,7 @@ class CurveSolver2D : public Gander::ErrorFn
 		/// This operator is called by the Eigen::LevenbergMarquardt
 		/// algorithm to compute an array of errors.
 		/// It shouldn't be called directly. Use solve() instead.
-		int operator()( const ArrayX &x, ArrayX &fvec ) const;
+		int operator()( const VectorX &x, VectorX &fvec ) const;
 
 	private :
 
@@ -107,6 +115,7 @@ class CurveSolver2D : public Gander::ErrorFn
 		int m_maxIterations;
 		double m_errorTolerance;
 		double m_parameterTolerance;
+		double m_step;
 
 };
 

@@ -32,8 +32,8 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_CURVEFITTINGTEST_H__
-#define __GANDERTEST_CURVEFITTINGTEST_H__
+#ifndef __GANDERTEST_CURVESOLVERTEST_H__
+#define __GANDERTEST_CURVESOLVERTEST_H__
 
 #include <vector>
 
@@ -45,10 +45,10 @@ namespace Gander
 namespace Test
 {
 
-void addCurveFittingTest( boost::unit_test::test_suite *test );
+void addCurveSolverTest( boost::unit_test::test_suite *test );
 
 }; // namespace Test
 
 }; // namespace Gander
 
-#endif // __GANDERTEST_CURVEFITTINGTEST_H__
+#endif // __GANDERTEST_CURVESOLVERTEST_H__

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,9 @@
 #include <iostream>
 
 #include "Gander/PointArray.h"
+#include "Gander/LinearCurveFn.h"
 
+#include "GanderTest/TestTools.h"
 #include "GanderTest/LevenbergMarquardtTest.h"
 #include "boost/test/floating_point_comparison.hpp"
 #include "boost/test/test_tools.hpp"
@@ -89,13 +91,17 @@ struct LevenbergMarquardtTest
 	/// Returns a set of points which are modeled on: y = a*x + b but include some noise.
 	void generatePoints( DoublePoint2DArray &points, double a, double b )
 	{
+		LinearCurve2DFn< double > curve;
+		curve.A() = a;
+		curve.B() = b;
+
 		points.clear();
 		for( unsigned int i = 0; i < 50; ++i )
 		{
 			double x = static_cast<double>(i);
 			Eigen::Vector2d point;
 			point(0) = x;
-			point(1) = a * x + b + drand48() / 10.0f;
+			point(1) = curve( x ) + randomNumber( .0, .1 );
 			points.push_back( point );
 		}
 	}
@@ -117,8 +123,8 @@ struct LevenbergMarquardtTest
 					generatePoints( points, a, b ); // y = a*x + b (with noise).
 
 					Detail::CurveLeastSquaresFn functor( points );
-					ForwardDifferenceJacobian<Detail::CurveLeastSquaresFn> fn( functor );
-					Eigen::LevenbergMarquardt<ForwardDifferenceJacobian<Detail::CurveLeastSquaresFn>, double> lm( fn );
+					ForwardDifferenceJacobian< Detail::CurveLeastSquaresFn, double > fn( functor );
+					Eigen::LevenbergMarquardt< ForwardDifferenceJacobian< Detail::CurveLeastSquaresFn, double >, double > lm( fn );
 
 					Eigen::VectorXd x(2);
 					x.fill(1.0f);

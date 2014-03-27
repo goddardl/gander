@@ -44,33 +44,40 @@ namespace Gander
 
 /// CurveFn
 /// The base class for implementing a curve function.
-/// Derived classes should override the numberOfParameters() method and
-/// add the () operator to implement the curve's function:
-/// T operator( double x ) const; // Returns the y value for a given x value.
-template< class T, class ArrayType = Eigen::Matrix< T, Eigen::Dynamic, 1 > >
+/// Derived classes implement two methods:
+/// static int numberOfParameters() // Return the number of parameters that the model requires.
+/// static T compute( double x, const VectorType &parameters ); // Returns the y value for a given x value using the parameters supplied.
+template< class Derived, class T, class Vector = Eigen::Matrix< T, Eigen::Dynamic, 1 > >
 class CurveFn
 {
 	public :
+		
+		typedef T RealType;
+		typedef Vector VectorType;
+		typedef Derived Type;
 
-		/// This method should be overridden by derived classes to return
-		/// the number of parameters that are required by this curve.
-		virtual int numberOfParameters() const = 0;
+		CurveFn() : m_parameters( Derived::numberOfParameters() )
+		{
+		}
+		
+		/// The () operator returns the result of the curve function using
+		/// the current member parameters. It does this by calling the static
+		/// implementation of compute() on the Derived class.
+		/// This is the implementation of y = a*x + b.
+		inline RealType operator()( RealType x ) const
+		{
+			return static_cast< const Derived * >( this )->compute( x, m_parameters );
+		}
 
-		inline ArrayType &parameters() { return m_parameters; }
-		inline const ArrayType &parameters() const { return m_parameters; }
+		inline VectorType &parameters() { return m_parameters; }
+		inline const VectorType &parameters() const { return m_parameters; }
 		
 		inline T &parameter( int index ) { return m_parameters[index]; }
-		inline const T &parameter( int index ) const { return m_parameters[index]; }
-
-		/// Initializes the array to a length of numberOfParameters().
-		/// The default constructor of the derived class should initialize
-		/// the parameters by calling BaseType::init() in it's constructor and
-		/// then setting their values.
-		void init() { m_parameters.resize( numberOfParameters() ); }
+		inline const T &parameter( int index ) const { return m_parameters(index); }
 
 	protected :
 
-		ArrayType m_parameters;
+		VectorType m_parameters;
 
 };
 
