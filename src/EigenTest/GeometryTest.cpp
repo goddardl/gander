@@ -73,12 +73,6 @@ struct GeometryTest
 			ry = AngleAxisd( xyz[1], Vector3d::UnitY() );
 			rz = AngleAxisd( xyz[2], Vector3d::UnitZ() );
 			
-			// Check that we can extract the xyz of rotation from the rotation matrix and assert that it
-			// is the same as the xyz we used to create the matrix.
-			BOOST_CHECK_CLOSE( xyz[0], AngleAxisd().fromRotationMatrix( rx ).angle(), 10e-8 );
-			BOOST_CHECK_CLOSE( xyz[1], AngleAxisd().fromRotationMatrix( ry ).angle(), 10e-8 );
-			BOOST_CHECK_CLOSE( xyz[2], AngleAxisd().fromRotationMatrix( rz ).angle(), 10e-8 );
-	
 			Eigen::Matrix3d rotation;
 			rotation = rz * ry * rx;
 
