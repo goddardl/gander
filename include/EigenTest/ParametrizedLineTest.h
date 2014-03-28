@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,41 +31,18 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+#ifndef __EIGENTEST_PARAMETRIZEDLINETEST_H__
+#define __EIGENTEST_PARAMETRIZEDLINETEST_H__
 
-#include <iostream>
+#include <vector>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include "boost/test/unit_test.hpp"
 
-#include "EigenTest/GeometryTest.h"
-#include "EigenTest/ParametrizedLineTest.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace EigenTest;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace EigenTest
 {
-	test_suite* test = BOOST_TEST_SUITE( "Eigen unit test" );
 
-	try
-	{
-		/// Test out some features of Eigen so that they can
-		/// serve as examples on how to use them.
-		addGeometryTest(test);
-		addParametrizedLineTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+void addParametrizedLineTest( boost::unit_test::test_suite *test );
 
-	return test;
-}
+}; // namespace EigenTest
+
+#endif // __EIGENTEST_PARAMETRIZEDLINETEST_H__
