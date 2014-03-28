@@ -97,12 +97,27 @@ class CurveSolver2D : public Gander::ErrorFn
 		/// Returns the CurveFn class that is fitted to the set of data points.
 		inline const CurveFN &fn() const { return m_fn; }
 		inline CurveFN &fn() { return m_fn; }
+
+		/// Returns a constant reference to the points that the curve is being fitted to.
+		inline const Point2DArray &points() const { return m_points; }
 		//@}
 
 		/// Executes the solver, solving the parameters in place.
 		/// The solved parameters can be accessed from the CurveFn.
 		void solve();
 
+		/// Returns the mean error of the fitted model.
+		double meanError() const;
+	
+		/// Returns an Eigen::VectorX of the errors of each point from the fitted model.
+		/// This method assumes that the Vector is of the same length as the number of points.
+		void errorVector( VectorX &fvec ) const;
+		
+		/// Returns an Eigen::VectorX of the errors of each point from the curve function
+		/// when using a set of parameters that are passed into the method.
+		/// This method assumes that the Vector is of the same length as the number of points.
+		void errorVector( const VectorX &parameters, VectorX &fvec ) const;
+		
 		/// This operator is called by the Eigen::LevenbergMarquardt
 		/// algorithm to compute an array of errors.
 		/// It shouldn't be called directly. Use solve() instead.

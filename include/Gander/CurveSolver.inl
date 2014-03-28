@@ -41,7 +41,7 @@ void CurveSolver2D< CurveFN, T >::solve()
 	typedef ForwardDifferenceJacobian< Type, T > FDJacobian;
 
 	// Create a copy of the curve function's initial parameters.	
-	typename FnType::VectorType resolvedParameters( m_fn.parameters() );
+	typename FnType::VectorXType resolvedParameters( m_fn.parameters() );
 
 	// Wrap this class with a an error function for computing the jacobian
 	// needed by the Levenberg Marquardt algorithm.
@@ -68,6 +68,38 @@ int CurveSolver2D< CurveFN, T >::operator()( const VectorX &x, VectorX &fvec ) c
 		fvec(i) = ( y - m_points[i](1) ) * ( y - m_points[i](1) );
 	}
 	return 0;
+}
+
+template< class CurveFN, class T > 
+double CurveSolver2D< CurveFN, T >::meanError() const
+{
+	double sum( 0. );
+	VectorX errors;
+	errors.resize( m_points.size() );
+	errorVector( errors );
+
+	for( unsigned int i = 0; i < m_points.size(); ++i )
+	{
+		sum += errors(i);
+	}
+
+	return sum / double( m_points.size() );
+}
+
+template< class CurveFN, class T > 
+void CurveSolver2D< CurveFN, T >::errorVector( VectorX &fvec ) const
+{
+	errorVector( m_fn.parameters(), fvec );
+}
+
+template< class CurveFN, class T > 
+void CurveSolver2D< CurveFN, T >::errorVector( const VectorX &parameters, VectorX &fvec ) const
+{
+	for( unsigned int i = 0; i < m_points.size(); ++i )
+	{
+		T y = FnType::compute( m_points[i](0), parameters );
+		fvec(i) = ( y - m_points[i](1) ) * ( y - m_points[i](1) );
+	}
 }
 
 #include "Gander/LinearCurveFn.h"
