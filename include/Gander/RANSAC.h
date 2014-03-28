@@ -103,7 +103,7 @@ public:
     void setConfidence( double confidence ) { m_confidence = confidence; };
     double getConfidence() const { return m_confidence; }
     /// Sets the threshold used to define when the datum (the points) are considered inliers of the model.
-	/// @param threshold The thresold to set.
+	/// @param threshold The threshold to set.
 	void setThreshold( double threshold ) { m_threshold = threshold; };
 	/// Returns the threshold that is used to define when the datum (the points) are considered inliers of the model.
 	/// @return The threshold.
