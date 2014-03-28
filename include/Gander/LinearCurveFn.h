@@ -40,22 +40,25 @@
 #include "Gander/CurveFn.h"
 
 #include "Eigen/Dense"
+#include "Eigen/Geometry"
 
 namespace Gander
 {
 
 /// LinearCurve2DFn
 /// Implements a simple linear curve using the function Y = A*X + B.
-template< class Real, class Vector = Eigen::Matrix< Real, Eigen::Dynamic, 1 > >
-class LinearCurve2DFn : public CurveFn< LinearCurve2DFn< Real, Vector >, Real, Vector >
+template< class Real, class VectorX = Eigen::Matrix< Real, Eigen::Dynamic, 1 > >
+class LinearCurve2DFn : public CurveFn< LinearCurve2DFn< Real, VectorX >, Real, VectorX >
 {
-		typedef CurveFn< LinearCurve2DFn< Real, Vector >, Real, Vector > BaseType;
+		typedef CurveFn< LinearCurve2DFn< Real, VectorX >, Real, VectorX > BaseType;
 
 	public :
 		
-		typedef LinearCurve2DFn< Real, Vector > Type;
+		typedef LinearCurve2DFn< Real, VectorX > Type;
 		typedef Real RealType;
-		typedef Vector VectorType;
+		typedef VectorX VectorXType;
+		typedef Eigen::Matrix< Real, 2, 1 > Vector2Type;
+		typedef Eigen::ParametrizedLine< RealType, 2 > ParametrizedLineType;
 
 		/// The default constructor should initialize the parameters by calling
 		/// BaseType::init() and then setting their values.
@@ -64,7 +67,7 @@ class LinearCurve2DFn : public CurveFn< LinearCurve2DFn< Real, Vector >, Real, V
 		/// The static compute method returns the result of the curve function using
 		/// the given parameters.
 		/// This is the implementation of y = a*x + b.
-		static inline RealType compute( RealType x, const VectorType &parameters )
+		static inline RealType compute( RealType x, const VectorXType &parameters )
 		{
 			return parameters(0) * x + parameters(1);
 		}
@@ -79,6 +82,14 @@ class LinearCurve2DFn : public CurveFn< LinearCurve2DFn< Real, Vector >, Real, V
 		/// Returns the current value of parameter B.
 		inline RealType &B() { return BaseType::parameter(1); }
 		inline const RealType &B() const { return BaseType::parameter(1); }
+		
+		/// Returns a parametrized line that matches this curve.
+		ParametrizedLineType parametrizedLine() const
+		{
+			ParametrizedLineType line;
+			line = ParametrizedLineType::Through( Vector2Type( 0., ( *this )( 0. ) ), Vector2Type( 10., ( *this )( 10. ) ) );
+			return line;
+		}
 };
 
 }; // namespace Gander
