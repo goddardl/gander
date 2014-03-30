@@ -51,6 +51,7 @@
 #include "GanderTest/TupleTest.h"
 #include "GanderTest/InterfacesTest.h"
 #include "GanderTest/CurveSolverTest.h"
+#include "GanderTest/RectifyTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;

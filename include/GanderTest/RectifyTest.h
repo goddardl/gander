@@ -36,11 +36,16 @@
 
 #include "boost/test/unit_test.hpp"
 
-namespace GanderTest
+namespace Gander
+{
+
+namespace Test
 {
 
 void addRectifyTest( boost::unit_test::test_suite *test );
 
-}; // namespace GanderTest
+}; // namespace Test
+
+}; // namespace Gander
 
 #endif // __GANDERTEST_RECTIFYTEST_H__

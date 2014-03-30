@@ -48,7 +48,7 @@
 #include "boost/test/test_tools.hpp"
 
 using namespace Gander;
-using namespace GanderTest;
+using namespace Gander::Test;
 using namespace boost;
 using namespace boost::unit_test;
 
@@ -77,17 +77,18 @@ void testProjectionMatrix( Eigen::MatrixXd &P, const Eigen::Vector3d &rxyz, cons
 	Eigen::Matrix3d rz;
 	rz = Eigen::AngleAxisd( rxyz[2], Eigen::Vector3d( 0, 0, 1 ) );
 
-	Eigen::Matrix3d rotation;
-	rotation = rz * ry * rx;
-
 	Eigen::Matrix3d calibration;
-	calibration << 2.1875, 0, 0.0141111, 0, 2.1875, 0.127, 0, 0, 1.;
-
-	// Construct the projection matrix.
-	P << calibration * rotation, txyz;
+	calibration << 2.1875, 0, -2.1875 * .5, 0, 2.1875, -2.1875 * .5, 0, 0, 1.;
+	
+	Eigen::Matrix3d rotation;
+	rotation = ( rz * ry * rx ).inverse();
+	P << calibration * rotation, -rotation * txyz;
 }
 
-namespace GanderTest
+namespace Gander
+{
+
+namespace Test
 {
 	struct RectifyTest
 	{
@@ -98,22 +99,18 @@ namespace GanderTest
 				srand(1);
 
 				Eigen::MatrixXd P( 3, 4 );
-				testProjectionMatrix( P, Eigen::Vector3d( 0., 10., 5. ), Eigen::Vector3d( 0, 0, -1 ) );
+				testProjectionMatrix( P, Eigen::Vector3d( 25., 90, 15. ), Eigen::Vector3d( .3, .4, .5 ) );
 
 				// Decompose the projection matrix into it's basic components.
 				Eigen::Matrix3d C, R;
 				Eigen::Vector3d T;
 
 				decomposeProjection( P, C, R, T );
-				
-				Eigen::Vector3d p( 0, 0, 0 );
-				p = P * p;
-				std::cerr << p << std::endl;
-				
+
 				// Get the optical center.
 				Eigen::Vector3d c1;
-				c1 = -R * T;
-				std::cerr << c1 << std::endl;
+				c1 = R.inverse() * -T;
+				BOOST_CHECK( areClose( c1, Eigen::Vector3d( .3, .4, .5 ), 10e-8, 10e-8 ) );				
 			
 			}
 			catch ( std::exception &e ) 
@@ -138,5 +135,7 @@ namespace GanderTest
 		test->add( new RectifyTestSuite( ) );
 	}
 
-} // namespace GanderTest
+} // namespace Gander
+
+} // namespace Test
 
