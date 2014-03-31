@@ -85,6 +85,20 @@ void testProjectionMatrix( Eigen::MatrixXd &P, const Eigen::Vector3d &rxyz, cons
 	P << calibration * rotation, -rotation * txyz;
 }
 
+/// Creates a calibration matrix.
+/// The focal length and aperture should be specified in mm.
+void calibrationMatrix( Eigen::Matrix3d &C, double focalLength, const Eigen::Vector2d &aperture, const Eigen::Vector2d &resolution )
+{
+	const double pixelWidth = aperture[0] / resolution[0];
+	const double pixelHeight = aperture[1] / resolution[1];
+	C << focalLength / pixelWidth, 0., resolution[0] * .5, 0, focalLength / pixelHeight, resolution[1] * .5, 0, 0, 1.;
+}
+
+
+todo:
+Write a method to construct a full projection matrix and write tests for it.
+Validate the rectification code.
+
 namespace Gander
 {
 
@@ -92,26 +106,74 @@ namespace Test
 {
 	struct RectifyTest
 	{
+		void testProjection()
+		{
+			Eigen::Vector2d aperture( 1.417 * 25.4, 0.945 * 25.4 ); // Aperture in mm.
+			Eigen::Vector2d resolution( 640., 480. ); // Resolution in pixels.
+			double f = 34; // Focal length in mm.
+		
+			Eigen::Matrix3d C;
+			calibrationMatrix( C, f, aperture, resolution );
+
+			// Build a projection matrix without any transformation.
+			Eigen::MatrixXd P( 3, 4 );
+			P << C, Eigen::Vector3d::Zero(); 
+	
+			// P transforms a point at a distance of 'f' with X and Y in the range of -aperture[X]*.5 to aperture[X]*.5 into pixel coordinates in the range of 0-resolution.
+			Eigen::Vector4d p( aperture[0] * .5, 0, f, 1. );
+			Eigen::Vector3d uv = P * p;
+			uv /= uv[2];
+			std::cerr << uv << std::endl;
+		}
+
 		void testDecomposeRQ3x3()
 		{
 			try
 			{
 				srand(1);
 
-				Eigen::MatrixXd P( 3, 4 );
-				testProjectionMatrix( P, Eigen::Vector3d( 25., 90, 15. ), Eigen::Vector3d( .3, .4, .5 ) );
+				Eigen::MatrixXd P1( 3, 4 ), P2( 3, 4 ), Pn1( 3, 4 ), Pn2( 3, 4 );
+				testProjectionMatrix( P1, Eigen::Vector3d( 1.5, 5., 0. ), Eigen::Vector3d( 1.25, .01, -0.025 ) );
+				testProjectionMatrix( P2, Eigen::Vector3d( -1., -4., 0. ), Eigen::Vector3d( -1., .3, -.1 ) );
 
 				// Decompose the projection matrix into it's basic components.
-				Eigen::Matrix3d C, R;
-				Eigen::Vector3d T;
+				Eigen::Matrix3d C1, C2, R1, R2, R, C, Q1, Q2;
+				Eigen::Vector3d T1, T2;
 
-				decomposeProjection( P, C, R, T );
+				decomposeProjection( P1, C1, R1, T1 );
+				decomposeProjection( P2, C2, R2, T2 );
 
-				// Get the optical center.
-				Eigen::Vector3d c1;
-				c1 = R.inverse() * -T;
-				BOOST_CHECK( areClose( c1, Eigen::Vector3d( .3, .4, .5 ), 10e-8, 10e-8 ) );				
-			
+				// Get the optical centers.
+				Eigen::Vector3d c1, c2;
+				c1 = R1.inverse() * -T1;
+				BOOST_CHECK( areClose( c1, Eigen::Vector3d( 1.25, .01, -0.025 ), 10e-8, 10e-8 ) );				
+				
+				c2 = R2.inverse() * -T2;
+				BOOST_CHECK( areClose( c2, Eigen::Vector3d( -1., .3, -0.1 ), 10e-8, 10e-8 ) );				
+		
+				// Calculate the new X axis (the direction of the baseline).
+				Eigen::Vector3d v1 = c1 - c2;
+				
+				// Calculate the new Y axis (orthogonal to the new X and the old Z).
+				Eigen::Vector3d v2 = R1.row(2).transpose().cross( v1 );
+
+				// Calculate the new Z axes (orthogonal to the baseline and Y).
+				Eigen::Vector3d v3 = v1.cross(v2);
+
+				// New extrinsic parameters (translation is left unchanged).
+				R << ( v1.adjoint() / v1.norm() ), ( v2.adjoint() / v2.norm() ), ( v3.adjoint() / v3.norm() );
+
+				// New intrinsic parameters (arbitrary).
+				C = ( C1 + C2 ) / 2.;
+				C( 0, 1 ) = 0.; // No skew.
+
+				// New projection matrices.
+				Pn1 = C * ( Eigen::MatrixXd( 3, 4 ) << R, -R*c1 ).finished();
+				Pn2 = C * ( Eigen::MatrixXd( 3, 4 ) << R, -R*c2 ).finished();
+
+				// Rectifying image transformation.
+				Q1 = Pn1.block( 0, 0, 2, 2 ) * P1.block( 0, 0, 2, 2 ).inverse();
+				Q2 = Pn2.block( 0, 0, 2, 2 ) * P2.block( 0, 0, 2, 2 ).inverse();
 			}
 			catch ( std::exception &e ) 
 			{
@@ -127,6 +189,7 @@ namespace Test
 		{
 			boost::shared_ptr<RectifyTest> instance( new RectifyTest() );
 			add( BOOST_CLASS_TEST_CASE( &RectifyTest::testDecomposeRQ3x3, instance ) );
+			add( BOOST_CLASS_TEST_CASE( &RectifyTest::testProjection, instance ) );
 		}
 	};
 
