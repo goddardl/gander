@@ -38,6 +38,7 @@
 #include "Gander/DecomposeRQ3x3.h"
 #include "Gander/AngleConversion.h"
 #include "Gander/AreClose.h"
+#include "Gander/Assert.h"
 
 #include "GanderTest/RectifyTest.h"
 #include "GanderTest/TestTools.h"
@@ -94,10 +95,30 @@ void calibrationMatrix( Eigen::Matrix3d &C, double focalLength, const Eigen::Vec
 	C << focalLength / pixelWidth, 0., resolution[0] * .5, 0, focalLength / pixelHeight, resolution[1] * .5, 0, 0, 1.;
 }
 
+void projectionMatrix( Eigen::MatrixXd &projection, const Eigen::Matrix3d &calibration, const Eigen::Vector3d &XYZ, const Eigen::Vector3d &T )
+{
+	GANDER_ASSERT( projection.cols() == 4 && projection.rows() == 3, "Matrix P must be of size 3x4." );
 
-todo:
-Write a method to construct a full projection matrix and write tests for it.
-Validate the rectification code.
+	// Create a rotation matrix using individual rotational components.
+	Eigen::Matrix3d rx;
+	rx = Eigen::AngleAxisd( XYZ[0], Eigen::Vector3d( 1, 0, 0 ) );
+
+	Eigen::Matrix3d ry;
+	ry = Eigen::AngleAxisd( XYZ[1], Eigen::Vector3d( 0, 1, 0 ) );
+
+	Eigen::Matrix3d rz;
+	rz = Eigen::AngleAxisd( XYZ[2], Eigen::Vector3d( 0, 0, 1 ) );
+
+	Eigen::Matrix3d rotation;
+	rotation = ( rz * ry * rx ).inverse();
+	projection << calibration * rotation, -rotation * XYZ;
+}
+
+Eigen::Vector3d worldToPixel( const Eigen::MatrixXd &projection, const Eigen::Vector3d &point )
+{
+	Eigen::Vector3d suv = projection * ( Eigen::Vector4d() << point, 1. ).finished();
+	return suv / suv[2];
+}
 
 namespace Gander
 {
@@ -112,18 +133,20 @@ namespace Test
 			Eigen::Vector2d resolution( 640., 480. ); // Resolution in pixels.
 			double f = 34; // Focal length in mm.
 		
+			// Build a calibration matrix.
 			Eigen::Matrix3d C;
 			calibrationMatrix( C, f, aperture, resolution );
 
 			// Build a projection matrix without any transformation.
 			Eigen::MatrixXd P( 3, 4 );
-			P << C, Eigen::Vector3d::Zero(); 
-	
-			// P transforms a point at a distance of 'f' with X and Y in the range of -aperture[X]*.5 to aperture[X]*.5 into pixel coordinates in the range of 0-resolution.
-			Eigen::Vector4d p( aperture[0] * .5, 0, f, 1. );
-			Eigen::Vector3d uv = P * p;
-			uv /= uv[2];
-			std::cerr << uv << std::endl;
+			projectionMatrix( P, C, Eigen::Vector3d( 0, 0, 0 ), Eigen::Vector3d( 0, 0, 0 ) );
+
+			// Check some basic projections of points to the image plane.
+			BOOST_CHECK( areClose( worldToPixel( P, Eigen::Vector3d( 0, 0, f ) ), Eigen::Vector3d( resolution[0] * .5, resolution[1] * .5, 1. ), 10e-8, 10e-8 ) );
+			BOOST_CHECK( areClose( worldToPixel( P, Eigen::Vector3d( -aperture[0] * .5, -aperture[1] * .5, f ) ), Eigen::Vector3d( 0., 0., 1. ), 10e-8, 10e-8 ) );
+			BOOST_CHECK( areClose( worldToPixel( P, Eigen::Vector3d( aperture[0] * .5, aperture[1] * .5, f ) ), Eigen::Vector3d( resolution[0], resolution[1], 1. ), 10e-8, 10e-8 ) );
+
+			todo. Test the projection matrix with rotation and translation
 		}
 
 		void testDecomposeRQ3x3()
