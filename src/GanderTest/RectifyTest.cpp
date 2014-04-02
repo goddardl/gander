@@ -145,8 +145,9 @@ namespace Test
 			BOOST_CHECK( areClose( worldToPixel( P, Eigen::Vector3d( 0, 0, f ) ), Eigen::Vector3d( resolution[0] * .5, resolution[1] * .5, 1. ), 10e-8, 10e-8 ) );
 			BOOST_CHECK( areClose( worldToPixel( P, Eigen::Vector3d( -aperture[0] * .5, -aperture[1] * .5, f ) ), Eigen::Vector3d( 0., 0., 1. ), 10e-8, 10e-8 ) );
 			BOOST_CHECK( areClose( worldToPixel( P, Eigen::Vector3d( aperture[0] * .5, aperture[1] * .5, f ) ), Eigen::Vector3d( resolution[0], resolution[1], 1. ), 10e-8, 10e-8 ) );
-
-			todo. Test the projection matrix with rotation and translation
+			
+			projectionMatrix( P, C, Eigen::Vector3d( Gander::degreesToRadians( 30. ), Gander::degreesToRadians( -10. ), Gander::degreesToRadians( 5. ) ), Eigen::Vector3d( 1., -.5, 2. ) );
+			test the transforms
 		}
 
 		void testDecomposeRQ3x3()
@@ -156,8 +157,8 @@ namespace Test
 				srand(1);
 
 				Eigen::MatrixXd P1( 3, 4 ), P2( 3, 4 ), Pn1( 3, 4 ), Pn2( 3, 4 );
-				testProjectionMatrix( P1, Eigen::Vector3d( 1.5, 5., 0. ), Eigen::Vector3d( 1.25, .01, -0.025 ) );
-				testProjectionMatrix( P2, Eigen::Vector3d( -1., -4., 0. ), Eigen::Vector3d( -1., .3, -.1 ) );
+				testProjectionMatrix( P1, Eigen::Vector3d( Gander::degreesToRadians( 1.5 ), Gander::degreesToRadians( 5. ), Gander::degreesToRadians( 0. ) ), Eigen::Vector3d( 1.25, .01, -0.025 ) );
+				testProjectionMatrix( P2, Eigen::Vector3d( Gander::degreesToRadians( -1. ), Gander::degreesToRadians( -4. ), Gander::degreesToRadians( 0. ) ), Eigen::Vector3d( -1., .3, -.1 ) );
 
 				// Decompose the projection matrix into it's basic components.
 				Eigen::Matrix3d C1, C2, R1, R2, R, C, Q1, Q2;
