@@ -61,7 +61,7 @@ double randomNumber( double from = 0., double to = 1. );
 /// @param numberOfPoints The number of points to generate along the curve.
 /// @param noisePercent The percentage of random noise to offset the resulting points by.
 template< class CurveFn >
-void generatePointsOnCurve( typename CurveFn::PointArrayType &points, const CurveFn &curve, unsigned int numberOfPoints = 50, double noisePercent = 10. );
+void generatePointsOnCurve( typename CurveFn::Point2DArrayType &points, const CurveFn &curve, double xMin = 0, double xMax = 50, unsigned int numberOfPoints = 50, double noisePercent = 10. );
 
 }; // namespace Test
 

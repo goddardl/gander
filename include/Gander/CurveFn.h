@@ -55,7 +55,7 @@ class CurveFn
 		typedef Real RealType;
 		typedef VectorX VectorXType;
 		typedef Eigen::Matrix< Real, 2, 1 > Vector2Type;
-		typedef std::vector< Vector2Type, Eigen::aligned_allocator<Vector2Type> > PointArrayType;
+		typedef std::vector< Vector2Type, Eigen::aligned_allocator<Vector2Type> > Point2DArrayType;
 		typedef Derived Type;
 
 		CurveFn() : m_parameters( Derived::numberOfParameters() )
@@ -65,7 +65,6 @@ class CurveFn
 		/// The () operator returns the result of the curve function using
 		/// the current member parameters. It does this by calling the static
 		/// implementation of compute() on the Derived class.
-		/// This is the implementation of y = a*x + b.
 		inline RealType operator()( RealType x ) const
 		{
 			return static_cast< const Derived * >( this )->compute( x, m_parameters );

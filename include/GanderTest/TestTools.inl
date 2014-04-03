@@ -38,14 +38,20 @@
 
 /// Returns a set of points which are modeled on the curve function with some additional noise.
 template< class CurveFn >
-void Gander::Test::generatePointsOnCurve( typename CurveFn::PointArrayType &points, const CurveFn &curve, unsigned int numberOfPoints, double noisePercent )
+void Gander::Test::generatePointsOnCurve( typename CurveFn::Point2DArrayType &points, const CurveFn &curve, double xMin, double xMax, unsigned int numberOfPoints, double noisePercent )
 {
+	if( xMax < xMin )
+	{
+		std::swap( xMin, xMax );
+	}
+
+	double inc = ( xMax - xMin ) / numberOfPoints;
 	noisePercent = std::min( 100., std::max( 0., noisePercent ) );
 	points.clear();
 	points.reserve( numberOfPoints );
-	for( unsigned int i = 0; i < numberOfPoints; ++i )
+	double x = xMin;
+	for( unsigned int i = 0; i < numberOfPoints; ++i, x += inc )
 	{
-		double x = static_cast<double>( i );
 		Eigen::Vector2d point;
 		point(0) = x;
 		point(1) = curve( x ) + randomNumber( .0, noisePercent / 100. );

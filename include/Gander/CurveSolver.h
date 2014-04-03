@@ -51,20 +51,20 @@ namespace Gander
 /// Provides a mechanism for fitting a curve with a known function to a set of 2D points.
 /// The CurveSolver2D class accepts a CurveFn as a template argument
 /// along with the type of the 2D points to be solved.
-template< class CurveFN, class Real = double > 
+template< class CurveFN > 
 class CurveSolver2D : public Gander::ErrorFn
 {
 
 	public:
 
-		typedef Real RealType;
 		typedef CurveFN FnType;
-		typedef CurveSolver2D< CurveFN, Real > Type;
+		typedef CurveSolver2D< CurveFN > Type;
+		typedef typename FnType::RealType RealType;
+		typedef typename FnType::VectorXType VectorXType;
+		typedef typename FnType::Vector2Type Vector2Type;
+		typedef typename FnType::Point2DArrayType Point2DArrayType;
 
-		typedef std::vector< Eigen::Matrix< Real, 2, 1 >, Eigen::aligned_allocator< Eigen::Matrix< Real, 2, 1 > > > Point2DArray;
-		typedef Eigen::Matrix< Real, Eigen::Dynamic, 1 > VectorX;
-
-		CurveSolver2D( const Point2DArray &points, int maxIterations = 1000, double errorTolerance = 10e-6, double parameterTolerance = 10e-6 ) :
+		CurveSolver2D( const Point2DArrayType &points, int maxIterations = 1000, double errorTolerance = 10e-6, double parameterTolerance = 10e-6 ) :
 			Gander::ErrorFn( points.size(), m_fn.numberOfParameters() ),
 			m_points( points ),
 			m_maxIterations( maxIterations ),
@@ -99,7 +99,7 @@ class CurveSolver2D : public Gander::ErrorFn
 		inline CurveFN &fn() { return m_fn; }
 
 		/// Returns a constant reference to the points that the curve is being fitted to.
-		inline const Point2DArray &points() const { return m_points; }
+		inline const Point2DArrayType &points() const { return m_points; }
 		//@}
 
 		/// Executes the solver, solving the parameters in place.
@@ -109,23 +109,23 @@ class CurveSolver2D : public Gander::ErrorFn
 		/// Returns the mean error of the fitted model.
 		double meanError() const;
 	
-		/// Returns an Eigen::VectorX of the errors of each point from the fitted model.
+		/// Returns an VectorXType of the errors of each point from the fitted model.
 		/// This method assumes that the Vector is of the same length as the number of points.
-		void errorVector( VectorX &fvec ) const;
+		void errorVector( VectorXType &fvec ) const;
 		
-		/// Returns an Eigen::VectorX of the errors of each point from the curve function
+		/// Returns an VectorXType of the errors of each point from the curve function
 		/// when using a set of parameters that are passed into the method.
 		/// This method assumes that the Vector is of the same length as the number of points.
-		void errorVector( const VectorX &parameters, VectorX &fvec ) const;
+		void errorVector( const VectorXType &parameters, VectorXType &fvec ) const;
 		
 		/// This operator is called by the Eigen::LevenbergMarquardt
 		/// algorithm to compute an array of errors.
 		/// It shouldn't be called directly. Use solve() instead.
-		int operator()( const VectorX &x, VectorX &fvec ) const;
+		int operator()( const VectorXType &x, VectorXType &fvec ) const;
 
 	private :
 
-		const Point2DArray &m_points;
+		const Point2DArrayType &m_points;
 		CurveFN m_fn;
 		int m_maxIterations;
 		double m_errorTolerance;
@@ -144,6 +144,24 @@ class CurveSolver2D : public Gander::ErrorFn
 /// @param parameterTolerance The maximum desired parameter tolerance to use when minimizing the function. 
 template< class T > 
 void fitLinearCurve2D(
+	T &a,
+	T &b,
+	const std::vector< Eigen::Matrix< T, 2, 1 >, Eigen::aligned_allocator< Eigen::Matrix< T, 2, 1 > > > &points,
+	int maxIterations = 1000,
+	double errorTolerance = 1e-6,
+	double parameterTolerance = 1e-6
+	);
+
+/// Fits the function y = 1. - pow( 1. - a, x / b ) to a set of points.
+/// This method is just a wrapper for the Curve2DSolver using an ExponentialCurve2DFn.
+/// @param a Returns the solved value for A.
+/// @param b Returns the solved value for B.
+/// @param points FloatPoint2dArray or DoublePoint2dArray that contains a set of points that the curve should be fitted to.
+/// @param maxIterations The maximum number of iterations to perform whilst minimizing.
+/// @param errorTolerance The maximum desired error tolerance to use when minimizing the function. 
+/// @param parameterTolerance The maximum desired parameter tolerance to use when minimizing the function. 
+template< class T > 
+void fitExponentialCurve2D(
 	T &a,
 	T &b,
 	const std::vector< Eigen::Matrix< T, 2, 1 >, Eigen::aligned_allocator< Eigen::Matrix< T, 2, 1 > > > &points,

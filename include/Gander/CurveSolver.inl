@@ -32,13 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "Gander/LinearCurveFn.h"
+#include "Gander/ExponentialCurveFn.h"
+
 namespace Gander
 {
 
-template< class CurveFN, class T > 
-void CurveSolver2D< CurveFN, T >::solve()
+template< class CurveFN > 
+void CurveSolver2D< CurveFN >::solve()
 {
-	typedef ForwardDifferenceJacobian< Type, T > FDJacobian;
+	typedef ForwardDifferenceJacobian< Type > FDJacobian;
 
 	// Create a copy of the curve function's initial parameters.	
 	typename FnType::VectorXType resolvedParameters( m_fn.parameters() );
@@ -59,22 +62,18 @@ void CurveSolver2D< CurveFN, T >::solve()
 	m_fn.parameters() = resolvedParameters;
 }
 		
-template< class CurveFN, class T > 
-int CurveSolver2D< CurveFN, T >::operator()( const VectorX &x, VectorX &fvec ) const
+template< class CurveFN > 
+int CurveSolver2D< CurveFN >::operator()( const VectorXType &x, VectorXType &fvec ) const
 {
-	for( unsigned int i = 0; i < m_points.size(); ++i )
-	{
-		T y = FnType::compute( m_points[i](0), x );
-		fvec(i) = ( y - m_points[i](1) ) * ( y - m_points[i](1) );
-	}
+	errorVector( x, fvec );
 	return 0;
 }
 
-template< class CurveFN, class T > 
-double CurveSolver2D< CurveFN, T >::meanError() const
+template< class CurveFN > 
+double CurveSolver2D< CurveFN >::meanError() const
 {
 	double sum( 0. );
-	VectorX errors;
+	VectorXType errors;
 	errors.resize( m_points.size() );
 	errorVector( errors );
 
@@ -86,23 +85,22 @@ double CurveSolver2D< CurveFN, T >::meanError() const
 	return sum / double( m_points.size() );
 }
 
-template< class CurveFN, class T > 
-void CurveSolver2D< CurveFN, T >::errorVector( VectorX &fvec ) const
+template< class CurveFN > 
+void CurveSolver2D< CurveFN >::errorVector( VectorXType &fvec ) const
 {
 	errorVector( m_fn.parameters(), fvec );
 }
 
-template< class CurveFN, class T > 
-void CurveSolver2D< CurveFN, T >::errorVector( const VectorX &parameters, VectorX &fvec ) const
+template< class CurveFN > 
+void CurveSolver2D< CurveFN >::errorVector( const VectorXType &parameters, VectorXType &fvec ) const
 {
 	for( unsigned int i = 0; i < m_points.size(); ++i )
 	{
-		T y = FnType::compute( m_points[i](0), parameters );
+		RealType y = FnType::compute( m_points[i](0), parameters );
 		fvec(i) = ( y - m_points[i](1) ) * ( y - m_points[i](1) );
 	}
 }
 
-#include "Gander/LinearCurveFn.h"
 template< class T > 
 void fitLinearCurve2D(
 		T &a,
@@ -113,7 +111,23 @@ void fitLinearCurve2D(
 		double parameterTolerance
 		)
 {
-	CurveSolver2D< LinearCurve2DFn< T >, T > curveSolver( points, maxIterations, errorTolerance, parameterTolerance );
+	CurveSolver2D< LinearCurve2DFn< T > > curveSolver( points, maxIterations, errorTolerance, parameterTolerance );
+	curveSolver.solve();
+	a = curveSolver.fn().A();
+	b = curveSolver.fn().B();
+};
+
+template< class T > 
+void fitExponentialCurve2D(
+		T &a,
+		T &b,
+		const std::vector< Eigen::Matrix< T, 2, 1 >, Eigen::aligned_allocator< Eigen::Matrix< T, 2, 1 > > > &points,
+		int maxIterations,
+		double errorTolerance,
+		double parameterTolerance
+		)
+{
+	CurveSolver2D< ExponentialCurve2DFn< T > > curveSolver( points, maxIterations, errorTolerance, parameterTolerance );
 	curveSolver.solve();
 	a = curveSolver.fn().A();
 	b = curveSolver.fn().B();

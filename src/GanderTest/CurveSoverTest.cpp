@@ -39,6 +39,7 @@
 #include "Gander/Math.h"
 #include "Gander/CurveSolver.h"
 #include "Gander/LinearCurveFn.h"
+#include "Gander/ExponentialCurveFn.h"
 #include "Gander/PointArray.h"
 
 #include "GanderTest/CurveSolverTest.h"
@@ -62,18 +63,47 @@ namespace Test
 
 struct CurveSolverTest
 {
+	
+	void testExponentialCurveSolver()
+	{
+		try
+		{
+			for( int a = 1; a < 10; a += 1 )
+			{
+				for( int b = 1; b < 10; b += 1 )
+				{
+					ExponentialCurve2DFn<double> curve( a / 10., b );
+					ExponentialCurve2DFn<double>::Point2DArrayType points;
+					generatePointsOnCurve( points, curve, 0., b );
+
+					double A = 0, B = 0;
+					CurveSolver2D< ExponentialCurve2DFn< double > > curveSolver( points, 1000 );
+					curveSolver.solve();
+					A = curveSolver.fn().A();
+					B = curveSolver.fn().B();
+
+					// The error should be within 1 decimal place as the noise is +-.1	
+					BOOST_CHECK( curveSolver.meanError() < 0.1 );
+				}
+			}
+		}
+		catch ( std::exception &e ) 
+		{
+			BOOST_WARN( !e.what() );
+			BOOST_CHECK( !"Exception thrown during LevenbergMarquardtTest." );
+		}
+	}
 
 	void testLinearCurveSolver()
 	{
 		try
 		{
-			for( int a = 1; a < 10; a += 2 )
+			for( int a = 1; a < 10; a += 1 )
 			{
-				for( int b = 1; b < 10; b += 2 )
+				for( int b = 1; b < 10; b += 1 )
 				{
-					double a = 2, b = 5;
 					LinearCurve2DFn<double> curve( a, b );
-					LinearCurve2DFn<double>::PointArrayType points;
+					LinearCurve2DFn<double>::Point2DArrayType points;
 					generatePointsOnCurve( points, curve ); // y = a*x + b (with 10% noise).
 
 					double A = 0, B = 0;
@@ -100,6 +130,7 @@ struct CurveSolverTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<CurveSolverTest> instance( new CurveSolverTest() );
 		add( BOOST_CLASS_TEST_CASE( &CurveSolverTest::testLinearCurveSolver, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CurveSolverTest::testExponentialCurveSolver, instance ) );
 	}
 };
 
