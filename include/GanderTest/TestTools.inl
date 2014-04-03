@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,42 +31,26 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_TESTTOOLSTEST_H__
-#define __GANDERTEST_TESTTOOLSTEST_H__
+#ifndef __GANDERTEST_TESTTOOLSTEST_INL__
+#define __GANDERTEST_TESTTOOLSTEST_INL__
 
 #include <vector>
-#include <stdlib.h>
 
-#include "Gander/Common.h"
-#include "Gander/Math.h"
-#include "Eigen/Dense"
-
-#include "boost/test/unit_test.hpp"
-
-namespace Gander
-{
-
-namespace Test
-{
-
-/// Returns a random number between the given range.
-/// @param from The minimum value.
-/// @param to The maximum value.
-/// @return A random number between from and to.
-double randomNumber( double from = 0., double to = 1. );
-
-/// Returns a set of randomly placed points along the given curve with an optional amount of noise.
-/// @param points The points on the curve to return.
-/// @param curve The curve function to generate the points along.
-/// @param numberOfPoints The number of points to generate along the curve.
-/// @param noisePercent The percentage of random noise to offset the resulting points by.
+/// Returns a set of points which are modeled on the curve function with some additional noise.
 template< class CurveFn >
-void generatePointsOnCurve( typename CurveFn::PointArrayType &points, const CurveFn &curve, unsigned int numberOfPoints = 50, double noisePercent = 10. );
+void Gander::Test::generatePointsOnCurve( typename CurveFn::PointArrayType &points, const CurveFn &curve, unsigned int numberOfPoints, double noisePercent )
+{
+	noisePercent = std::min( 100., std::max( 0., noisePercent ) );
+	points.clear();
+	points.reserve( numberOfPoints );
+	for( unsigned int i = 0; i < numberOfPoints; ++i )
+	{
+		double x = static_cast<double>( i );
+		Eigen::Vector2d point;
+		point(0) = x;
+		point(1) = curve( x ) + randomNumber( .0, noisePercent / 100. );
+		points.push_back( point );
+	}
+}
 
-}; // namespace Test
-
-}; // namespace Gander
-
-#include "GanderTest/TestTools.inl"
-
-#endif // __GANDERTEST_TESTTOOLSTEST_H__
+#endif // __GANDERTEST_TESTTOOLSTEST_INL__

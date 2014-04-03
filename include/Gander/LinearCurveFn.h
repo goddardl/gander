@@ -57,11 +57,10 @@ class LinearCurve2DFn : public CurveFn< LinearCurve2DFn< Real, VectorX >, Real, 
 		typedef LinearCurve2DFn< Real, VectorX > Type;
 		typedef Real RealType;
 		typedef VectorX VectorXType;
-		typedef Eigen::Matrix< Real, 2, 1 > Vector2Type;
+		typedef typename BaseType::Vector2Type Vector2Type;
 		typedef Eigen::ParametrizedLine< RealType, 2 > ParametrizedLineType;
 
-		/// The default constructor should initialize the parameters by calling
-		/// BaseType::init() and then setting their values.
+		inline LinearCurve2DFn( double a, double b ) { A() = a; B() = b; }
 		inline LinearCurve2DFn() { A() = 1.; B() = 1.; }
 
 		/// The static compute method returns the result of the curve function using

@@ -47,13 +47,15 @@ namespace Gander
 /// Derived classes implement two methods:
 /// static int numberOfParameters() // Return the number of parameters that the model requires.
 /// static T compute( double x, const VectorXType &parameters ); // Returns the y value for a given x value using the parameters supplied.
-template< class Derived, class T, class VectorX = Eigen::Matrix< T, Eigen::Dynamic, 1 > >
+template< class Derived, class Real, class VectorX = Eigen::Matrix< Real, Eigen::Dynamic, 1 > >
 class CurveFn
 {
 	public :
 		
-		typedef T RealType;
+		typedef Real RealType;
 		typedef VectorX VectorXType;
+		typedef Eigen::Matrix< Real, 2, 1 > Vector2Type;
+		typedef std::vector< Vector2Type, Eigen::aligned_allocator<Vector2Type> > PointArrayType;
 		typedef Derived Type;
 
 		CurveFn() : m_parameters( Derived::numberOfParameters() )
@@ -72,8 +74,8 @@ class CurveFn
 		inline VectorXType &parameters() { return m_parameters; }
 		inline const VectorXType &parameters() const { return m_parameters; }
 		
-		inline T &parameter( int index ) { return m_parameters[index]; }
-		inline const T &parameter( int index ) const { return m_parameters(index); }
+		inline RealType &parameter( int index ) { return m_parameters[index]; }
+		inline const RealType &parameter( int index ) const { return m_parameters(index); }
 
 	protected :
 

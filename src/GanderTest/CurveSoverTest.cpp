@@ -44,7 +44,6 @@
 #include "GanderTest/CurveSolverTest.h"
 #include "GanderTest/TestTools.h"
 
-
 #include "Eigen/Geometry"
 
 #include "boost/test/floating_point_comparison.hpp"
@@ -64,25 +63,6 @@ namespace Test
 struct CurveSolverTest
 {
 
-	/// Returns a set of points which are modeled on: y = a*x + b but include some noise.
-	void generateLinearCurvePoints( DoublePoint2DArray &points, double a, double b )
-	{
-		LinearCurve2DFn< double > curve;
-		curve.A() = a;
-		curve.B() = b;
-
-		points.clear();
-		points.reserve( 50 );
-		for( unsigned int i = 0; i < 50; ++i )
-		{
-			double x = static_cast<double>( i );
-			Eigen::Vector2d point;
-			point(0) = x;
-			point(1) = curve( x ) + randomNumber( .0, .1 );
-			points.push_back( point );
-		}
-	}
-
 	void testLinearCurveSolver()
 	{
 		try
@@ -91,10 +71,10 @@ struct CurveSolverTest
 			{
 				for( int b = 1; b < 10; b += 2 )
 				{
-					double a = 2;
-					double b = 5;
-					DoublePoint2DArray points;
-					generateLinearCurvePoints( points, a, b ); // y = a*x + b (with 10% noise).
+					double a = 2, b = 5;
+					LinearCurve2DFn<double> curve( a, b );
+					LinearCurve2DFn<double>::PointArrayType points;
+					generatePointsOnCurve( points, curve ); // y = a*x + b (with 10% noise).
 
 					double A = 0, B = 0;
 					Gander::fitLinearCurve2D( A, B, points );
