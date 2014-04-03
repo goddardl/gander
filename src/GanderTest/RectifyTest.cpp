@@ -95,23 +95,41 @@ void calibrationMatrix( Eigen::Matrix3d &C, double focalLength, const Eigen::Vec
 	C << focalLength / pixelWidth, 0., resolution[0] * .5, 0, focalLength / pixelHeight, resolution[1] * .5, 0, 0, 1.;
 }
 
-void projectionMatrix( Eigen::MatrixXd &projection, const Eigen::Matrix3d &calibration, const Eigen::Vector3d &XYZ, const Eigen::Vector3d &T )
+void projectionMatrix( Eigen::MatrixXd &projection, const Eigen::Matrix3d &calibration, const Eigen::Vector3d &rotXYZ, const Eigen::Vector3d &translation )
 {
 	GANDER_ASSERT( projection.cols() == 4 && projection.rows() == 3, "Matrix P must be of size 3x4." );
 
 	// Create a rotation matrix using individual rotational components.
 	Eigen::Matrix3d rx;
-	rx = Eigen::AngleAxisd( XYZ[0], Eigen::Vector3d( 1, 0, 0 ) );
+	rx = Eigen::AngleAxisd( rotXYZ[0], Eigen::Vector3d( 1, 0, 0 ) );
 
 	Eigen::Matrix3d ry;
-	ry = Eigen::AngleAxisd( XYZ[1], Eigen::Vector3d( 0, 1, 0 ) );
+	ry = Eigen::AngleAxisd( rotXYZ[1], Eigen::Vector3d( 0, 1, 0 ) );
 
 	Eigen::Matrix3d rz;
-	rz = Eigen::AngleAxisd( XYZ[2], Eigen::Vector3d( 0, 0, 1 ) );
-
+	rz = Eigen::AngleAxisd( rotXYZ[2], Eigen::Vector3d( 0, 0, 1 ) );
+			
 	Eigen::Matrix3d rotation;
 	rotation = ( rz * ry * rx ).inverse();
-	projection << calibration * rotation, -rotation * XYZ;
+
+	std::cerr << Eigen::Vector4d( 0, 0, 0, 1 ) << std::endl;
+	projection << calibration * rotation, rotation * -translation;
+
+	std::cerr << "------" << std::endl << ( Eigen::MatrixXd(3,4) << rotation, -rotation * translation ).finished() << std::endl;
+	std::cerr << "------" << std::endl << ( Eigen::MatrixXd(3,4) << rotation, -translation ).finished() << std::endl;
+	
+	Eigen::Matrix4d r = Eigen::Matrix4d::Identity(), ri = Eigen::Matrix4d::Identity(), t = Eigen::Matrix4d::Identity(), ti = Eigen::Matrix4d::Identity() ;
+	Eigen::Matrix3d R = ( rz * ry * rx );
+	Eigen::Matrix3d Ri = R.inverse();
+	t.col(3).head(3) = translation;
+	ti.col(3).head(3) = -translation;
+	r.block(0,0,3,3) = R;
+	ri.block(0,0,3,3) = Ri;
+	//std::cerr << ( r * t ).inverse() << std::endl;
+	//std::cerr << "p *** "<< ( r * t ) * Eigen::Vector4d( 0, 0, 5, 1. ) << std::endl;
+	//std::cerr << "p' *** "<< ( t.inverse() * ri ) << std::endl;
+	std::cerr << "**** "<< r * t * Eigen::Vector4d( 0, 0, 34, 1. ) << std::endl;
+	std::cerr << "**** "<< ti * ri * Eigen::Vector4d( 25.0694, -46.9939, 9.01297, 1. ) << std::endl;
 }
 
 Eigen::Vector3d worldToPixel( const Eigen::MatrixXd &projection, const Eigen::Vector3d &point )
@@ -146,8 +164,8 @@ namespace Test
 			BOOST_CHECK( areClose( worldToPixel( P, Eigen::Vector3d( -aperture[0] * .5, -aperture[1] * .5, f ) ), Eigen::Vector3d( 0., 0., 1. ), 10e-8, 10e-8 ) );
 			BOOST_CHECK( areClose( worldToPixel( P, Eigen::Vector3d( aperture[0] * .5, aperture[1] * .5, f ) ), Eigen::Vector3d( resolution[0], resolution[1], 1. ), 10e-8, 10e-8 ) );
 			
-			projectionMatrix( P, C, Eigen::Vector3d( Gander::degreesToRadians( 30. ), Gander::degreesToRadians( -10. ), Gander::degreesToRadians( 5. ) ), Eigen::Vector3d( 1., -.5, 2. ) );
-			test the transforms
+			projectionMatrix( P, C, Eigen::Vector3d( Gander::degreesToRadians( 90. ), Gander::degreesToRadians( 10. ), Gander::degreesToRadians( 5. ) ), Eigen::Vector3d( 1., .5, 15. ) );
+			std::cerr << worldToPixel( P, Eigen::Vector3d( 5.33819, -48.7201, 0.318756 ) ) << std::endl;
 		}
 
 		void testDecomposeRQ3x3()
@@ -196,8 +214,8 @@ namespace Test
 				Pn2 = C * ( Eigen::MatrixXd( 3, 4 ) << R, -R*c2 ).finished();
 
 				// Rectifying image transformation.
-				Q1 = Pn1.block( 0, 0, 2, 2 ) * P1.block( 0, 0, 2, 2 ).inverse();
-				Q2 = Pn2.block( 0, 0, 2, 2 ) * P2.block( 0, 0, 2, 2 ).inverse();
+				Q1 = Pn1.block( 0, 0, 3, 3 ) * P1.block( 0, 0, 3, 3 ).inverse();
+				Q2 = Pn2.block( 0, 0, 3, 3 ) * P2.block( 0, 0, 3, 3 ).inverse();
 			}
 			catch ( std::exception &e ) 
 			{
