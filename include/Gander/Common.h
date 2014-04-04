@@ -115,9 +115,8 @@ enum{ EnumTypeSize = 8 };
 
 }; // namespace Gander
 
-/// A useful macro for defining the common types required by most classes.
-/// CLASSTYPE should be the class that the macro is defined within and REALTYPE
-/// should be data type to be used within Eigen classes.
+/// A useful macro for defining the common eigen types required by most classes.
+/// REALTYPE should be the data type to be used within Eigen classes.
 #define GANDER_DECLARE_EIGEN_TYPES( REALTYPE )\
 typedef REALTYPE RealType;\
 typedef Eigen::Matrix< REALTYPE, Eigen::Dynamic, 1 > VectorXType;\
