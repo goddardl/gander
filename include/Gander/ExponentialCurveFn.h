@@ -48,17 +48,15 @@ namespace Gander
 /// ExponentialCurve2DFn
 /// Implements an exponential curve using the function Y = 1. - pow( 1 - A, x / B )
 /// Where A is in the range of 0-1.
-template< class Real, class VectorX = Eigen::Matrix< Real, Eigen::Dynamic, 1 > >
-class ExponentialCurve2DFn : public CurveFn< ExponentialCurve2DFn< Real, VectorX >, Real, VectorX >
+template< class Real >
+class ExponentialCurve2DFn : public CurveFn< ExponentialCurve2DFn< Real >, Real >
 {
-		typedef CurveFn< ExponentialCurve2DFn< Real, VectorX >, Real, VectorX > BaseType;
+		typedef CurveFn< ExponentialCurve2DFn< Real >, Real > BaseType;
 
 	public :
 		
-		typedef ExponentialCurve2DFn< Real, VectorX > Type;
-		typedef Real RealType;
-		typedef VectorX VectorXType;
-		typedef typename BaseType::Vector2Type Vector2Type;
+		typedef ExponentialCurve2DFn< Real > Type;
+		GANDER_DECLARE_EIGEN_TYPES( Real )
 
 		inline ExponentialCurve2DFn( double a, double b ) { A() = a; B() = b; }
 		inline ExponentialCurve2DFn() { A() = .5; B() = 1.; }
@@ -100,7 +98,7 @@ class ExponentialCurve2DFn : public CurveFn< ExponentialCurve2DFn< Real, VectorX
 		}
 
 		/// Defines the number of parameters. In this case, there are 2: A and B.
-		static int numberOfParameters() { return 2; };
+		inline unsigned int numberOfParameters() const { return 2; };
 
 		/// Returns the current value of parameter A.
 		inline RealType &A() { return BaseType::parameter(0); }

@@ -62,6 +62,10 @@ class CurveLeastSquaresFn : public Gander::ErrorFn
 
 public:
 
+	typedef double RealType;
+	typedef Eigen::VectorXd VectorXType;
+	typedef Eigen::MatrixXd MatrixXType;
+
 	CurveLeastSquaresFn( const DoublePoint2DArray &points ) :
 		Gander::ErrorFn( 2, points.size() ),
 		m_points( points )
@@ -123,8 +127,8 @@ struct LevenbergMarquardtTest
 					generatePoints( points, a, b ); // y = a*x + b (with noise).
 
 					Detail::CurveLeastSquaresFn functor( points );
-					ForwardDifferenceJacobian< Detail::CurveLeastSquaresFn, double > fn( functor );
-					Eigen::LevenbergMarquardt< ForwardDifferenceJacobian< Detail::CurveLeastSquaresFn, double >, double > lm( fn );
+					ForwardDifferenceJacobian< Detail::CurveLeastSquaresFn > fn( functor );
+					Eigen::LevenbergMarquardt< ForwardDifferenceJacobian< Detail::CurveLeastSquaresFn >, double > lm( fn );
 
 					Eigen::VectorXd x(2);
 					x.fill(1.0f);

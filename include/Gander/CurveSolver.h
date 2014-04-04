@@ -35,6 +35,7 @@
 #define __GANDER_CURVESOLVER_H__
 
 #include <vector>
+#include <set>
 
 #include "Gander/Math.h"
 #include "Gander/PointArray.h"
@@ -49,29 +50,40 @@ namespace Gander
 
 /// CurveSolver2D
 /// Provides a mechanism for fitting a curve with a known function to a set of 2D points.
-/// The CurveSolver2D class accepts a CurveFn as a template argument
+/// The CurveSolver2D class accepts a FnType as a template argument
 /// along with the type of the 2D points to be solved.
-template< class CurveFN > 
+template< class ModelFn > 
 class CurveSolver2D : public Gander::ErrorFn
 {
 
 	public:
 
-		typedef CurveFN FnType;
-		typedef CurveSolver2D< CurveFN > Type;
-		typedef typename FnType::RealType RealType;
-		typedef typename FnType::VectorXType VectorXType;
-		typedef typename FnType::Vector2Type Vector2Type;
-		typedef typename FnType::Point2DArrayType Point2DArrayType;
-
-		CurveSolver2D( const Point2DArrayType &points, int maxIterations = 1000, double errorTolerance = 10e-6, double parameterTolerance = 10e-6 ) :
-			Gander::ErrorFn( m_fn.numberOfParameters(), points.size() ),
-			m_points( points ),
+		typedef ModelFn FnType;
+		typedef CurveSolver2D< FnType > Type;
+		GANDER_DECLARE_EIGEN_TYPES( typename FnType::RealType )
+		
+		CurveSolver2D( const FnType &fn, const Point2DArrayType *points, int maxIterations = 1000, double errorTolerance = 10e-6, double parameterTolerance = 10e-6 ) :
+			ErrorFn( m_fn.numberOfParameters() ),
+			m_fn( fn, points ),
 			m_maxIterations( maxIterations ),
 			m_errorTolerance( errorTolerance ),
 			m_parameterTolerance( parameterTolerance ),
-			m_step( std::numeric_limits<float>::epsilon() )
-		{}
+			m_step( std::numeric_limits<float>::epsilon() ),
+			m_pointsPtr( NULL )
+		{
+			setPoints( points );
+		}
+		
+		CurveSolver2D( const Point2DArrayType *points, int maxIterations = 1000, double errorTolerance = 10e-6, double parameterTolerance = 10e-6 ) :
+			ErrorFn( m_fn.numberOfParameters() ),
+			m_maxIterations( maxIterations ),
+			m_errorTolerance( errorTolerance ),
+			m_parameterTolerance( parameterTolerance ),
+			m_step( std::numeric_limits<float>::epsilon() ),
+			m_pointsPtr( NULL )
+		{
+			setPoints( points );
+		}
 
 		//! @name Parameter Accessors
 		/// The setter and getter methods for the parameters of the
@@ -90,25 +102,35 @@ class CurveSolver2D : public Gander::ErrorFn
 		inline const double &parameterTolerance() const { return m_parameterTolerance; };
 		inline double &parameterTolerance() { return m_parameterTolerance; };
 
-		/// The step (epsilon) value that the minimiser should use.
+		/// Returns the FnType class that is fitted to the set of data points.
+		inline const FnType &fn() const { return m_fn; }
+		inline FnType &fn() { return m_fn; }
+		
+		/// The step (epsilon) value to use when calculating the Jacobian of forward differences.
 		inline const double &step() const { return m_step; };
 		inline double &step() { return m_step; };
 
-		/// Returns the CurveFn class that is fitted to the set of data points.
-		inline const CurveFN &fn() const { return m_fn; }
-		inline CurveFN &fn() { return m_fn; }
-
-		/// Returns a constant reference to the points that the curve is being fitted to.
-		inline const Point2DArrayType &points() const { return m_points; }
+		/// Returns a constant pointer to the points that the curve is being fitted to.
+		inline const Point2DArrayType *getPoints() const { return m_pointsPtr; }
+		
+		/// Sets the pointer to the list of observable points that the curve is being fitted to.
+		inline void setPoints( const Point2DArrayType *points )
+		{
+			m_pointsPtr = points;
+			if( points != NULL )
+			{
+				ErrorFn::setNumberOfValues( points->size() );
+			}
+		}
 		//@}
 
 		/// Executes the solver, solving the parameters in place.
-		/// The solved parameters can be accessed from the CurveFn.
+		/// The solved parameters can be accessed from the FnType.
 		void solve();
 
 		/// Returns the mean error of the fitted model.
-		double meanError() const;
-	
+		double squaredMeanError() const;
+		
 		/// Returns an VectorXType of the errors of each point from the fitted model.
 		/// This method assumes that the Vector is of the same length as the number of points.
 		void errorVector( VectorXType &fvec ) const;
@@ -120,17 +142,16 @@ class CurveSolver2D : public Gander::ErrorFn
 		
 		/// This operator is called by the Eigen::LevenbergMarquardt
 		/// algorithm to compute an array of errors.
-		/// It shouldn't be called directly. Use solve() instead.
 		int operator()( const VectorXType &x, VectorXType &fvec ) const;
-
+		
 	private :
 
-		const Point2DArrayType &m_points;
-		CurveFN m_fn;
+		FnType m_fn;
 		int m_maxIterations;
 		double m_errorTolerance;
 		double m_parameterTolerance;
 		double m_step;
+		const Point2DArrayType *m_pointsPtr;
 
 };
 

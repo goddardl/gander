@@ -43,22 +43,19 @@ namespace Gander
 {
 
 /// CurveFn
-/// The base class for implementing a curve function.
-/// Derived classes implement two methods:
-/// static int numberOfParameters() // Return the number of parameters that the model requires.
+/// The base class for implementing a curve function of the form y = x.
+/// Derived classes should implement two methods:
+/// unsigned int numberOfParameters() const; // Return the number of parameters that the model requires.
 /// static T compute( double x, const VectorXType &parameters ); // Returns the y value for a given x value using the parameters supplied.
-template< class Derived, class Real, class VectorX = Eigen::Matrix< Real, Eigen::Dynamic, 1 > >
+template< class Derived, class Real >
 class CurveFn
 {
 	public :
 		
-		typedef Real RealType;
-		typedef VectorX VectorXType;
-		typedef Eigen::Matrix< Real, 2, 1 > Vector2Type;
-		typedef std::vector< Vector2Type, Eigen::aligned_allocator<Vector2Type> > Point2DArrayType;
-		typedef Derived Type;
+		typedef CurveFn< Derived, Real > Type;
+		GANDER_DECLARE_EIGEN_TYPES( Real )
 
-		CurveFn() : m_parameters( Derived::numberOfParameters() )
+		CurveFn() : m_parameters( static_cast< const Derived * >( this )->numberOfParameters() )
 		{
 		}
 		
@@ -76,6 +73,9 @@ class CurveFn
 		inline RealType &parameter( int index ) { return m_parameters[index]; }
 		inline const RealType &parameter( int index ) const { return m_parameters(index); }
 
+		/// Defines the number of parameters. This should be overridden by the derived class.
+		inline unsigned int numberOfParameters() const { return 0; };
+	
 	protected :
 
 		VectorXType m_parameters;

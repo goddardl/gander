@@ -38,15 +38,15 @@
 namespace Gander
 {
 
-template< class CurveFN > 
-void CurveSolver2D< CurveFN >::solve()
+template< class ModelFn > 
+void CurveSolver2D< ModelFn >::solve()
 {
 	typedef ForwardDifferenceJacobian< Type > FDJacobian;
-
-	// Create a copy of the curve function's initial parameters.	
+	
+	// Create a copy of the model's initial parameters.	
 	typename FnType::VectorXType resolvedParameters( m_fn.parameters() );
-
-	// Wrap this class with a an error function for computing the jacobian
+	
+	// Wrap this class with an error function for computing the jacobian
 	// needed by the Levenberg Marquardt algorithm.
 	FDJacobian fn( *this, m_step );
 
@@ -61,43 +61,47 @@ void CurveSolver2D< CurveFN >::solve()
 	// Write the parameters back to the curve function.
 	m_fn.parameters() = resolvedParameters;
 }
-		
-template< class CurveFN > 
-int CurveSolver2D< CurveFN >::operator()( const VectorXType &x, VectorXType &fvec ) const
+
+template< class ModelFn > 
+int CurveSolver2D< ModelFn >::operator()( const VectorXType &x, VectorXType &fvec ) const
 {
 	errorVector( x, fvec );
 	return 0;
 }
 
-template< class CurveFN > 
-double CurveSolver2D< CurveFN >::meanError() const
+template< class ModelFn > 
+double CurveSolver2D< ModelFn >::squaredMeanError() const
 {
+	GANDER_ASSERT( ErrorFn::values() > 0 && m_pointsPtr != NULL, "No observable values have been supplied." );
+
 	double sum( 0. );
 	VectorXType errors;
-	errors.resize( m_points.size() );
+	errors.resize( m_pointsPtr->size() );
 	errorVector( errors );
 
-	for( unsigned int i = 0; i < m_points.size(); ++i )
+	for( unsigned int i = 0; i < m_pointsPtr->size(); ++i )
 	{
 		sum += errors(i);
 	}
 
-	return sum / double( m_points.size() );
+	return sum / double( m_pointsPtr->size() );
 }
 
-template< class CurveFN > 
-void CurveSolver2D< CurveFN >::errorVector( VectorXType &fvec ) const
+template< class ModelFn > 
+void CurveSolver2D< ModelFn >::errorVector( VectorXType &fvec ) const
 {
 	errorVector( m_fn.parameters(), fvec );
 }
 
-template< class CurveFN > 
-void CurveSolver2D< CurveFN >::errorVector( const VectorXType &parameters, VectorXType &fvec ) const
+template< class ModelFn > 
+void CurveSolver2D< ModelFn >::errorVector( const VectorXType &parameters, VectorXType &fvec ) const
 {
-	for( unsigned int i = 0; i < m_points.size(); ++i )
+	GANDER_ASSERT( ErrorFn::values() > 0 && m_pointsPtr != NULL, "No observable values have been supplied." );
+
+	for( unsigned int i = 0; i < m_pointsPtr->size(); ++i )
 	{
-		RealType y = FnType::compute( m_points[i](0), parameters );
-		fvec(i) = ( y - m_points[i](1) ) * ( y - m_points[i](1) );
+		RealType y = FnType::compute( (*m_pointsPtr)[i](0), parameters );
+		fvec(i) = ( y - (*m_pointsPtr)[i](1) ) * ( y - (*m_pointsPtr)[i](1) );
 	}
 }
 
@@ -111,7 +115,7 @@ void fitLinearCurve2D(
 		double parameterTolerance
 		)
 {
-	CurveSolver2D< LinearCurve2DFn< T > > curveSolver( points, maxIterations, errorTolerance, parameterTolerance );
+	CurveSolver2D< LinearCurve2DFn< T > > curveSolver( &points, maxIterations, errorTolerance, parameterTolerance );
 	curveSolver.solve();
 	a = curveSolver.fn().A();
 	b = curveSolver.fn().B();
@@ -127,7 +131,7 @@ void fitExponentialCurve2D(
 		double parameterTolerance
 		)
 {
-	CurveSolver2D< ExponentialCurve2DFn< T > > curveSolver( points, maxIterations, errorTolerance, parameterTolerance );
+	CurveSolver2D< ExponentialCurve2DFn< T > > curveSolver( &points, maxIterations, errorTolerance, parameterTolerance );
 	curveSolver.solve();
 	a = curveSolver.fn().A();
 	b = curveSolver.fn().B();

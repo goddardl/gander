@@ -47,10 +47,10 @@ namespace Gander
 ///
 /// The error function at x to be returned in fvec. The vector x should be of length
 /// inputs() and the vector fvec of length values(). 
-///		int operator()( const VectorType &x, VectorType &fvec ) const
+///		int operator()( const VectorXType &x, VectorXType &fvec ) const
 ///
 /// To be defined if automatic differentiation is not being used. 
-/// int df( const VectorType &x, MatrixType &fJac ) const
+/// int df( const VectorXType &x, MatrixXType &fJac ) const
 ///
 class ErrorFn
 {
@@ -65,12 +65,12 @@ class ErrorFn
 		/// Provides access to the number of observable values (the residuals).
 		inline void setNumberOfValues( unsigned int values ) { m_values = values; }
 		inline unsigned int getNumberOfValues() const { return m_values; }
-		inline unsigned int values() const { return m_values; }
+		inline unsigned int values() const { return getNumberOfValues(); }
 		
 		/// Provides access to the number of unknowns to solve.
 		inline void setNumberOfInputs( unsigned int inputs ) { m_inputs = inputs; }
 		inline unsigned int getNumberOfInputs() const { return m_inputs; }
-		inline unsigned int inputs() const { return m_inputs; }
+		inline unsigned int inputs() const { return getNumberOfInputs(); }
 
 	private :
 
@@ -81,33 +81,32 @@ class ErrorFn
 
 /// A Wrapper class for the Gander::ErrorFn which converts a Least Squares function
 /// to a Least Squares Jacobian function using forward differences.
-template< class LeastSquaresFn, class Real = double >
+template< class LeastSquaresFn >
 class ForwardDifferenceJacobian
 {
 
 	public:
 
-		typedef Eigen::Matrix< Real, Eigen::Dynamic, 1 > VectorType;
-		typedef Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > MatrixType;
-		typedef Real RealType;
+		typedef ForwardDifferenceJacobian< LeastSquaresFn > Type;
+		GANDER_DECLARE_EIGEN_TYPES( typename LeastSquaresFn::RealType )
 
-		ForwardDifferenceJacobian( LeastSquaresFn &fn, RealType step = std::numeric_limits<float>::epsilon() )
+		ForwardDifferenceJacobian( const LeastSquaresFn &fn, RealType step = std::numeric_limits<float>::epsilon() )
 			:	m_fn( fn ),
 			m_step( step )
 		{}
 
-		int operator()( const VectorType &x, VectorType &fvec ) const
+		int operator()( const VectorXType &x, VectorXType &fvec ) const
 		{
 			GANDER_ASSERT( m_fn.inputs() > 0 && m_fn.values() > 0, "The number of values and inputs must be greater than 0." );
 			return m_fn( x, fvec );
 		}
 
-		int df( const VectorType &x, MatrixType &fJac ) const
+		int df( const VectorXType &x, MatrixXType &fJac ) const
 		{
-			VectorType v( getNumberOfInputs() );
+			VectorXType v( getNumberOfInputs() );
 			v = x;
 
-			VectorType fErr( getNumberOfValues() );
+			VectorXType fErr( getNumberOfValues() );
 			m_fn( v, fErr );
 
 			const RealType reciprocal = 1. / m_step;
@@ -117,7 +116,7 @@ class ForwardDifferenceJacobian
 				v( parameter ) += m_step;
 
 				// Compute the new error vector.
-				VectorType stepErr( getNumberOfValues() );
+				VectorXType stepErr( getNumberOfValues() );
 				m_fn( v, stepErr );
 
 				for( unsigned int i = 0; i < getNumberOfValues(); ++i )
@@ -131,11 +130,9 @@ class ForwardDifferenceJacobian
 			return 0;
 		}
 
-		inline void setNumberOfValues( unsigned int values ) { m_fn.setNumberOfValues( values ); }
 		inline unsigned int getNumberOfValues() const { return m_fn.getNumberOfValues(); }
 		inline unsigned int values() const { return m_fn.values(); }
 
-		inline void setNumberOfInputs( unsigned int inputs ) { m_fn.setNumberOfInputs( inputs ); }
 		inline unsigned int getNumberOfInputs() const { return m_fn.getNumberOfInputs(); }
 		inline unsigned int inputs() const { return m_fn.inputs(); }
 
@@ -144,7 +141,7 @@ class ForwardDifferenceJacobian
 
 	private :
 
-		LeastSquaresFn &m_fn;
+		const LeastSquaresFn &m_fn;
 		RealType m_step;
 
 };

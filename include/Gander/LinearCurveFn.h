@@ -47,18 +47,16 @@ namespace Gander
 
 /// LinearCurve2DFn
 /// Implements a simple linear curve using the function Y = A*X + B.
-template< class Real, class VectorX = Eigen::Matrix< Real, Eigen::Dynamic, 1 > >
-class LinearCurve2DFn : public CurveFn< LinearCurve2DFn< Real, VectorX >, Real, VectorX >
+template< class Real >
+class LinearCurve2DFn : public CurveFn< LinearCurve2DFn< Real >, Real >
 {
-		typedef CurveFn< LinearCurve2DFn< Real, VectorX >, Real, VectorX > BaseType;
+		typedef CurveFn< LinearCurve2DFn< Real >, Real > BaseType;
 
 	public :
 		
-		typedef LinearCurve2DFn< Real, VectorX > Type;
-		typedef Real RealType;
-		typedef VectorX VectorXType;
-		typedef typename BaseType::Vector2Type Vector2Type;
-		typedef Eigen::ParametrizedLine< RealType, 2 > ParametrizedLineType;
+		typedef LinearCurve2DFn< Real > Type;
+		GANDER_DECLARE_EIGEN_TYPES( Real )
+		typedef Eigen::ParametrizedLine< Real, 2 > ParametrizedLineType;
 
 		inline LinearCurve2DFn( double a, double b ) { A() = a; B() = b; }
 		inline LinearCurve2DFn() { A() = 1.; B() = 1.; }
@@ -72,7 +70,7 @@ class LinearCurve2DFn : public CurveFn< LinearCurve2DFn< Real, VectorX >, Real, 
 		}
 
 		/// Defines the number of parameters. In this case, there are 2: A and B.
-		static int numberOfParameters() { return 2; };
+		inline unsigned int numberOfParameters() const { return 2; };
 
 		/// Returns the current value of parameter A.
 		inline RealType &A() { return BaseType::parameter(0); }

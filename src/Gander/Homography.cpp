@@ -54,6 +54,10 @@ class HomographyLeastSquaresFn : public Gander::ErrorFn
 {
 
 public:
+
+	typedef double RealType;
+	typedef Eigen::VectorXd VectorXType;
+	typedef Eigen::MatrixXd MatrixXType;
 	
 	HomographyLeastSquaresFn( const Eigen::MatrixXd &points1, const Eigen::MatrixXd &points2 ) :
 		Gander::ErrorFn( 2, points1.cols() ),
@@ -118,8 +122,8 @@ protected :
 bool refineHomography( const Eigen::MatrixXd &points1, const Eigen::MatrixXd &points2, Eigen::MatrixXd &H, int maxIters )
 {
 	Detail::HomographyLeastSquaresFn functor( points1, points2 );
-	ForwardDifferenceJacobian< Detail::HomographyLeastSquaresFn, double > fn( functor );
-	Eigen::LevenbergMarquardt< ForwardDifferenceJacobian< Detail::HomographyLeastSquaresFn, double >, double > lm( fn );
+	ForwardDifferenceJacobian< Detail::HomographyLeastSquaresFn > fn( functor );
+	Eigen::LevenbergMarquardt< ForwardDifferenceJacobian< Detail::HomographyLeastSquaresFn >, double > lm( fn );
 
 	Eigen::VectorXd x(8);
 	x << H(0,0), H(1,0), H(2,0), H(0,1), H(1,1), H(2,1), H(0,2), H(1,2);
