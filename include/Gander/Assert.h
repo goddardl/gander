@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 #ifndef __GANDER_ASSERT_H__
 #define __GANDER_ASSERT_H__
 
+#include <stdexcept>
 #include "Gander/Common.h"
 
 namespace Gander
