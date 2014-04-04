@@ -65,7 +65,7 @@ class CurveSolver2D : public Gander::ErrorFn
 		typedef typename FnType::Point2DArrayType Point2DArrayType;
 
 		CurveSolver2D( const Point2DArrayType &points, int maxIterations = 1000, double errorTolerance = 10e-6, double parameterTolerance = 10e-6 ) :
-			Gander::ErrorFn( points.size(), m_fn.numberOfParameters() ),
+			Gander::ErrorFn( m_fn.numberOfParameters(), points.size() ),
 			m_points( points ),
 			m_maxIterations( maxIterations ),
 			m_errorTolerance( errorTolerance ),

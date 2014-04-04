@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "Gander/Math.h"
+#include "Gander/Assert.h"
 
 namespace Gander
 {
@@ -53,20 +54,29 @@ namespace Gander
 ///
 class ErrorFn
 {
-public:
+	public :
 
-	ErrorFn( size_t values, size_t inputs )
-		: m_values( values ), m_inputs( inputs )
-	{
-	}
+		ErrorFn( unsigned int inputs = 0, unsigned int values = 0 ) :
+			m_values( values ),
+			m_inputs( inputs )
+		{
+		}
 
-	inline size_t values() const { return m_values; }
-	inline size_t inputs() const { return m_inputs; }
+		/// Provides access to the number of observable values (the residuals).
+		inline void setNumberOfValues( unsigned int values ) { m_values = values; }
+		inline unsigned int getNumberOfValues() const { return m_values; }
+		inline unsigned int values() const { return m_values; }
+		
+		/// Provides access to the number of unknowns to solve.
+		inline void setNumberOfInputs( unsigned int inputs ) { m_inputs = inputs; }
+		inline unsigned int getNumberOfInputs() const { return m_inputs; }
+		inline unsigned int inputs() const { return m_inputs; }
 
-private :
-	
-	const size_t m_values; // The number of observable values (the residuals).
-	const size_t m_inputs; // The number of unknowns to solve.
+	private :
+
+		unsigned int m_values;
+		unsigned int m_inputs;
+
 };
 
 /// A Wrapper class for the Gander::ErrorFn which converts a Least Squares function
@@ -75,60 +85,67 @@ template< class LeastSquaresFn, class Real = double >
 class ForwardDifferenceJacobian
 {
 
-public:
+	public:
 
-	typedef Eigen::Matrix< Real, Eigen::Dynamic, 1 > VectorType;
-	typedef Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > MatrixType;
-	typedef Real RealType;
-	
-	ForwardDifferenceJacobian( LeastSquaresFn &fn, RealType step = std::numeric_limits<float>::epsilon() )
-	:	m_fn( fn ),
-		m_step( step )
-	{}
+		typedef Eigen::Matrix< Real, Eigen::Dynamic, 1 > VectorType;
+		typedef Eigen::Matrix< Real, Eigen::Dynamic, Eigen::Dynamic > MatrixType;
+		typedef Real RealType;
 
-	int operator()( const VectorType &x, VectorType &fvec ) const
-	{
-		return m_fn( x, fvec );
-	}
+		ForwardDifferenceJacobian( LeastSquaresFn &fn, RealType step = std::numeric_limits<float>::epsilon() )
+			:	m_fn( fn ),
+			m_step( step )
+		{}
 
-	int df( const VectorType &x, MatrixType &fJac ) const
-	{
-		VectorType v( inputs() );
-		v = x;
-
-		VectorType fErr( values() );
-		m_fn( v, fErr );
-
-		const RealType reciprocal = 1. / m_step;
-		for( unsigned int parameter = 0; parameter < inputs(); ++parameter )
+		int operator()( const VectorType &x, VectorType &fvec ) const
 		{
-			// Increment a parameter by a step.
-			v( parameter ) += m_step;
-
-			// Compute the new error vector.
-			VectorType stepErr( values() );
-			m_fn( v, stepErr );
-
-			for( unsigned int i = 0; i < values(); ++i )
-			{
-				fJac( i, parameter ) = ( stepErr(i) - fErr(i) ) * reciprocal;
-			}
-
-			// Restore the stepped parameter.
-			v( parameter ) = x( parameter );
+			GANDER_ASSERT( m_fn.inputs() > 0 && m_fn.values() > 0, "The number of values and inputs must be greater than 0." );
+			return m_fn( x, fvec );
 		}
-		return 0;
-	}
 
-	inline size_t values() const { return m_fn.values(); }
-	inline size_t inputs() const { return m_fn.inputs(); }
-	inline RealType getStep() const { return m_step; }
-	inline void setStep( RealType step ) { m_step = step; }
+		int df( const VectorType &x, MatrixType &fJac ) const
+		{
+			VectorType v( getNumberOfInputs() );
+			v = x;
 
-private :
+			VectorType fErr( getNumberOfValues() );
+			m_fn( v, fErr );
 
-	LeastSquaresFn &m_fn;
-	RealType m_step;
+			const RealType reciprocal = 1. / m_step;
+			for( unsigned int parameter = 0; parameter < getNumberOfInputs(); ++parameter )
+			{
+				// Increment a parameter by a step.
+				v( parameter ) += m_step;
+
+				// Compute the new error vector.
+				VectorType stepErr( getNumberOfValues() );
+				m_fn( v, stepErr );
+
+				for( unsigned int i = 0; i < getNumberOfValues(); ++i )
+				{
+					fJac( i, parameter ) = ( stepErr(i) - fErr(i) ) * reciprocal;
+				}
+
+				// Restore the stepped parameter.
+				v( parameter ) = x( parameter );
+			}
+			return 0;
+		}
+
+		inline void setNumberOfValues( unsigned int values ) { m_fn.setNumberOfValues( values ); }
+		inline unsigned int getNumberOfValues() const { return m_fn.getNumberOfValues(); }
+		inline unsigned int values() const { return m_fn.values(); }
+
+		inline void setNumberOfInputs( unsigned int inputs ) { m_fn.setNumberOfInputs( inputs ); }
+		inline unsigned int getNumberOfInputs() const { return m_fn.getNumberOfInputs(); }
+		inline unsigned int inputs() const { return m_fn.inputs(); }
+
+		inline RealType getStep() const { return m_step; }
+		inline void setStep( RealType step ) { m_step = step; }
+
+	private :
+
+		LeastSquaresFn &m_fn;
+		RealType m_step;
 
 };
 

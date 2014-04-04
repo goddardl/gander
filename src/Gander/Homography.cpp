@@ -56,7 +56,7 @@ class HomographyLeastSquaresFn : public Gander::ErrorFn
 public:
 	
 	HomographyLeastSquaresFn( const Eigen::MatrixXd &points1, const Eigen::MatrixXd &points2 ) :
-		Gander::ErrorFn( points1.cols(), 2 ),
+		Gander::ErrorFn( 2, points1.cols() ),
 		m_points1( points1 ),
 		m_points2( points2 )
 	{

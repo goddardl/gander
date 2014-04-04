@@ -63,7 +63,7 @@ class CurveLeastSquaresFn : public Gander::ErrorFn
 public:
 
 	CurveLeastSquaresFn( const DoublePoint2DArray &points ) :
-		Gander::ErrorFn( points.size(), 2 ),
+		Gander::ErrorFn( 2, points.size() ),
 		m_points( points )
 	{}
 
