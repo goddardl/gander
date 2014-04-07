@@ -51,6 +51,7 @@
 #include "GanderTest/TupleTest.h"
 #include "GanderTest/InterfacesTest.h"
 #include "GanderTest/CurveSolverTest.h"
+#include "GanderTest/ParameterizedModelTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -74,6 +75,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addTupleTest(test);
 		addInterfacesTest(test);
 		addCurveSolverTest(test);
+		addParameterizedModelTest(test);
 	}
 	catch (std::exception &ex)
 	{
