@@ -89,6 +89,63 @@ class LinearCurve2DFn : public CurveFn< LinearCurve2DFn< Real >, Real >
 		}
 };
 
+/*
+ *
+/// LinearCurve2DFn
+/// Implements a simple linear curve using the function Y = A*X + B.
+template< class Real >
+class LinearCurve2DFn : public ParameterizedModel< Linear< Curve2DFn, Real >, Real, 1, 1 >
+{
+		typedef ParameterizedModel< Linear< Curve2DFn, Real >, Real, 1, 1 > BaseType;
+
+	public :
+		
+		typedef LinearCurve2DFn< Real > Type;
+		GANDER_DECLARE_EIGEN_TYPES( Real )
+		typedef typename BaseType::ModelType ModelType;
+		typedef Eigen::ParametrizedLine< Real, 2 > ParametrizedLineType;
+
+		inline LinearCurve2DFn( double a, double b, double x )
+		{
+			BaseType::addParameter< double >( "A", a );
+			BaseType::addParameter< double >( "B", b );
+			BaseType::addParameter< double >( "X", x );
+		}
+
+		inline LinearCurve2DFn()
+		{
+			BaseType::addParameter< double >( "A", 1. );
+			BaseType::addParameter< double >( "B", 1. );
+			BaseType::addParameter< double >( "X", 0. );
+		}
+
+		/// The static compute method returns the result of the curve function using
+		/// the given parameters.
+		/// This is the implementation of y = a*x + b.
+		static inline void compute( RealType x, const VectorXType &parameters )
+		{
+			this needs to be implemented
+		}
+
+		/// Returns the current value of parameter A.
+		inline unsigned int A() const { return 0; }
+
+		/// Returns the current value of parameter B.
+		inline unsigned int B() const { return 1; }
+		
+		/// Returns the current value of parameter X.
+		inline unsigned int X() const { return 2; }
+		
+		/// Returns a parametrized line that matches this curve.
+		ParametrizedLineType parametrizedLine() const
+		{
+			ParametrizedLineType line;
+			line = ParametrizedLineType::Through( Vector2Type( 0., ( *this )( 0. ) ), Vector2Type( 10., ( *this )( 10. ) ) );
+			return line;
+		}
+};
+*/
+
 }; // namespace Gander
 
 #endif

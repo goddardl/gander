@@ -47,6 +47,13 @@
 
 #include "Eigen/Dense"
 
+
+todo:
+
+Create methods to get, set and add parameters of RealType and write test cases for them.
+Get the curve classes to derive from this class.
+Comment and rebase this class.
+
 namespace Gander
 {
 
@@ -58,15 +65,26 @@ class ParameterizedModel
 		
 		typedef typename std::conditional< ( ModelRows == 1 && ModelCols == 1 ), Real, Eigen::Matrix< Real, ModelRows, ModelCols > >::type ModelType;
 		typedef ParameterizedModel< Derived, Real, ModelRows, ModelCols > Type;
-		typedef Real RealType;
-		typedef Eigen::Matrix< RealType, Eigen::Dynamic, 1 > VectorXType;
-		typedef Eigen::Matrix< RealType, Eigen::Dynamic, Eigen::Dynamic > MatrixXType;
-		typedef Eigen::Matrix< RealType, 2, 1 > Vector2Type;
-		typedef Eigen::ParametrizedLine< RealType, 2 > ParametrizedLineType;
+		GANDER_DECLARE_EIGEN_TYPES( Real )
 
 		inline ParameterizedModel()
 		{
 		};
+
+		void addParameter( const std::string &name, const RealType &defaultValue )
+		{
+			GANDER_ASSERT( std::find( m_parameterNames.begin(), m_parameterNames.end(), name ) == m_parameterNames.end(), "Parameter already exists." );
+			
+			Parameter parameter;
+			parameter.rows = 1;
+			parameter.cols = 1;
+			parameter.firstElementIndex = m_serializedParameters.size();
+			m_parameters.push_back( parameter );
+			
+			m_parameterNames.push_back( name );
+			m_serializedParameters.conservativeResize( m_serializedParameters.size() + 1 );
+			m_serializedParameters.segment( parameter.firstElementIndex, defaultValue.size() ) = VectorXType::Map( &defaultValue, 1 );
+		}
 
 		template< class EigenType = MatrixXType >
 		void addParameter( const std::string &name, const EigenType &defaultValue )
