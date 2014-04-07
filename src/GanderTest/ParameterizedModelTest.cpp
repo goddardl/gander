@@ -46,6 +46,9 @@ using namespace Gander::Test;
 using namespace boost;
 using namespace boost::unit_test;
 
+struct Model : public ParameterizedModel< Model, double, 1, 1 > {};
+struct Model2x2 : public ParameterizedModel< Model, double, 2, 2 > {};
+
 namespace Gander
 {
 
@@ -54,9 +57,15 @@ namespace Test
 
 struct ParameterizedModelTest
 {
+	void testModelOfOne()
+	{
+		BOOST_CHECK( ( std::is_same< double, Model::ModelType >::value ) );
+		BOOST_CHECK( ( std::is_same< Eigen::Matrix2d, Model2x2::ModelType >::value ) );
+	}
+
 	void testAccessors()
 	{
-		ParameterizedModel< double > p;
+		Model p;
 
 		Eigen::Vector2d v( 1, 2 ), v2;
 		p.addParameter( "A", v );
@@ -88,7 +97,7 @@ struct ParameterizedModelTest
 		BOOST_CHECK_EQUAL( p.parameterName( 0 ), "A" );
 		BOOST_CHECK_EQUAL( p.parameterName( 1 ), "B" );
 			
-		BOOST_CHECK_EQUAL( p.parameters(), ( ParameterizedModel< double >::VectorXType( p.parameters().size() ) << 5, 6, 1, 3, 2, 4 ).finished() );
+		BOOST_CHECK_EQUAL( p.parameters(), ( Model::VectorXType( p.parameters().size() ) << 5, 6, 1, 3, 2, 4 ).finished() );
 
 		BOOST_CHECK_THROW( p.addParameter( "A", v ), std::runtime_error ); // Try to add an existing parameter.
 		BOOST_CHECK_THROW( p.getParameter( "C", v ), std::runtime_error ); // Try to get a non-existent parameter.
@@ -102,6 +111,7 @@ struct ParameterizedModelTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<ParameterizedModelTest> instance( new ParameterizedModelTest() );
 		add( BOOST_CLASS_TEST_CASE( &ParameterizedModelTest::testAccessors, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &ParameterizedModelTest::testModelOfOne, instance ) );
 	}
 };
 

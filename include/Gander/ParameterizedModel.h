@@ -36,6 +36,9 @@
 
 #include <vector>
 #include <string>
+#include <tuple>
+
+#include <type_traits>
 
 #include "Gander/Math.h"
 #include "Gander/Assert.h"
@@ -48,13 +51,18 @@ namespace Gander
 {
 
 /// ParameterizedModel
-template< class Real >
+template< class Derived, class Real, unsigned ModelRows = 1, unsigned ModelCols = 1 >
 class ParameterizedModel
 {
 	public :
 		
-		typedef ParameterizedModel< Real > Type;
-		GANDER_DECLARE_EIGEN_TYPES( Real )
+		typedef typename std::conditional< ( ModelRows == 1 && ModelCols == 1 ), Real, Eigen::Matrix< Real, ModelRows, ModelCols > >::type ModelType;
+		typedef ParameterizedModel< Derived, Real, ModelRows, ModelCols > Type;
+		typedef Real RealType;
+		typedef Eigen::Matrix< RealType, Eigen::Dynamic, 1 > VectorXType;
+		typedef Eigen::Matrix< RealType, Eigen::Dynamic, Eigen::Dynamic > MatrixXType;
+		typedef Eigen::Matrix< RealType, 2, 1 > Vector2Type;
+		typedef Eigen::ParametrizedLine< RealType, 2 > ParametrizedLineType;
 
 		inline ParameterizedModel()
 		{
@@ -133,6 +141,20 @@ class ParameterizedModel
 		{
 			return m_serializedParameters;
 		}
+		
+		/// The static compute method returns the result of the model using the given parameters.
+		/// Derived classes should override this method.
+		static inline void compute( ModelType &model, const VectorXType &parameters )
+		{
+			GANDER_ASSERT( 0, "Derived classes must override the compute() method." );
+		}
+		
+		/// The () operator returns the resulting model using the current parameters.
+		/// It does this by calling the static implementation of compute() on the Derived class.
+		ModelType operator()( ModelType &model ) const
+		{
+			return static_cast< const Derived * >( this )->compute( model, m_parameters );
+		}
 
 	protected :
 
@@ -151,3 +173,4 @@ class ParameterizedModel
 }; // namespace Gander
 
 #endif
+
