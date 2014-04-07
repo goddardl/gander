@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,46 +31,21 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDER_STATICASSERT_H__
-#define __GANDER_STATICASSERT_H__
+#ifndef __GANDERTEST_PARAMETERIZEDMODELTEST_H__
+#define __GANDERTEST_PARAMETERIZEDMODELTEST_H__
 
-#include "Gander/Common.h"
+#include "boost/test/unit_test.hpp"
 
 namespace Gander
 {
 
-namespace Detail
+namespace Test
 {
 
-template<bool condition>
-struct static_assertion {};
+void addParameterizedModelTest( boost::unit_test::test_suite *test );
 
-template<>
-struct static_assertion<true>
-{
-	enum
-	{
-		// The derived class has not implemented a function that is required by the base class.
-		DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_PURE_STATIC_METHODS_REQUIRED_BY_THE_BASE_CLASS,
-		// The tuple class can be defined as either being static or dynamic. In the static case,
-		// all of the dynamic methods raise this static error.
-		THIS_METHOD_CANNOT_BE_CALLED_ON_A_STATIC_TUPLE,
-		// An index of value is outside of the required range.
-		VALUE_IS_OUT_OF_BOUNDS,
-		// The class being written or read from uses an incompatible type.
-		CANNOT_ASSIGN_TO_CLASSES_THAT_HAVE_A_DIFFERENT_STORAGE_TYPE,
-	};
-};
-
-}; // namespace Detail
-
-#define GANDER_STATIC_ASSERT(CONDITION,MSG) \
-	enum{ CAT( CAT(ERROR, __AT__ ), __LINE__ ) = Detail::static_assertion<bool(CONDITION)>::MSG };
-
-// Prints a compile time error when the code is compiled. This can be used to ensure that a template method is never compiled.
-#define GANDER_STATIC_ASSERT_ERROR(MSG) \
-	const int MSG; MSG = 1;
+}; // namespace Test
 
 }; // namespace Gander
 
-#endif
+#endif // __GANDERTEST_PARAMETERIZEDMODELTEST_H__
