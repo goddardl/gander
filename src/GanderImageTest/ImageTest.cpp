@@ -86,7 +86,7 @@ struct ImageTest
 		BOOST_CHECK_EQUAL( image.numberOfChannelPointers(), 1 );
 		BOOST_CHECK_EQUAL( image.isDynamic(), false );
 
-		image.setChannelPointer( Chan_Red, &rgb[0][0][0], 3 * sizeof( float ) * 2 );
+		image.setChannelPointer( Chan_Red, &rgb[0][0][0], 2 );
 		BOOST_CHECK( image.isValid() );
 	}
 };

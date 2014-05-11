@@ -39,22 +39,20 @@ namespace Image
 {
 
 template< class T >
+inline void DynamicLayout< T >::increment( ChannelPointerContainerType &container, Channel channel, int v )
+{
+	GANDER_ASSERT( ( m_channels.contains( channel ) ), "DynamicLayout: Channel does not exist in this layout." );
+	unsigned int index = channels().index( channel );
+	container[index] += int( m_steps[index] ) * v;
+}
+
+template< class T >
 inline void DynamicLayout< T >::increment( ChannelPointerContainerType &container, int v )
 {
 	unsigned int size = container.size();
 	for( unsigned int i = 0; i < size; ++i )
 	{
-		container[i] += m_steps[i];
-	}
-}
-
-template< class T >
-inline void DynamicLayout< T >::decrement( ChannelPointerContainerType &container, int v )
-{
-	unsigned int size = container.size();
-	for( unsigned int i = 0; i < size; ++i )
-	{
-		container[i] -= m_steps[i];
+		container[i] += int( m_steps[i] ) * v;
 	}
 }
 

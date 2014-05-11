@@ -309,9 +309,9 @@ struct CompoundLayoutRecurse< Derived, false, None, None, None, None, None, None
 		{
 		}
 		
-		/// Decrements all channel pointers in the container by v.
+		/// Increments the given channel pointer in the container by v.
 		template< class CompoundChannelPointerContainer >
-		inline void decrement( CompoundChannelPointerContainer &container, int v )
+		inline void increment( CompoundChannelPointerContainer &container, Channel channel, int v )
 		{
 		}
 
@@ -395,11 +395,11 @@ struct CompoundLayoutRecurse< Derived, true, T0, None, None, None, None, None, N
 			m_dynamicLayout.increment( container.template child< CompoundChannelPointerContainer::LayoutType::NumberOfLayouts - Iteration >(), v );
 		}
 		
-		/// Decrements all channel pointers in the container by v.
+		/// Increments the given channel pointer in the container by v.
 		template< class CompoundChannelPointerContainer >
-		inline void decrement( CompoundChannelPointerContainer &container, int v )
+		inline void increment( CompoundChannelPointerContainer &container, Channel channel, int v )
 		{
-			m_dynamicLayout.decrement( container.template child< CompoundChannelPointerContainer::LayoutType::NumberOfLayouts - Iteration >(), v );
+			m_dynamicLayout.increment( container.template child< CompoundChannelPointerContainer::LayoutType::NumberOfLayouts - Iteration >(), channel, v );
 		}
 
 	protected :	
@@ -477,14 +477,20 @@ struct CompoundLayoutRecurse : public CompoundLayoutRecurse< Derived, IS_DYNAMIC
 			BaseType::template increment< CompoundChannelPointerContainer >( container, v );
 		}
 		
-		/// Decrements all channel pointers in the container by v.
+		/// Increments the given channel pointer in the container by v.
 		template< class CompoundChannelPointerContainer >
-		inline void decrement( CompoundChannelPointerContainer &container, int v )
+		inline void increment( CompoundChannelPointerContainer &container, Channel channel, int v )
 		{
-			m_layout.decrement( container.template child< CompoundChannelPointerContainer::LayoutType::NumberOfLayouts - Iteration >(), v );
-			BaseType::template decrement< CompoundChannelPointerContainer >( container, v );
+			if( m_layout.contains( channel ) )
+			{
+				m_layout.increment( container.template child< CompoundChannelPointerContainer::LayoutType::NumberOfLayouts - Iteration >(), channel, v );
+			}
+			else
+			{
+				BaseType::template increment< CompoundChannelPointerContainer >( container, channel, v );
+			}
 		}
-
+		
 		template< unsigned Index, bool DisableStaticAsserts = false, class ReturnType = typename BaseType::template LayoutTraits< Index, DisableStaticAsserts >::LayoutType >
 		inline ReturnType &child()
 		{
@@ -556,10 +562,10 @@ struct CompoundLayout : public Detail::CompoundLayoutRecurse<
 			BaseType::template increment< ChannelPointerContainerType >( container, v );
 		}
 		
-		/// Decrements all channel pointers in the container by v.
-		inline void decrement( ChannelPointerContainerType &container, int v )
+		/// Increments the given channel pointer in the container by v.
+		inline void increment( ChannelPointerContainerType &container, Channel channel, int v )
 		{
-			BaseType::template decrement< ChannelPointerContainerType >( container, v );
+			BaseType::template increment< ChannelPointerContainerType >( container, channel, v );
 		}
 		
 		template< unsigned Index, bool DisableStaticAsserts = true >

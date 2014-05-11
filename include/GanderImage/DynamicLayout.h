@@ -90,8 +90,8 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 			};
 		};
 		
-		template< int Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false  >
-		struct ChannelTraitsAtIndex : public BaseType::template LayoutTraits< 0, DisableStaticAsserts >
+		template< int Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
+		struct ChannelTraitsAtIndex : public ChannelTraits< Chan_None, DisableStaticAsserts >
 		{
 			enum
 			{	
@@ -112,13 +112,13 @@ struct DynamicLayout : DynamicLayoutBase< DynamicLayout< T >, T >
 		/// in order to access all of the channels that this layout represents.
 		inline unsigned int numberOfChannelPointers() const;
 		//@}
+		
+		/// Increments the specified channel pointer in the container by v.
+		inline void increment( ChannelPointerContainerType &container, Channel c, int v );
 
 		/// Increments all channel pointers in the container by v.
 		inline void increment( ChannelPointerContainerType &container, int v );
 		
-		/// Decrements all channel pointers in the container by v.
-		inline void decrement( ChannelPointerContainerType &container, int v );
-
 	private :
 
 		friend class DynamicLayoutBase< DynamicLayout< T >, T >;

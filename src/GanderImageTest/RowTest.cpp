@@ -56,31 +56,34 @@ namespace ImageTest
 struct RowTest
 {
 
-	void testRowIterators()
+	void testGet()
 	{
-		typedef CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > Layout;
-		Row< Layout >::PixelIterator it;
+		// Create 2x2 image of RGB values.
+		float rgb[2][2][3] = {
+			{ { 0., 1., 2. }, { 3., 4., 5. } },
+			{ { 6., 7., 8. }, { 9., 10., 11. } },
+		};
+			
+		// Create an image with interleaved RGB channels.
+		typedef BrothersLayout< float, Brothers_RGB > Layout;
+		Gander::Image::Image< Layout > image( 2, 2 );
 		
-		it->addChannels( Mask_U, Brothers_VU );
-		it->addChannels( Mask_Z );
+		image.setChannelPointer( Chan_Red, &rgb[0][0][0], 2 );
+		BOOST_CHECK( image.isValid() );
 
-		float bgr[6] = { 3., 2., 1., 6., 5., 4. };
-		float alpha[2] = { 7., 8. };
-		float vu[4] = { 10., 9., 12., 11. };
-		float z[2] = { 13., 14. };
-		it->setChannelPointer( Chan_Blue, &bgr[0] );	
-		it->setChannelPointer( Chan_Alpha, &alpha );	
-		it->setChannelPointer( Chan_Z, &z );	
-		it->setChannelPointer( Chan_U, &vu[1] );	
-
-		Row< Layout > row( 2 );
-		row.setStart( it );
-
+		Gander::Image::Image< Layout >::Row row;
+		image.get( row, 0 );	
 		BOOST_CHECK_EQUAL( row.width(), 2 );
-		BOOST_CHECK( row.getStart() == it );
-		BOOST_CHECK( row.begin() == it );
-		BOOST_CHECK( row.end() == it + 2 );
+		
+		BOOST_CHECK_EQUAL( row.begin()->channel< Chan_Green >(), 1. );
+		
+		image.get( row, 1 );
+		Gander::Image::Image< Layout >::ConstPixelIterator it = row.begin();
+		BOOST_CHECK_EQUAL( it->channel< Chan_Green >(), 7. );
+		BOOST_CHECK( ( it + 2 ) == row.end() );
+		this doens't work. Find out why.
 	}
+
 };
 
 struct RowTestSuite : public boost::unit_test::test_suite
@@ -88,7 +91,7 @@ struct RowTestSuite : public boost::unit_test::test_suite
 	RowTestSuite() : boost::unit_test::test_suite( "RowTestSuite" )
 	{
 		boost::shared_ptr<RowTest> instance( new RowTest() );
-		add( BOOST_CLASS_TEST_CASE( &RowTest::testRowIterators, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &RowTest::testGet, instance ) );
 	}
 };
 

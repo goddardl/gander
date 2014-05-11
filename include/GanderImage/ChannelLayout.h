@@ -102,7 +102,7 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		};
 		
 		template< int Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false   >
-		struct ChannelTraitsAtIndex : public BaseType::template LayoutTraits< 0 >
+		struct ChannelTraitsAtIndex : public ChannelTraits<Chan_None, DisableStaticAsserts>
 		{
 			GANDER_IMAGE_STATIC_ASSERT( ( Mask & BaseType::template LayoutTraits< 0 >::LayoutType::ChannelMask ) != 0 || DisableStaticAsserts,  CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
 			GANDER_STATIC_ASSERT( Index == 0 || DisableStaticAsserts, VALUE_IS_OUT_OF_BOUNDS );
@@ -112,12 +112,12 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 				ChannelIndexInLayout = Index,
 			};
 		};
+		
+		/// Increments the specified channel pointer in the container by v.
+		inline void increment( ChannelPointerContainerType &container, Channel c, int v );
 
 		/// Increments all channel pointers in the container by v.
 		inline void increment( ChannelPointerContainerType &container, int v );
-		
-		/// Decrements all channel pointers in the container by v.
-		inline void decrement( ChannelPointerContainerType &container, int v );
 		
 		using BaseType::contains;
 

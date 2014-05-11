@@ -45,6 +45,7 @@
 #include "GanderImage/StaticAssert.h"
 #include "GanderImage/Pixel.h"
 #include "GanderImage/PixelIterator.h"
+#include "GanderImage/Image.h"
 
 namespace Gander
 {
@@ -53,12 +54,13 @@ namespace Image
 {
 
 template< class Layout >
-class Row
+class Row : public Gander::EqualComparisonOperators< Row< Layout > >
 {
 	public :
 		
 		typedef Layout LayoutType;
 		typedef Row< LayoutType > Type;
+		typedef typename Gander::Image::Image< LayoutType > ImageType;
 		typedef typename Gander::Image::template Pixel< LayoutType > Pixel;
 		typedef typename Gander::Image::template PixelIterator< LayoutType > PixelIterator;
 		typedef typename Gander::Image::template ConstPixelIterator< LayoutType > ConstPixelIterator;
@@ -66,21 +68,11 @@ class Row
 		typedef PixelIterator iterator;
 		typedef ConstPixelIterator const_iterator;
 
-		inline Row( unsigned int width ) :
-			m_width( width )
+		inline Row() :
+			m_width( 0 )
 		{
 		}
 		
-		inline void setStart( const ConstPixelIterator &it )
-		{
-			m_start = it;
-		}
-
-		inline const const_iterator &getStart() const
-		{
-			return m_start;
-		}
-
 		inline unsigned int width() const
 		{
 			return m_width;
@@ -103,29 +95,26 @@ class Row
 
 		const const_iterator &end() const
 		{
-			return iterator( m_start ).increment( m_width );
+			std::cerr << "w " << m_width << std::endl;
+			return const_iterator( m_start ).increment( m_width );
+		}
+		
+		iterator &begin() 
+		{
+			return m_start;
 		}
 
-		template< class T >
-		inline bool operator == ( const T &rhs ) const
+		template< class RhsLayoutType >
+		inline bool equalTo( const Row< RhsLayoutType > &rhs ) const
 		{
 			return m_start == rhs.m_start && m_width == rhs.m_width;
 		}
 
-		template< class T >
-		inline bool operator != ( const T &rhs ) const
-		{
-			return !( m_start == rhs.m_start && m_width == rhs.m_width );
-		}
-
 	protected :
 		
-		inline Row( const PixelIterator &start, unsigned int width ) :
-			m_start( start ),
-			m_width( width )
-		{}
-
-		const_iterator m_start;
+		template< class > friend class Image;
+		
+		iterator m_start;
 		unsigned int m_width;
 
 };

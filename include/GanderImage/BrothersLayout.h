@@ -98,20 +98,20 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 			};
 		};
 		
-		template< int Index, EnumType Mask = Mask_All  >
-		struct ChannelTraitsAtIndex : public BaseType::template LayoutTraits< 0 >
+		template< int Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
+		struct ChannelTraitsAtIndex : public ChannelTraits<Chan_None, DisableStaticAsserts >
 		{
 			enum
 			{	
 				ChannelIndexInLayout = Index,
 			};
 		};
+		
+		/// Increments the specified channel pointer in the container by v.
+		inline void increment( ChannelPointerContainerType &container, Channel c, int v );
 
 		/// Increments all channel pointers in the container by v.
 		inline void increment( ChannelPointerContainerType &container, int v );
-		
-		/// Decrements all channel pointers in the container by v.
-		inline void decrement( ChannelPointerContainerType &container, int v );
 		
 		using BaseType::contains;
 

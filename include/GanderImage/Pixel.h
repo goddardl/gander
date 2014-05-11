@@ -76,7 +76,7 @@ class PixelBase
 		template< class T >
 		inline const Derived &operator = ( const T &rhs )
 		{
-			return static_cast< Derived * >( this )->template copyFrom< T >( rhs );
+			return static_cast< Derived * >( this )->template copyByValueFrom< T >( rhs );
 		}
 		
 		template< EnumType Index > struct LayoutTraits : public Layout::template LayoutTraits< Index > {};
@@ -100,9 +100,9 @@ class PixelBase
 			return !this->template equalTo< T >( rhs );
 		}
 
-		/// The copyFrom method is the implementation of the assignment operator.		
+		/// The copyByValueFrom method is the implementation of the assignment operator.		
 		template< class T >
-		inline const Derived & copyFrom( const T &rhs, bool copyAvailableChannels = false )
+		inline const Derived & copyByValueFrom( const T &rhs, bool copyAvailableChannels = false )
 		{
 			if( static_cast< Derived * >( this )->channels() != rhs.channels() )
 			{
@@ -112,7 +112,6 @@ class PixelBase
 			GANDER_ASSERT( static_cast< Derived * >( this )->channels() == rhs.channels() || copyAvailableChannels,
 				"Cannot copy one pixel to another if they have different channels."
 			);
-			
 			forEachChannel( *this, rhs, Copy() );
 			return *static_cast< const Derived * >( this );
 		}
@@ -163,6 +162,7 @@ class PixelBase
 		template< class, class, class > friend class PixelBase;
 		template< class > friend class Pixel;
 		template< class > friend class PixelAccessor;
+		template< class > friend class ConstPixelAccessor;
 };
 
 template< class Layout >
@@ -181,7 +181,7 @@ struct Pixel : public PixelBase< Pixel< Layout >, Layout, typename Layout::Chann
 		template< class T >
 		inline const Pixel &operator = ( const T &rhs )
 		{
-			return BaseType::template copyFrom< T >( rhs );
+			return BaseType::template copyByValueFrom< T >( rhs );
 		}
 	
 	private :
@@ -189,20 +189,21 @@ struct Pixel : public PixelBase< Pixel< Layout >, Layout, typename Layout::Chann
 		template< class, class, class > friend class PixelBase;
 		template< class > friend class Pixel;
 		template< class > friend class PixelAccessor;
+		template< class > friend class ConstPixelAccessor;
 };
 
 template< class Layout >
-struct PixelAccessor : public PixelBase< PixelAccessor< Layout >, Layout, typename Layout::ChannelPointerContainerType >
+struct ConstPixelAccessor : public PixelBase< ConstPixelAccessor< Layout >, Layout, typename Layout::ChannelPointerContainerType >
 {
 	private :
 		
-		typedef PixelBase< PixelAccessor< Layout >, Layout, typename Layout::ChannelPointerContainerType > BaseType;
+		typedef PixelBase< ConstPixelAccessor< Layout >, Layout, typename Layout::ChannelPointerContainerType > BaseType;
 
 	public :	
 		
 		typedef typename Layout::ChannelPointerContainerType ContainerType;
 		typedef Layout LayoutType;
-		typedef PixelAccessor< Layout > Type;
+		typedef ConstPixelAccessor< Layout > Type;
 
 		inline unsigned int numberOfChannelPointers() const { return BaseType::m_layout.numberOfChannelPointers(); };
 		inline ChannelSet requiredChannels() const { return BaseType::m_layout.requiredChannels(); };
@@ -212,10 +213,13 @@ struct PixelAccessor : public PixelBase< PixelAccessor< Layout >, Layout, typena
 			BaseType::m_layout.template setChannelPointer< ContainerType >( BaseType::m_container, channel, pointer );
 		}
 		
-		template< class T >
-		inline const PixelAccessor & operator = ( const T &rhs )
+		template< class T >		
+		inline const Type & operator = ( const T &rhs ) const
 		{
-			return BaseType::template copyFrom< T >( rhs );
+			// Use a static assert to always give an error to stop assignments to this class.
+			GANDER_IMAGE_STATIC_ASSERT( ( !std::is_same< T, T >::value ), YOU_CANNOT_COPY_BY_VALUE_TO_A_CONST_CLASS );
+
+			return *this;
 		}
 		
 	private :
@@ -223,6 +227,35 @@ struct PixelAccessor : public PixelBase< PixelAccessor< Layout >, Layout, typena
 		template< class, class, class > friend class PixelBase;
 		template< class > friend class Pixel;
 		template< class > friend class PixelAccessor;
+		template< class > friend class ConstPixelAccessor;
+};
+
+template< class Layout >
+struct PixelAccessor : public ConstPixelAccessor< Layout >
+{
+	private :
+		
+		typedef ConstPixelAccessor< Layout > BaseType;
+
+	public :	
+		
+		typedef typename Layout::ChannelPointerContainerType ContainerType;
+		typedef Layout LayoutType;
+		typedef PixelAccessor< Layout > Type;
+
+		template< class T >
+		inline const PixelAccessor & operator = ( const T &rhs )
+		{
+			BaseType::template copyByValueFrom< T >( rhs );
+			return *this;
+		}
+		
+	private :
+
+		template< class, class, class > friend class PixelBase;
+		template< class > friend class Pixel;
+		template< class > friend class PixelAccessor;
+		template< class > friend class ConstPixelAccessor;
 };
 
 }; // namespace Image

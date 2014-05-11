@@ -61,15 +61,15 @@ class EqualComparisonOperators
 /// A class template to define the pre-decrement and post-decrement operators.
 /// This class should be used as a base for any class that wishes to implement the pre-decrement and post-decrement operators.
 /// All the derived class has to do is implement the method equalTo :
-/// Derived &decrement( int );
+/// Derived &increment( int );
 template< typename Derived >
 class DecrementOperators
 {
-	friend inline Derived &operator -- ( Derived &a ) { return a.decrement( 1 ); }
+	friend inline Derived &operator -- ( Derived &a ) { return a.increment( -1 ); }
 	friend inline Derived operator -- ( Derived &a, int )
 	{
 		Derived d( a );
-		a.decrement( 1 );
+		a.increment( -1 );
 		return d;
 	}
 };
@@ -93,7 +93,6 @@ class IncrementOperators
 /// A class template to define the integer addition, subtraction, subtract-accumulate and add-accumulate operators.
 /// In order for the derived class to use these operators, it must implement the folloing methods :
 /// Derived &increment( int );
-/// Derived &decrement( int );
 template< typename Derived >
 class IntegerArithmeticOperators
 {
@@ -106,7 +105,7 @@ class IntegerArithmeticOperators
 	/// The subtract-accumulate operator.
 	friend inline Derived &operator -= ( Derived &a, int i )
 	{
-		a.decrement( i );
+		a.increment( -i );
 		return a;
 	}
 	/// Addition operator.

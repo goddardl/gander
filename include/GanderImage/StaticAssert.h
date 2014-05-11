@@ -85,6 +85,12 @@ struct static_assertion<true>
 		DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_TRAITS_STRUCTS_REQUIRED_BY_THE_BASE_CLASS,
 		// This method has only been implemented to support 4 or less channels. It will need to be extended if more are required.
 		THIS_FUNCTION_DOES_NOT_SUPPORT_MORE_THAN_FOUR_CHANNELS__PLEASE_EXTEND_IT_OR_OVERLOAD_IT_TO_ADD_SUPPORT_FOR_MORE,
+		// PixelIterators cannot be compared by value. To do that, they need to be dereferenced.
+		PIXELITERATORS_CAN_ONLY_BE_COMPARED_TO_OTHER_PIXELITERATORS__DEREFERENCE_IT_IN_ORDER_TO_COMPARE_BY_VALUE,
+		// ConstPixelAccessors cannot be assigned to!
+		YOU_CANNOT_COPY_BY_VALUE_TO_A_CONST_CLASS,
+		// You cannot copy from a ConstPixelAccessor or ConstPixelIterator to a PixelIterator
+		YOU_CANNOT_COPY_BY_REFERENCE_FROM_A_CONST_CLASS_TO_A_NONCONST_CLASS,
 	};
 };
 

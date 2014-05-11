@@ -37,24 +37,20 @@ namespace Gander
 
 namespace Image
 {
-		
+
+template< class T, ChannelBrothers B >
+inline void BrothersLayout< T, B >::increment( ChannelPointerContainerType &container, Channel channel, int v )
+{
+	increment( container, v );
+}
+
 template< class T, ChannelBrothers B >
 inline void BrothersLayout< T, B >::increment( ChannelPointerContainerType &container, int v )
 {
 	typename ChannelPointerContainerType::iterator it( container.begin() );
 	for( ; it != container.end(); ++it )
 	{
-		*it += BrotherTraits<B>::NumberOfBrothers;
-	}
-}
-
-template< class T, ChannelBrothers B >
-inline void BrothersLayout< T, B >::decrement( ChannelPointerContainerType &container, int v )
-{
-	typename ChannelPointerContainerType::iterator it( container.begin() );
-	for( ; it != container.end(); ++it )
-	{
-		*it -= BrotherTraits<B>::NumberOfBrothers;
+		(*it) += int( BrotherTraits<B>::NumberOfBrothers ) * v;
 	}
 }
 

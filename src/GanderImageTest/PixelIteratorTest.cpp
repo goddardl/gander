@@ -58,6 +58,7 @@ struct PixelIteratorTest
 	{
 		typedef CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > Layout;
 		typedef PixelIterator< Layout > PixelIterator;
+		typedef Pixel< Layout > Pixel;
 		typedef ConstPixelIterator< Layout > ConstPixelIterator;
 		
 		PixelIterator it;
@@ -85,9 +86,34 @@ struct PixelIteratorTest
 		PixelIterator it4( it );
 		BOOST_CHECK( ( it4 == it ) );
 		
-		// Test the copy constructor from a ConstPixelIterator.
-		PixelIterator it5( it3 );
-		BOOST_CHECK( ( it5 == it3 ) );
+		// Test assignment to and from the Pixel type.
+		Pixel p;
+		BOOST_CHECK_THROW( p = *it, std::runtime_error ); // Throws because the pixel hasn't had the dynamic channels added.
+
+		// So add the channels and try again...
+		p.addChannels( Mask_U, Brothers_VU );
+		p.addChannels( Mask_Z );
+		p = *it;
+		BOOST_CHECK( ( *it == p ) );
+
+		// Test that we can change the pointer of a ConstPixelAccessor.
+		float alpha2[2] = { 30., 40. };
+		it3->setChannelPointer( Chan_Alpha, &alpha2 );
+		BOOST_CHECK_EQUAL( it3->channel<Chan_Alpha>(), 30. );
+
+		// Test that we can change the pointer of a PixelAccessor.
+		it->setChannelPointer( Chan_Alpha, &alpha2 );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Alpha>(), 30. );
+
+		// Now change a value of the pixel and try to assign it to a pixel iterator.
+		BOOST_CHECK( p.channel< Chan_Alpha >() == 7. );
+		p.channel< Chan_Alpha >() = 25.;
+		BOOST_CHECK( p.channel< Chan_Alpha >() == 25. );
+		
+		*it = p;
+
+		BOOST_CHECK_EQUAL( it->channel<Chan_Alpha>(), 25. );
+		BOOST_CHECK_EQUAL( alpha2[0], 25. );
 	}
 	
 	void testConstPixelIterator()
@@ -140,13 +166,49 @@ struct PixelIteratorTest
 		BOOST_CHECK_EQUAL( cit->channel<Chan_U>(), 9. );
 		
 		float bgr2[6] = { 3., 2., 1., 6., 5., 4. };
-		PixelIterator it2( cit );
+		PixelIterator it2( *it ); // Test the constructor from a PixelAccessor.
 		BOOST_CHECK( ( cit == it2 ) );
 		it2->setChannelPointer( Chan_Blue, &bgr2[0] );	
 		BOOST_CHECK( ( cit != it2 ) );
 	}
-
+	
 	void testPixelIterator()
+	{
+		typedef PixelIterator< BrothersLayout< float, Brothers_BGR > > PixelIterator;
+		PixelIterator it;
+		
+		BOOST_CHECK_EQUAL( it->requiredChannels(), ChannelSet( Mask_Blue ) );
+	
+		float bgr[6] = { 3., 2., 1., 6., 5., 4. };
+		it->setChannelPointer( Chan_Blue, &bgr[0] );	
+
+		BOOST_CHECK_EQUAL( it->channel<Chan_Red>(), 1. );
+		BOOST_CHECK_EQUAL( (*it).channel<Chan_Green>(), 2. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Blue>(), 3. );
+
+		it->channel<Chan_Green>() = 0.;
+		BOOST_CHECK_EQUAL( it->channel<Chan_Green>(), 0. );
+		(*it).channel<Chan_Green>() = 2.;
+		BOOST_CHECK_EQUAL( it->channel<Chan_Green>(), 2. );
+
+		it++;
+		BOOST_CHECK_EQUAL( it->channel<Chan_Red>(), 4. );
+		BOOST_CHECK_EQUAL( (*it).channel<Chan_Green>(), 5. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Blue>(), 6. );
+
+		--it;
+		BOOST_CHECK_EQUAL( it->channel<Chan_Red>(), 1. );
+		BOOST_CHECK_EQUAL( (*it).channel<Chan_Green>(), 2. );
+		BOOST_CHECK_EQUAL( it->channel<Chan_Blue>(), 3. );
+		
+		float bgr2[6] = { 3., 2., 1., 6., 5., 4. };
+		PixelIterator it2( it );
+		BOOST_CHECK( ( it == it2 ) );
+		it2->setChannelPointer( Chan_Blue, &bgr2[0] );	
+		BOOST_CHECK( ( it != it2 ) );
+	}
+
+	void testCompoundPixelIterator()
 	{
 		typedef PixelIterator< CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > > PixelIterator;
 		PixelIterator it;
@@ -199,7 +261,6 @@ struct PixelIteratorTest
 		BOOST_CHECK( ( it == it2 ) );
 		it2->setChannelPointer( Chan_Blue, &bgr2[0] );	
 		BOOST_CHECK( ( it != it2 ) );
-
 	}
 };
 
@@ -209,6 +270,7 @@ struct PixelIteratorTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<PixelIteratorTest> instance( new PixelIteratorTest() );
 		add( BOOST_CLASS_TEST_CASE( &PixelIteratorTest::testPixelIterator, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &PixelIteratorTest::testCompoundPixelIterator, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelIteratorTest::testConstPixelIterator, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &PixelIteratorTest::testPixelIteratorConstructors, instance ) );
 	}

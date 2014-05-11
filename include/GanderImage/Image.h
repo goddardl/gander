@@ -39,13 +39,16 @@
 #include "Gander/Common.h"
 
 #include "GanderImage/Pixel.h"
-#include "GanderImage/Row.h"
+#include "GanderImage/PixelIterator.h"
 
 namespace Gander
 {
 
 namespace Image
 {
+
+// Forward declaration of the Row class.
+template< class Layout > class Row;
 
 template< class Layout >
 class Image
@@ -56,6 +59,8 @@ class Image
 		typedef Image< Layout > Type;
 		typedef typename Gander::Image::Pixel< Layout > Pixel;
 		typedef typename Gander::Image::PixelAccessor< Layout > PixelAccessor;
+		typedef typename Gander::Image::PixelIterator< Layout > PixelIterator;
+		typedef typename Gander::Image::ConstPixelIterator< Layout > ConstPixelIterator;
 		typedef typename Gander::Image::Row< Layout > Row;
 		
 		template< EnumType Index > struct LayoutTraits : public Layout::template LayoutTraits< Index > {};
@@ -90,15 +95,9 @@ class Image
 
 		/// Sets the channel pointer that represents a particular channel.
 		/// @param buf A pointer to the channel data.
-		/// @param stride The distance in bytes between the first element in a row and the first in the next.
-		/// If the stride is negative then the image is flipped vertically.
+		/// @param stride The distance between the first element in a row and the first in the next.
 		void setChannelPointer( Channel channel, void *buf, size_t stride )
 		{
-			if( stride < 0 ) 
-			{ 
-				buf = reinterpret_cast< unsigned char * >( buf ) - ( static_cast<size_t>( m_height ) - 1 ) * stride;
-			}
-
 			if( requiredChannels().contains( channel ) )
 			{
 				// Find out if we are replacing a channel or inserting a new one.
@@ -119,6 +118,33 @@ class Image
 			else
 			{
 				GANDER_ASSERT( false, "This image does not contain the requested channel in it's layout. If the layout is dynamic, add the channel before trying to set it's pointer." );
+			}
+		}
+
+		inline size_t stride( Channel channel ) const
+		{
+			return m_strides[ m_pixelAccessor.channels().index( channel ) ];
+		}
+
+		inline ConstPixelIterator begin() const
+		{
+			return static_cast< ConstPixelIterator >( m_pixelAccessor );
+		}
+		
+		inline void get( Row &row, int y )
+		{
+			row.m_width = m_width;
+			row.m_start = m_pixelAccessor;
+
+			ChannelSet requiredChannels( m_pixelAccessor.requiredChannels() );
+			ChannelSet::const_iterator it( requiredChannels.begin() );
+			ChannelSet::const_iterator end( requiredChannels.end() );
+			
+			for( int i = 0; it != end; ++it, ++i )
+			{
+				std::cerr << "Y = " << y << std::endl;
+				std::cerr << "Stride = " << m_strides[i] << std::endl;
+				row.m_start.increment( m_strides[i] * y, *it );
 			}
 		}
 

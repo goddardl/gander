@@ -87,7 +87,6 @@ template< class Pixel1, class Pixel2, class Op, Gander::EnumType FullMask, Gande
 			Gander::Image::ChannelSet dynamicChannels( Gander::Image::ChannelMask( FullMask & ( ~StaticMask ) ) ); 
 			dynamicChannels &= p1.channels();
 			dynamicChannels &= p2.channels();
-
 			for( ChannelSet::const_iterator it( dynamicChannels.begin() ); it != dynamicChannels.end(); ++it )
 			{
 				switch( *it )

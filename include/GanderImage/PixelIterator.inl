@@ -39,35 +39,21 @@ namespace Image
 {
 
 template< class Layout >
-template< class RhsLayout >	
-ConstPixelIterator< Layout >::ConstPixelIterator( const ConstPixelIterator< RhsLayout > &it )
+ConstPixelIterator< Layout >::ConstPixelIterator( const PixelIterator< LayoutType > &it )
 {
-	if( std::template is_same< RhsLayout, Layout >::value )
-	{
-		BaseType::m_layout = it.m_layout;
-	}
-	else if( BaseType::m_layout.isDynamic() && it->channels().contains( BaseType::channels() ) )
-	{
-		ChannelSet missingChannels( it->channels() - BaseType::channels() );
-		if( missingChannels.size() > 0 )
-		{
-			BaseType::addChannels( missingChannels );
-		}
-
-		typedef typename ConstPixelIterator< RhsLayout >::ConstPixelAccessor RhsPixelAccessor;
-		static_cast< ConstPixelAccessor * >( this )->template copyFrom< RhsPixelAccessor >( static_cast< const RhsPixelAccessor & >( it ), true );
-	}
-	else
-	{
-		GANDER_ASSERT( false, "Cannot copy from an iterator that doesn't have the required channels." );
-	}
-};
+	*this = static_cast< const typename Gander::Image::template ConstPixelIterator< LayoutType > & >( it );
+}
 
 template< class Layout >
-template< class RhsLayout >	
-ConstPixelIterator< Layout >::ConstPixelIterator( const PixelIterator< RhsLayout > &it )
+ConstPixelIterator< Layout >::ConstPixelIterator( const PixelAccessor< LayoutType > &accessor )
 {
-	*this = static_cast< const typename Gander::Image::template ConstPixelIterator< RhsLayout > & >( it );
+	*this = static_cast< const typename Gander::Image::template ConstPixelIterator< LayoutType > & >( accessor );
+}
+
+template< class Layout >
+ConstPixelIterator< Layout >::ConstPixelIterator( const ConstPixelAccessor< LayoutType > &accessor )
+{
+	*this = static_cast< const typename Gander::Image::template ConstPixelIterator< LayoutType > & >( accessor );
 }
 
 }; // namespace Image

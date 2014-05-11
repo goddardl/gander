@@ -71,67 +71,82 @@ class ConstPixelIterator :
 	private :
 		
 		typedef PixelAccessor< Layout > BaseType;
-
+	
 	public :	
 		
-		typedef const typename Gander::Image::template PixelAccessor< Layout > ConstPixelAccessor;	
+		typedef typename Gander::Image::template ConstPixelAccessor< Layout > ConstPixelAccessorType;	
+		typedef typename Gander::Image::template PixelAccessor< Layout > PixelAccessorType;	
+
 		typedef typename BaseType::ContainerType ContainerType;
 		typedef Layout LayoutType;
 		typedef ConstPixelIterator< Layout > Type;
 		
 		inline ConstPixelIterator() {};
 		
-		template< class RhsLayout >	
-		ConstPixelIterator( const ConstPixelIterator< RhsLayout > &it );
+		ConstPixelIterator( const PixelIterator< Layout > &it );
 		
-		template< class RhsLayout >	
-		ConstPixelIterator( const PixelIterator< RhsLayout > &it );
+		ConstPixelIterator( const PixelAccessorType &accessor );
 		
-		inline const PixelAccessor< Layout > &operator * () const
+		ConstPixelIterator( const ConstPixelAccessorType &accessor );
+		
+		inline ConstPixelAccessorType &operator * ()
 		{
-			return *static_cast< const PixelAccessor< Layout > * >( this );
+			return *static_cast< ConstPixelAccessorType * >( this );
 		}
 
-		inline const PixelAccessor< Layout > *operator -> () const
+		inline ConstPixelAccessorType *operator -> ()
 		{
-			return static_cast< const PixelAccessor< Layout > * >( this );
+			return static_cast< ConstPixelAccessorType * >( this );
 		}
 		
-		template< class T >
-		inline const ConstPixelIterator & operator = ( const T &rhs )
+		inline const ConstPixelAccessorType &operator * () const
 		{
-			return BaseType::template copyFrom< T >( rhs );
+			return *static_cast< const ConstPixelAccessorType * >( this );
+		}
+
+		inline const ConstPixelAccessorType *operator -> () const
+		{
+			return static_cast< const ConstPixelAccessorType * >( this );
 		}
 		
+		inline Type &increment( int v, Channel channel )
+		{
+			BaseType::m_layout.increment( BaseType::m_container, channel, v );
+			return *this;
+		}
+
 		inline Type &increment( int v )
 		{
 			BaseType::m_layout.increment( BaseType::m_container, v );
 			return *this;
 		}
 
-		inline Type &decrement( int v )
+		template< class T >		
+		inline bool operator == ( const T &rhs ) const
 		{
-			BaseType::m_layout.decrement( BaseType::m_container, v );
-			return *this;
-		}
+			GANDER_IMAGE_STATIC_ASSERT(
+				( std::is_same< T, ConstPixelIterator< typename T::LayoutType > >::value || std::is_same< T, PixelIterator< typename T::LayoutType > >::value ),
+				PIXELITERATORS_CAN_ONLY_BE_COMPARED_TO_OTHER_PIXELITERATORS__DEREFERENCE_IT_IN_ORDER_TO_COMPARE_BY_VALUE
+			);
 
-		inline bool operator == ( const Type &rhs ) const
-		{
-			return &BaseType::template channelAtIndex<0>() == &rhs.template channelAtIndex<0>();
+			return &BaseType::template channelAtIndex<0, typename BaseType::template ChannelTraitsAtIndex<0>::ConstReferenceType >() ==
+				&rhs.template channelAtIndex<0, typename T::template ChannelTraitsAtIndex<0>::ConstReferenceType >();
 		}
-
-		inline bool operator != ( const Type &rhs ) const
+		
+		template< class T >		
+		inline bool operator != ( const T &rhs ) const
 		{
-			return &BaseType::template channelAtIndex<0>() != &rhs.template channelAtIndex<0>();
+			return !( this->template operator == < T >( rhs ) );
 		}
 
 	private :
 
 		template< class, class, class > friend class PixelBase;
-		template< class > friend class Pixel;
-		template< class > friend class PixelAccessor;
-		template< class > friend class ConstPixelIterator;
-		template< class > friend class PixelIterator;
+		template< class > friend class Gander::Image::Pixel;
+		template< class > friend class Gander::Image::ConstPixelAccessor;
+		template< class > friend class Gander::Image::PixelAccessor;
+		template< class > friend class Gander::Image::ConstPixelIterator;
+		template< class > friend class Gander::Image::PixelIterator;
 };
 
 template< class Layout >
@@ -143,39 +158,60 @@ class PixelIterator : public ConstPixelIterator< Layout >
 
 	public :	
 	
-		typedef typename Gander::Image::template PixelAccessor< Layout > PixelAccessor;	
-		typedef typename BaseType::ConstPixelAccessor ConstPixelAccessor;	
+		typedef typename Gander::Image::template ConstPixelIterator< Layout > ConstPixelIteratorType;	
+		typedef typename Gander::Image::template ConstPixelAccessor< Layout > ConstPixelAccessorType;	
+		typedef typename Gander::Image::template PixelAccessor< Layout > PixelAccessorType;	
+		
 		typedef typename BaseType::ContainerType ContainerType;
 		typedef Layout LayoutType;
 		typedef PixelIterator< Layout > Type;
 
 		inline PixelIterator() {};
-	
-		template< class RhsLayout >	
-		PixelIterator( const ConstPixelIterator< RhsLayout > &it ) : BaseType( it ) {};
 		
-		template< class RhsLayout >	
-		PixelIterator( const typename Gander::Image::template PixelIterator< RhsLayout > &it ) :
-			BaseType( static_cast< const typename Gander::Image::template ConstPixelIterator< RhsLayout > & >( it ) )
-		{}
+		inline PixelIterator( const PixelIterator< Layout > &it ) : BaseType( it ) {};
 		
-		inline PixelAccessor &operator * ()
+		inline PixelIterator( const PixelAccessorType &accessor ) : BaseType( accessor ) {};
+		
+		inline PixelIterator( const ConstPixelAccessorType &accessor )
 		{
-			return *static_cast< PixelAccessor * >( this );
+			// Use a static assert to always give an error to stop assignments to this class from a ConstPixelAccessor.
+			GANDER_IMAGE_STATIC_ASSERT( ( std::is_same< ConstPixelAccessorType, PixelIterator >::value ), YOU_CANNOT_COPY_BY_REFERENCE_FROM_A_CONST_CLASS_TO_A_NONCONST_CLASS );
+		};
+		
+		inline PixelIterator( const ConstPixelIteratorType &it )
+		{
+			// Use a static assert to always give an error to stop assignments to this class from a ConstPixelIterator.
+			GANDER_IMAGE_STATIC_ASSERT( ( std::is_same< ConstPixelAccessorType, PixelIterator >::value ), YOU_CANNOT_COPY_BY_REFERENCE_FROM_A_CONST_CLASS_TO_A_NONCONST_CLASS );
+		};
+		
+		inline PixelAccessorType &operator * ()
+		{
+			return *static_cast< PixelAccessorType * >( this );
 		}
 
-		inline PixelAccessor *operator -> ()
+		inline PixelAccessorType *operator -> ()
 		{
-			return static_cast< PixelAccessor * >( this );
+			return static_cast< PixelAccessorType * >( this );
 		}
 		
+		inline const PixelAccessorType &operator * () const
+		{
+			return *static_cast< const PixelAccessorType * >( this );
+		}
+
+		inline const PixelAccessorType *operator -> () const
+		{
+			return static_cast< const PixelAccessorType * >( this );
+		}
+	
 	private :
 
 		template< class, class, class > friend class PixelBase;
-		template< class > friend class Pixel;
+		template< class > friend class Gander::Image::Pixel;
+		template< class > friend class Gander::Image::ConstPixelAccessor;
 		template< class > friend class Gander::Image::PixelAccessor;
-		template< class > friend class ConstPixelIterator;
-		template< class > friend class PixelIterator;
+		template< class > friend class Gander::Image::ConstPixelIterator;
+		template< class > friend class Gander::Image::PixelIterator;
 };
 
 }; // namespace Image
