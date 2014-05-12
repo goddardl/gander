@@ -104,11 +104,6 @@ class PixelBase
 		template< class T >
 		inline const Derived & copyByValueFrom( const T &rhs, bool copyAvailableChannels = false )
 		{
-			if( static_cast< Derived * >( this )->channels() != rhs.channels() )
-			{
-				std::cerr <<static_cast< Derived * >( this )->channels().value() << std::endl;
-				std::cerr << rhs.channels().value() << std::endl;
-			}
 			GANDER_ASSERT( static_cast< Derived * >( this )->channels() == rhs.channels() || copyAvailableChannels,
 				"Cannot copy one pixel to another if they have different channels."
 			);

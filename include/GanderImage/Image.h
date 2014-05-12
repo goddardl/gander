@@ -131,7 +131,7 @@ class Image
 			return static_cast< ConstPixelIterator >( m_pixelAccessor );
 		}
 		
-		inline void get( Row &row, int y )
+		void set( Row &row, int y ) const
 		{
 			row.m_width = m_width;
 			row.m_start = m_pixelAccessor;
@@ -142,8 +142,6 @@ class Image
 			
 			for( int i = 0; it != end; ++it, ++i )
 			{
-				std::cerr << "Y = " << y << std::endl;
-				std::cerr << "Stride = " << m_strides[i] << std::endl;
 				row.m_start.increment( m_strides[i] * y, *it );
 			}
 		}

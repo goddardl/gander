@@ -71,17 +71,21 @@ struct RowTest
 		image.setChannelPointer( Chan_Red, &rgb[0][0][0], 2 );
 		BOOST_CHECK( image.isValid() );
 
+		// Create a row and get data for it from the image.
 		Gander::Image::Image< Layout >::Row row;
-		image.get( row, 0 );	
+		image.set( row, 0 ); // This is equivalent to doing row.get( image, 0 )
+
+		// Verify that the row was set correctly.
 		BOOST_CHECK_EQUAL( row.width(), 2 );
-		
 		BOOST_CHECK_EQUAL( row.begin()->channel< Chan_Green >(), 1. );
 		
-		image.get( row, 1 );
-		Gander::Image::Image< Layout >::ConstPixelIterator it = row.begin();
+		// Test the getting of a different row.
+		row.get( image, 1 );
+		Gander::Image::ConstPixelIterator<Layout> it = row.begin();
 		BOOST_CHECK_EQUAL( it->channel< Chan_Green >(), 7. );
-		BOOST_CHECK( ( it + 2 ) == row.end() );
-		this doens't work. Find out why.
+
+		// Test that the end() method works as expected.
+		BOOST_CHECK( ( it + row.width() ) == row.end() );
 	}
 
 };

@@ -150,7 +150,8 @@ class ConstPixelIterator :
 };
 
 template< class Layout >
-class PixelIterator : public ConstPixelIterator< Layout >
+class PixelIterator :
+	public ConstPixelIterator< Layout >
 {
 	private :
 		

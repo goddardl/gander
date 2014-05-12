@@ -93,21 +93,25 @@ class Row : public Gander::EqualComparisonOperators< Row< Layout > >
 			return m_start;
 		}
 
-		const const_iterator &end() const
-		{
-			std::cerr << "w " << m_width << std::endl;
-			return const_iterator( m_start ).increment( m_width );
-		}
-		
 		iterator &begin() 
 		{
 			return m_start;
 		}
 
+		const_iterator end() const
+		{
+			return iterator( m_start ).increment( m_width );
+		}
+		
 		template< class RhsLayoutType >
 		inline bool equalTo( const Row< RhsLayoutType > &rhs ) const
 		{
 			return m_start == rhs.m_start && m_width == rhs.m_width;
+		}
+
+		void get( const ImageType &image, int y )
+		{
+			image.set( *this, y );
 		}
 
 	protected :
