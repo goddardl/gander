@@ -1,6 +1,8 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2004-2012, Industrial Light & Magic, a division of Lucas
+//  Digital Ltd. LLC
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,55 +33,62 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream>
+#ifndef __GANDER_BOX__
+#define __GANDER_BOX__
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include <limits>
 
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/AngleConversionTest.h"
-#include "GanderTest/DecomposeRQ3x3Test.h"
-#include "GanderTest/CommonTest.h"
-#include "GanderTest/EnumHelperTest.h"
-#include "GanderTest/BitTwiddlerTest.h"
-#include "GanderTest/TupleTest.h"
-#include "GanderTest/BoxTest.h"
-#include "GanderTest/InterfacesTest.h"
+#include "Gander/Common.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+#include "Gander/Math.h"
+#include "Eigen/Dense"
 
-using namespace Gander;
-using namespace Gander::Test;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-		addDecomposeRQ3x3Test(test);
-		addAngleConversionTest(test);
-		addCommonTest(test);
-		addEnumHelperTest(test);
-		addBitTwiddlerTest(test);
-		addTupleTest(test);
-		addInterfacesTest(test);
-		addBoxTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+template <class T>	
+class Box
+{
+	public :
 
-	return test;
-}
+		///	Constructors - an "empty" box is created by default.
+		Box(); 
+		Box( const T &point );
+		Box( const T &minT, const T &maxT );
+
+		///  The equality operators.
+		bool equalTo( const Box<T> &src ) const;
+		bool operator == ( const Box<T> &src ) const;
+		bool operator != ( const Box<T> &src ) const;
+
+		///	Box manipulation.
+		void makeEmpty();
+		void extendBy( const T &point );
+		void extendBy( const Box<T> &box );
+		void makeInfinite();    
+
+		///	Query functions - these compute results each time.
+		T size() const;
+		T center() const;
+		bool intersects( const T &point ) const;
+		bool intersects( const Box<T> &box ) const;
+
+		///	Classification.
+		bool isEmpty() const;
+		bool hasVolume() const;
+		bool isInfinite() const;
+
+		/// The data members.
+		T min;
+		T max;
+
+};
+
+typedef Box< Eigen::Vector2d > Box2d;
+
+}// namespace Gander
+
+#include "Gander/Box.inl"
+
+#endif
+
