@@ -130,9 +130,6 @@ struct BoxTest
 
 };
 
-//		void extendBy( const T &point );
-//		void extendBy( const Box<T> &box );
-//		void makeInfinite();    
 struct BoxTestSuite : public boost::unit_test::test_suite
 {
 	BoxTestSuite() : boost::unit_test::test_suite( "BoxTestSuite" )

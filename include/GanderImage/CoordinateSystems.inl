@@ -1,8 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2014, Luke Goddard. All rights reserved.
-//  Copyright (c) 2004-2012, Industrial Light & Magic, a division of Lucas
-//  Digital Ltd. LLC
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,64 +31,52 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDER_BOX__
-#define __GANDER_BOX__
-
-#include <limits>
-
-#include "Gander/Common.h"
-
-#include "Gander/Math.h"
-#include "Eigen/Dense"
 
 namespace Gander
 {
 
-template <class T>	
-class Box
+namespace Image
 {
-	public :
 
-		///	Constructors - an "empty" box is created by default.
-		Box(); 
-		Box( const T &point );
-		Box( const T &minT, const T &maxT );
+inline int yDownToDisplaySpace( const Gander::Box2i &displayWindow, int yDown )
+{
+	const int distanceFromTop = yDown - displayWindow.min(1);
+	return displayWindow.max(1) - distanceFromTop;
+}
 
-		///  The equality operators.
-		bool equalTo( const Box<T> &src ) const;
-		bool operator == ( const Box<T> &src ) const;
-		bool operator != ( const Box<T> &src ) const;
+inline Eigen::Vector2i yDownToDisplaySpace( const Gander::Box2i &displayWindow, const Eigen::Vector2i &yDown )
+{
+	return Eigen::Vector2i( yDown(0), yDownToDisplaySpace( displayWindow, yDown(1) ) );
+}
 
-		///	Box manipulation.
-		void makeEmpty();
-		void extendBy( const T &point );
-		void extendBy( const Box<T> &box );
-		void makeInfinite();    
+inline Gander::Box2i yDownToDisplaySpace( const Gander::Box2i &displayWindow, const Gander::Box2i &yDown )
+{
+	Gander::Box2i result;
+	result.extendBy( yDownToDisplaySpace( displayWindow, yDown.min ) );
+	result.extendBy( yDownToDisplaySpace( displayWindow, yDown.max ) );
+	return result;
+}
 
-		///	Query functions - these compute results each time.
-		T size() const;
-		T center() const;
-		bool intersects( const T &point ) const;
-		bool intersects( const Box<T> &box ) const;
+inline int displayToYDownSpace( const Gander::Box2i &displayWindow, int yUp )
+{
+	const int distanceFromTop = displayWindow.max(1) - yUp;
+	return displayWindow.min(1) + distanceFromTop;
+}
 
-		///	Classification.
-		bool isEmpty() const;
-		bool hasVolume() const;
-		bool isInfinite() const;
+inline Eigen::Vector2i displayToYDownSpace( const Gander::Box2i &displayWindow, const Eigen::Vector2i &yUp )
+{
+	return Eigen::Vector2i( yUp(0), displayToYDownSpace( displayWindow, yUp(1) ) );
+}
 
-		/// The data members.
-		T min;
-		T max;
+inline Gander::Box2i displayToYDownSpace( const Gander::Box2i &displayWindow, const Gander::Box2i &yUp )
+{
+	Gander::Box2i result;
+	result.extendBy( displayToYDownSpace( displayWindow, yUp.min ) );
+	result.extendBy( displayToYDownSpace( displayWindow, yUp.max ) );
+	return result;
+}
 
-};
+}; // namespace Image
 
-typedef Box< Eigen::Vector2d > Box2d;
-typedef Box< Eigen::Vector2f > Box2f;
-typedef Box< Eigen::Vector2i > Box2i;
-
-}// namespace Gander
-
-#include "Gander/Box.inl"
-
-#endif
+}; // namespace Gander
 

@@ -432,6 +432,7 @@ tests = {
 			],
 			"LIBS" : [
 				"Gander",
+				"GanderTest",
 				"GanderImage",
 				"boost_test_exec_monitor" + boostLibSuffix
 			],

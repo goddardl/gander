@@ -1,8 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2014, Luke Goddard. All rights reserved.
-//  Copyright (c) 2004-2012, Industrial Light & Magic, a division of Lucas
-//  Digital Ltd. LLC
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,64 +31,23 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDER_BOX__
-#define __GANDER_BOX__
+#ifndef __GANDERIMAGETEST_IMAGEREADERTEST_H__
+#define __GANDERIMAGETEST_IMAGEREADERTEST_H__
 
-#include <limits>
+#include <vector>
 
-#include "Gander/Common.h"
-
-#include "Gander/Math.h"
-#include "Eigen/Dense"
+#include "boost/test/unit_test.hpp"
 
 namespace Gander
 {
 
-template <class T>	
-class Box
+namespace ImageTest
 {
-	public :
 
-		///	Constructors - an "empty" box is created by default.
-		Box(); 
-		Box( const T &point );
-		Box( const T &minT, const T &maxT );
+void addImageReaderTest( boost::unit_test::test_suite *test );
 
-		///  The equality operators.
-		bool equalTo( const Box<T> &src ) const;
-		bool operator == ( const Box<T> &src ) const;
-		bool operator != ( const Box<T> &src ) const;
+}; // namespace ImageTest
 
-		///	Box manipulation.
-		void makeEmpty();
-		void extendBy( const T &point );
-		void extendBy( const Box<T> &box );
-		void makeInfinite();    
+}; // namespace Gander
 
-		///	Query functions - these compute results each time.
-		T size() const;
-		T center() const;
-		bool intersects( const T &point ) const;
-		bool intersects( const Box<T> &box ) const;
-
-		///	Classification.
-		bool isEmpty() const;
-		bool hasVolume() const;
-		bool isInfinite() const;
-
-		/// The data members.
-		T min;
-		T max;
-
-};
-
-typedef Box< Eigen::Vector2d > Box2d;
-typedef Box< Eigen::Vector2f > Box2f;
-typedef Box< Eigen::Vector2i > Box2i;
-
-}// namespace Gander
-
-#include "Gander/Box.inl"
-
-#endif
-
+#endif // __GANDERIMAGETEST_IMAGEREADERTEST_H__

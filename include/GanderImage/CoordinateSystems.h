@@ -1,8 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2014, Luke Goddard. All rights reserved.
-//  Copyright (c) 2004-2012, Industrial Light & Magic, a division of Lucas
-//  Digital Ltd. LLC
+//  Copyright (c) 2012-2013 Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,64 +32,47 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDER_BOX__
-#define __GANDER_BOX__
+#ifndef __GANDERIMAGE_COORDINATESYSTEMS_H__
+#define __GANDERIMAGE_COORDINATESYSTEMS_H__
 
-#include <limits>
+#include <vector>
 
 #include "Gander/Common.h"
-
-#include "Gander/Math.h"
-#include "Eigen/Dense"
+#include "Gander/Box.h"
 
 namespace Gander
 {
 
-template <class T>	
-class Box
+namespace Image
 {
-	public :
 
-		///	Constructors - an "empty" box is created by default.
-		Box(); 
-		Box( const T &point );
-		Box( const T &minT, const T &maxT );
+/// @name Coordinate system conversions.
+/// The image coordinate system used by Gander has the origin at the
+/// bottom, with increasing Y coordinates going up. The OpenEXR
+/// coordinate system has the origin at the top with increasing Y
+/// coordinates going down. These methods assist in converting between
+/// the two coordinate systems. They assume that the display window is
+/// using the corresponding Y-down space - note that this means it
+/// is not necessary to perform any conversion on the display window
+/// itself.
+////////////////////////////////////////////////////////////////////
+//@{
+/// Converts from the Y-down coordinate space to the Y-up space of
+/// the Format.
+inline int yDownToDisplaySpace( const Gander::Box2i &displayWindow, int yDown );
+inline Eigen::Vector2i yDownToDisplaySpace( const Gander::Box2i &displayWindow, const Eigen::Vector2i &yDown );
+inline Gander::Box2i yDownToDisplaySpace( const Gander::Box2i &displayWindow, const Gander::Box2i &yDown );
+/// Converts from the Y-up space of the display to the Y-down
+/// coordinate space.
+inline int displayToYDownSpace( const Gander::Box2i &displayWindow, int yUp );
+inline Eigen::Vector2i displayToYDownSpace( const Gander::Box2i &displayWindow, const Eigen::Vector2i &yUp );
+inline Gander::Box2i displayToYDownSpace( const Gander::Box2i &displayWindow, const Gander::Box2i &yUp );
+//@}
 
-		///  The equality operators.
-		bool equalTo( const Box<T> &src ) const;
-		bool operator == ( const Box<T> &src ) const;
-		bool operator != ( const Box<T> &src ) const;
+}; // namespace Image
 
-		///	Box manipulation.
-		void makeEmpty();
-		void extendBy( const T &point );
-		void extendBy( const Box<T> &box );
-		void makeInfinite();    
+}; // namespace Gander
 
-		///	Query functions - these compute results each time.
-		T size() const;
-		T center() const;
-		bool intersects( const T &point ) const;
-		bool intersects( const Box<T> &box ) const;
-
-		///	Classification.
-		bool isEmpty() const;
-		bool hasVolume() const;
-		bool isInfinite() const;
-
-		/// The data members.
-		T min;
-		T max;
-
-};
-
-typedef Box< Eigen::Vector2d > Box2d;
-typedef Box< Eigen::Vector2f > Box2f;
-typedef Box< Eigen::Vector2i > Box2i;
-
-}// namespace Gander
-
-#include "Gander/Box.inl"
+#include "GanderImage/CoordinateSystems.inl"
 
 #endif
-
