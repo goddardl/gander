@@ -257,9 +257,9 @@ struct ChannelTest
 		
 		Channel f2( ChannelSet::flag("new2") );
 		BOOST_CHECK_EQUAL( f2, 12 );
-		BOOST_CHECK_EQUAL( f, ChannelSet::findFlag("new") );
-		BOOST_CHECK_EQUAL( f2, ChannelSet::findFlag("new2") );
-		BOOST_CHECK_EQUAL( Chan_None, ChannelSet::findFlag("wrong") );
+		BOOST_CHECK_EQUAL( f, ChannelSet::find("new") );
+		BOOST_CHECK_EQUAL( f2, ChannelSet::find("new2") );
+		BOOST_CHECK_EQUAL( Chan_None, ChannelSet::find("wrong") );
 	}
 
 	void testBracketAccessor()

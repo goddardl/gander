@@ -59,7 +59,7 @@ typename Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::Flag Gande
 }
 
 template<class T, class FlagType, unsigned nDefaultFlagSet, class FlagMaskType>
-typename Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::Flag Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::findFlag( const char *name )
+typename Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::Flag Gander::FlagSet<T, FlagType, nDefaultFlagSet, FlagMaskType>::find( const char *name )
 {
 	for( T i = 0; i < g_flagMappings.size(); ++i )
 	{

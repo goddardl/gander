@@ -402,7 +402,7 @@ class FlagSet
 	/// then a NULL flag will be returned (with a m_value of 0).
 	/// @param name The name of the flag.
 	/// @return Returns the flag which matches the name.
-	static inline Flag findFlag( const char *name );
+	static inline Flag find( const char *name );
 
 	private :
 	
