@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "Gander/Common.h"
+#include "Gander/Box.h"
 
 #include "GanderImage/Pixel.h"
 #include "GanderImage/PixelIterator.h"
@@ -66,100 +67,152 @@ class Image
 		template< EnumType Index > struct LayoutTraits : public Layout::template LayoutTraits< Index > {};
 		template< ChannelDefault C, bool DisableStaticAsserts = false > struct ChannelTraits : public Layout::template ChannelTraits< C, DisableStaticAsserts > {};
 		template< EnumType Index > struct ChannelTraitsAtIndex : public Layout::template ChannelTraitsAtIndex< Index > {};
+		
+		/// Constructs a new image of an unspecified size.
+		inline Image()
+		{
+			init();
+		}
 
 		/// Constructs a new image of a specified width and height.
-		inline Image( int32u width, int32 height ) : m_width( width ), m_height( height ) {}
+		inline Image( int32u width, int32 height )
+		{
+			init();
+			
+			Gander::Box2i box( Eigen::Vector2i( 0, 0 ), Eigen::Vector2i( width - 1, height - 1 ) );
+			setDataWindow( box );
+			setDisplayWindow( box );
+		}
 
 		inline bool isValid() const
 		{
-			return m_pixelAccessor.requiredChannels() == m_availableChannels;
-		}
-
-		inline unsigned int numberOfChannels() const { return m_pixelAccessor.numberOfChannels(); }
-		inline ChannelSet channels() const { return m_pixelAccessor.channels(); }
-		inline bool isDynamic() const { return m_pixelAccessor.isDynamic(); }
-		inline unsigned int numberOfChannelPointers() const { return m_pixelAccessor.numberOfChannelPointers(); };
-		inline ChannelSet requiredChannels() const { return m_pixelAccessor.requiredChannels(); };
-		inline unsigned int width() const { return m_width; };
-		inline unsigned int height() const { return m_height; };
-
-		/// Adds a new channel to the image if the layout is dynamic.
-		/// @param channel The channel to add to the image.
-		void addChannels( ChannelSet channels, ChannelBrothers brothers = Brothers_None )
-		{
-			if( !m_pixelAccessor.channels().contains( channels ) )
+			if( m_rowAccessors.empty() )
 			{
-				m_pixelAccessor.addChannels( channels, brothers );
+				return false;
 			}
+
+			return requiredChannels() == m_availableChannels && width() > 0 && height() > 0 && !m_dataWindow.isEmpty();
 		}
+
+		bool operator == ( const Type &rhs ) const
+		{
+			if( rhs.getDataWindow() != getDataWindow() || rhs.getDisplayWindow() != getDisplayWindow() || rhs.m_rowAccessors.size() != m_rowAccessors.size() )
+			{
+				return false;
+			}
+
+			for( int i = getDataWindow().min(1); i <= getDataWindow().max(1); ++i )
+			{
+				for( int j = getDataWindow().min(0); j <= getDataWindow().max(0); ++j )
+				{
+					if( (*this)[i][j] != rhs[i][j] )
+					{
+						return false;
+					}
+				}
+			}
+		
+			return true;
+		}
+
+		static inline unsigned int numberOfChannels() { return LayoutType::numberOfChannels(); }
+		static inline ChannelSet channels() { return LayoutType::channels(); }
+		static inline unsigned int numberOfChannelPointers() { return LayoutType::numberOfChannelPointers(); };
+		static inline ChannelSet requiredChannels() { return LayoutType::requiredChannels(); };
+		inline unsigned int width() const { return m_dataWindow.size()(0)+1; };
+		inline unsigned int height() const { return m_dataWindow.size()(1)+1; };
+		inline void setDataWindow( const Gander::Box2i &box ) { init(); m_dataWindow = box; }
+		inline void setDisplayWindow( const Gander::Box2i &box ) { m_displayWindow = box; }
+		inline const Gander::Box2i &getDataWindow() const { return m_dataWindow; }
+		inline const Gander::Box2i &getDisplayWindow() const { return m_displayWindow; }
 
 		/// Sets the channel pointer that represents a particular channel.
 		/// @param buf A pointer to the channel data.
 		/// @param stride The distance between the first element in a row and the first in the next.
-		void setChannelPointer( Channel channel, void *buf, size_t stride )
+		void setChannelPointer( Channel channel, void *buf, int stride )
 		{
+			GANDER_ASSERT( m_availableChannels != requiredChannels(), "This image has already been initialized." );
 			if( requiredChannels().contains( channel ) )
 			{
 				// Find out if we are replacing a channel or inserting a new one.
-				if( m_availableChannels.contains( channel ) ) // Exists.
+				unsigned int index = requiredChannels().index( channel );
+				m_availableChannels += channel;
+
+				if( m_rowAccessors.empty() )
 				{
-					unsigned int index = m_availableChannels.index( channel );
-					m_strides[index] = stride;
-				}
-				else // Does not exist.
-				{
-					m_availableChannels += channel;
-					unsigned int index = m_availableChannels.index( channel );
-					m_strides.insert( m_strides.begin() + index, stride );
+					GANDER_ASSERT( !m_dataWindow.isEmpty(), "The data window must be set before the channel pointers." );
+					m_rowAccessors.resize( m_dataWindow.size()(1)+1 );
 				}
 				
-				m_pixelAccessor.setChannelPointer( channel, buf );
+				if( stride < 0 )
+				{
+					m_strides[index] = -stride;
+					for( int i = 0; i <= m_dataWindow.size()(1); ++i )
+					{
+						m_rowAccessors[i].setChannelPointer( channel, buf );
+						m_rowAccessors[i].increment( ( m_dataWindow.size()(1) - i ) * (-stride), channel );
+					}
+				}
+				else
+				{
+					m_strides[index] = stride;
+					for( int i = 0; i <= m_dataWindow.size()(1); ++i )
+					{
+						m_rowAccessors[i].setChannelPointer( channel, buf );
+						m_rowAccessors[i].increment( stride * i, channel );
+					}
+				}
+
 			}
 			else
 			{
-				GANDER_ASSERT( false, "This image does not contain the requested channel in it's layout. If the layout is dynamic, add the channel before trying to set it's pointer." );
+				GANDER_ASSERT( false, "This image does not contain the requested channel in it's layout." );
 			}
 		}
 
-		inline size_t stride( Channel channel ) const
+		inline void set( Row &row, int y ) const
 		{
-			return m_strides[ m_pixelAccessor.channels().index( channel ) ];
+			int index = y - m_dataWindow.min(1);
+
+			GANDER_ASSERT( isValid(), "The image is not valid." );
+			GANDER_ASSERT( index < int( m_rowAccessors.size() ) && index >= 0, "Row access is out of bounds." );
+
+			row.m_width = width();
+			row.m_x = getDataWindow().min(0);
+			row.m_start = m_rowAccessors[index];
 		}
 
-		inline ConstPixelIterator begin() const
+		inline Row operator [] ( int y ) const
 		{
-			return static_cast< ConstPixelIterator >( m_pixelAccessor );
-		}
-		
-		void set( Row &row, int y ) const
-		{
-			row.m_width = m_width;
-			row.m_start = m_pixelAccessor;
-
-			ChannelSet requiredChannels( m_pixelAccessor.requiredChannels() );
-			ChannelSet::const_iterator it( requiredChannels.begin() );
-			ChannelSet::const_iterator end( requiredChannels.end() );
-			
-			for( int i = 0; it != end; ++it, ++i )
-			{
-				row.m_start.increment( m_strides[i] * y, *it );
-			}
+			Row row;
+			set( row, y );
+			return row;
 		}
 
 	private :
 
-		/// Holds a pointer to the start of each channel in the image.	
-		PixelAccessor m_pixelAccessor;
+		inline void init()
+		{	
+			m_rowAccessors.clear();
+			m_availableChannels.clear();
+			m_strides.resize( requiredChannels().size() );
+		}
+	
+		/// The data window of the image.
+		Gander::Box2i m_dataWindow;
+		
+		/// The display window of the image.	
+		Gander::Box2i m_displayWindow;
+
+		/// Holds a pointer to the start of each row in the image.	
+		std::vector<PixelIterator> m_rowAccessors;
 
 		/// Holds a list of the stride values for each channel. The values are ordered by channel index.
-		std::vector< size_t > m_strides;
+		std::vector< int > m_strides;
 
 		/// Holds a set of all of the channels that have been set. This value is used
 		/// to verify if the image is valid or not.
 		ChannelSet m_availableChannels;
-
-		unsigned int m_width;
-		unsigned int m_height;
 };
 
 }; // namespace Image

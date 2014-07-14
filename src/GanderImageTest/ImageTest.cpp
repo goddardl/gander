@@ -35,6 +35,7 @@
 #include <cstdlib>
 
 #include "GanderImage/Image.h"
+#include "GanderImage/Row.h"
 #include "GanderImage/BrothersLayout.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
@@ -82,12 +83,28 @@ struct ImageTest
 		BOOST_CHECK_EQUAL( image.channels(), Mask_RGB );
 		BOOST_CHECK_EQUAL( image.width(), 2 );
 		BOOST_CHECK_EQUAL( image.height(), 2 );
+		BOOST_CHECK( image.getDataWindow() == Gander::Box2i( Eigen::Vector2i( 0, 0 ), Eigen::Vector2i( 1, 1 ) ) );
+		BOOST_CHECK( image.getDisplayWindow() == Gander::Box2i( Eigen::Vector2i( 0, 0 ), Eigen::Vector2i( 1, 1 ) ) );
+
 		BOOST_CHECK_EQUAL( image.requiredChannels(), Chan_Red ); // As the channels are interleaved, only the red one is needed.
 		BOOST_CHECK_EQUAL( image.numberOfChannelPointers(), 1 );
-		BOOST_CHECK_EQUAL( image.isDynamic(), false );
 
 		image.setChannelPointer( Chan_Red, &rgb[0][0][0], 2 );
 		BOOST_CHECK( image.isValid() );
+
+		// Test the [] operator. Although convenient, it is not as efficient as creating a row and iterating over it.
+		BOOST_CHECK_EQUAL( image[0][0][Chan_Red], 0 );
+		BOOST_CHECK_EQUAL( image[0][0][Chan_Green], 1 );
+		BOOST_CHECK_EQUAL( image[0][0][Chan_Blue], 2 );
+		BOOST_CHECK_EQUAL( image[0][1][Chan_Red], 3 );
+		BOOST_CHECK_EQUAL( image[0][1][Chan_Green], 4 );
+		BOOST_CHECK_EQUAL( image[0][1][Chan_Blue], 5 );
+		BOOST_CHECK_EQUAL( image[1][0][Chan_Red], 6 );
+		BOOST_CHECK_EQUAL( image[1][0][Chan_Green], 7 );
+		BOOST_CHECK_EQUAL( image[1][0][Chan_Blue], 8 );
+		BOOST_CHECK_EQUAL( image[1][1][Chan_Red], 9 );
+		BOOST_CHECK_EQUAL( image[1][1][Chan_Green], 10 );
+		BOOST_CHECK_EQUAL( image[1][1][Chan_Blue], 11 );
 	}
 };
 

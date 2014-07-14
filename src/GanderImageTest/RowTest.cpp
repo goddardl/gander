@@ -68,6 +68,8 @@ struct RowTest
 		typedef BrothersLayout< float, Brothers_RGB > Layout;
 		Gander::Image::Image< Layout > image( 2, 2 );
 		
+		BOOST_CHECK( image.requiredChannels() == Mask_Red );
+		
 		image.setChannelPointer( Chan_Red, &rgb[0][0][0], 2 );
 		BOOST_CHECK( image.isValid() );
 

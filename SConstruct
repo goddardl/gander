@@ -387,7 +387,7 @@ libraries = {
 		"install" : False,
 		"envAppends" : {
 			"LIBS" : [
-			"Gander"
+				"Gander"
 			],
 		}
 	},
@@ -395,6 +395,7 @@ libraries = {
 		"install" : True,
 		"envAppends" : {
 			"LIBS" : [
+				"OpenImageIO"	
 			],
 		}
 	},
@@ -433,6 +434,7 @@ tests = {
 			"LIBS" : [
 				"Gander",
 				"GanderTest",
+				"OpenImageIO",
 				"GanderImage",
 				"boost_test_exec_monitor" + boostLibSuffix
 			],

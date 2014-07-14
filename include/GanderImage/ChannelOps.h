@@ -50,6 +50,7 @@ namespace Image
 
 struct IsEqual
 {
+
 	public :
 
 		inline void init()
@@ -64,6 +65,8 @@ struct IsEqual
 		}
 
 		bool value() const { return m_return; }
+		
+		IsEqual() : m_return( false ) {};
 
 	private :
 

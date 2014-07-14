@@ -40,7 +40,7 @@
 #include "GanderImage/Channel.h"
 #include "GanderImage/CoordinateSystems.h"
 
-#include "OpenImageIO/imagecache.h"
+#include "OpenImageIO/imageio.h"
 OIIO_NAMESPACE_USING
 
 namespace Gander
@@ -49,39 +49,25 @@ namespace Gander
 namespace Image
 {
 
-namespace Detail
-{
-
-/// \todo Add a mutex to this image cache if we intend to have multiple threads use the ImageReader at the same time.
-inline static ImageCache *imageCache()
-{
-	static ImageCache *cache = 0;
-	if( cache == 0 )
-	{
-		cache = ImageCache::create();
-	}
-	return cache;
-}
-
-} // namespace Detail
-
 template< class ImageType >
 void readImage( ImageType &image, const std::string &path )
 {
-	const ImageSpec *spec = Detail::imageCache()->imagespec( ustring( path.c_str() ) );
-	ustring uFileName( path.c_str() );
+	ImageInput *file = ImageInput::open( path );
+	GANDER_ASSERT( ( file != 0 ), boost::str( boost::format( "Failed to open file \"%s\"" ) % path ) );
+	
+	const ImageSpec &spec = file->spec();
 
 	// Create the display window. The upper bounds are inclusive so we have to subtract 1.
-	Gander::Box2i displayWindow( Eigen::Vector2i( spec->full_x, spec->full_y ), Eigen::Vector2i(  spec->full_x + spec->full_width - 1, spec->full_y + spec->full_height - 1 ) );
+	Gander::Box2i displayWindow( Eigen::Vector2i( spec.full_x, spec.full_y ), Eigen::Vector2i(  spec.full_x + spec.full_width - 1, spec.full_y + spec.full_height - 1 ) );
+	image.setDisplayWindow( displayWindow );
 	
 	// Create the data window. The upper bounds are inclusive so we have to subtract 1.
-	Gander::Box2i dataWindow( Eigen::Vector2i( spec->x, spec->y ), Eigen::Vector2i( spec->x + spec->width - 1, spec->y + spec->height - 1 ) );
-	dataWindow = yDownToDisplaySpace( displayWindow, dataWindow );
+	Gander::Box2i dataWindow( Eigen::Vector2i( spec.x, spec.y ), Eigen::Vector2i( spec.x + spec.width - 1, spec.y + spec.height - 1 ) );
+	image.setDataWindow( yDownToDisplaySpace( displayWindow, dataWindow ) );
 	
-	const std::vector< std::string > &channelNames( spec->channelnames );
+	const std::vector< std::string > &channelNames( spec.channelnames );
 	ChannelSet availableChannels;
 	
-	size_t channelIndices[ image.requiredChannels().size() ];
 	for( std::vector< std::string >::const_iterator it( channelNames.begin() ); it != channelNames.end(); ++it )
 	{
 		Channel channel = ChannelSet::find( it->c_str() );
@@ -92,33 +78,34 @@ void readImage( ImageType &image, const std::string &path )
 		}
 			
 		availableChannels += channel;
-		
-		if( image.requiredChannels().contains( channel ) )
-		{
-			index[ image.requiredChannels().index( channel ) ] = it - channelNames.begin();
-		}
 	}
 
 	GANDER_ASSERT( ( image.channels() == availableChannels ), "The image and the file to be read have different channels." );
 
-	unsigned int i = 0;
-	for( ChannelSet::const_iterator it( image.requiredChannels.begin() ); it != image.requiredChannels.end(); ++it, ++i )
+	float imageData[ spec.width * spec.height * spec.nchannels ];
+	if( spec.tile_width == 0 )
 	{
-		const int newY = displayToYDownSpace( displayWindow, dataWindow.max(1) );
-		float *ptr = ( dataWindow.size()(0) + 1 ) * ( dataWindow.size()(1) + 1 );
-		Detail::imageCache()->get_pixels(
-			uFileName,
-			0, 0, // subimage, miplevel
-			dataWindow.min(0), dataWindow.max(0) + 1,
-			newY, newY + dataWindow.size()(1) + 1,
-			0, 1,
-			channelIndices[i], channelIndices[i] + 1,
-			TypeDesc::FLOAT,
-			ptr
-		);
-		image.setChannelPointer( *it, ptr, dataWindow.size()(1) + 1 );
+		file->read_image( TypeDesc::FLOAT, &imageData[0] );
+		for( ChannelSet::const_iterator it( image.requiredChannels().begin() ); it != image.requiredChannels().end(); ++it )
+		{
+			float *buffer = new float[ spec.width * spec.height ];
+			int offset = image.requiredChannels().index( *it );
+			for( int y = 0; y < spec.height; ++y )
+			{
+				for( int x = 0; x < spec.width; ++x, offset += spec.nchannels )
+				{
+					buffer[ spec.width * y + x ] = imageData[ offset ];
+				}
+			}
+			image.setChannelPointer( *it, buffer, -(dataWindow.size()(0)+1) );
+		}
 	}
-
+	else
+	{
+		GANDER_ASSERT( ( 0 ), "Reading of tiled images is not supported yet." );
+	}
+	
+	file->close();
 }
 
 }; // namespace Image

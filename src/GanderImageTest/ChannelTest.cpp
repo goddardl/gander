@@ -86,7 +86,7 @@ struct ChannelTest
 	void testArithmeticOperators()
 	{
 		ChannelSet set;
-		ChannelSet blueSet( Chan_Blue );
+		ChannelSet BSet( Chan_Blue );
 		BOOST_CHECK( !set.contains( Chan_Blue ) );
 		set += Chan_Blue;
 		BOOST_CHECK( set.contains( Chan_Blue ) );
@@ -96,9 +96,9 @@ struct ChannelTest
 		BOOST_CHECK( set.contains( Chan_Blue ) );
 		set -= Mask_Blue;
 		BOOST_CHECK( !set.contains( Chan_Blue ) );
-		set += blueSet;
+		set += BSet;
 		BOOST_CHECK( set.contains( Chan_Blue ) );
-		set -= blueSet;
+		set -= BSet;
 		BOOST_CHECK( !set.contains( Chan_Blue ) );
 		
 		ChannelSet rgba( Mask_RGBA );
@@ -131,13 +131,13 @@ struct ChannelTest
 
 	void testEquality()
 	{
-		ChannelSet red( Mask_Red );
-		BOOST_CHECK( red != Mask_Blue );
-		BOOST_CHECK( red != Chan_Blue );
-		BOOST_CHECK( red != ChannelSet( Mask_Blue ) );
-		BOOST_CHECK( red == Mask_Red );
-		BOOST_CHECK( red == Chan_Red );
-		BOOST_CHECK( red == ChannelSet( Chan_Red ) );
+		ChannelSet R( Mask_Red );
+		BOOST_CHECK( R != Mask_Blue );
+		BOOST_CHECK( R != Chan_Blue );
+		BOOST_CHECK( R != ChannelSet( Mask_Blue ) );
+		BOOST_CHECK( R == Mask_Red );
+		BOOST_CHECK( R == Chan_Red );
+		BOOST_CHECK( R == ChannelSet( Chan_Red ) );
 		BOOST_CHECK( ChannelSet( Mask_Red ) < ChannelSet( Mask_RGB ) );
 		BOOST_CHECK( ChannelSet( Mask_Red ) <= ChannelSet( Mask_RGB ) );
 		BOOST_CHECK( ChannelSet( Mask_RGBA ) > ChannelSet( Mask_RGB ) );
@@ -165,13 +165,13 @@ struct ChannelTest
 
 	void testChannelSetConstructors()
 	{
-		ChannelSet alphaSet( Chan_Alpha );
-		BOOST_CHECK( alphaSet.contains( Chan_Alpha ) );
+		ChannelSet ASet( Chan_Alpha );
+		BOOST_CHECK( ASet.contains( Chan_Alpha ) );
 
-		ChannelSet blueSet( Mask_Blue );
-		BOOST_CHECK( blueSet.contains( Chan_Blue ) );
+		ChannelSet BSet( Mask_Blue );
+		BOOST_CHECK( BSet.contains( Chan_Blue ) );
 
-		ChannelSet copySet( alphaSet );
+		ChannelSet copySet( ASet );
 		BOOST_CHECK( copySet.contains( Chan_Alpha ) );
 
 		ChannelSet rgb( Mask_RGB );
@@ -246,11 +246,11 @@ struct ChannelTest
 
 	void testNewFlags()
 	{
-		Channel red( ChannelSet::flag("red") );
-		BOOST_CHECK_EQUAL( red, Chan_Red );
+		Channel R( ChannelSet::flag("R") );
+		BOOST_CHECK_EQUAL( R, Chan_Red );
 		
-		Channel green( ChannelSet::flag("green") );
-		BOOST_CHECK_EQUAL( green, Chan_Green );
+		Channel G( ChannelSet::flag("G") );
+		BOOST_CHECK_EQUAL( G, Chan_Green );
 		
 		Channel f( ChannelSet::flag("new") );
 		BOOST_CHECK_EQUAL( f, 11 );		
@@ -276,15 +276,15 @@ struct ChannelTest
 		ChannelSet rgba( Mask_RGBA );
 		std::stringstream s;
 		s << rgba;
-		BOOST_CHECK_EQUAL( s.str(), std::string( "red green blue alpha " ) );
+		BOOST_CHECK_EQUAL( s.str(), std::string( "R G B A " ) );
 
 		std::stringstream t;
 		t << Chan_Blue;
-		BOOST_CHECK_EQUAL( t.str(), std::string( "blue" ) );
+		BOOST_CHECK_EQUAL( t.str(), std::string( "B" ) );
 		
 		std::stringstream r;
 		r << Mask_RGB;
-		BOOST_CHECK_EQUAL( r.str(), std::string( "red green blue " ) );
+		BOOST_CHECK_EQUAL( r.str(), std::string( "R G B " ) );
 	}
 
 	void testIntersection()
@@ -297,15 +297,15 @@ struct ChannelTest
 	
 	void testChannelMasks()
 	{
-		Channel red( Chan_Red );
-		BOOST_CHECK( red == Chan_Red );
+		Channel R( Chan_Red );
+		BOOST_CHECK( R == Chan_Red );
 
-		Channel blue( Chan_Blue );
-		blue = red;
-		BOOST_CHECK( blue == Chan_Red );
+		Channel B( Chan_Blue );
+		B = R;
+		BOOST_CHECK( B == Chan_Red );
 
-		red = Chan_Green;
-		BOOST_CHECK( red == Chan_Green );
+		R = Chan_Green;
+		BOOST_CHECK( R == Chan_Green );
 	}
 };
 

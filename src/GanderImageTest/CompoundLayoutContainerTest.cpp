@@ -37,7 +37,6 @@
 #include "GanderImage/CompoundLayout.h"
 #include "GanderImage/ChannelLayout.h"
 #include "GanderImage/BrothersLayout.h"
-#include "GanderImage/DynamicLayout.h"
 #include "GanderImage/CompoundLayoutContainer.h"
 
 #include "GanderImageTest/CompoundLayoutContainerTest.h"

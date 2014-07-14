@@ -41,16 +41,16 @@
 template <>
 const char* Gander::Image::ChannelSet::g_defaultFlags[ Gander::Image::ChannelTraits::NumberOfDefaultChannels ] = {
 	"unused",
-	"red",
-	"green",
-	"blue",
-	"alpha",
-	"z",
-	"u",
-	"v",
-	"mask",
-	"forward",
-	"backward",
+	"R",
+	"G",
+	"B",
+	"A",
+	"Z",
+	"U",
+	"V",
+	"Mask",
+	"Forward",
+	"Backward",
 };
 
 template <>

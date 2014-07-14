@@ -122,17 +122,22 @@ struct ChannelLayoutTest
 		
 		BOOST_CHECK_EQUAL( layout.channels(), ChannelSet( Mask_Green ) );
 		
-		layout.channel< Layout::ChannelContainerType >( c, Chan_Green ) = 2.;
+		layout.setChannel< Layout::ChannelContainerType >( c, Chan_Green, 2. );
 		
-		BOOST_CHECK_EQUAL( float( layout.channel< Layout::ChannelContainerType >( c, Chan_Green ) ), 2. );
-		BOOST_CHECK_THROW( layout.channel< Layout::ChannelContainerType >( c, Chan_Red ), std::runtime_error );
+		BOOST_CHECK_EQUAL( ( layout.getChannel< Layout::ChannelContainerType, float >( c, Chan_Green ) ), 2. );
+		BOOST_CHECK_THROW( ( layout.getChannel< Layout::ChannelContainerType, float >( c, Chan_Red ) ), std::runtime_error );
+
+		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< Layout::ChannelContainerType >( c, 0 ) ), 2. );
+		BOOST_CHECK_THROW( ( layout.channelAtIndex< Layout::ChannelContainerType >( c, 1 ) ), std::runtime_error );
+
+		BOOST_CHECK_THROW( ( layout.getChannel< Layout::ChannelContainerType, float >( c, Chan_Red ) ), std::runtime_error );
 		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< Layout::ChannelContainerType >( c, 0 ) ), 2. );
 		BOOST_CHECK_THROW( layout.channelAtIndex< Layout::ChannelContainerType >( c, 1 ), std::runtime_error );
 	
 		float green = 3.;	
 		layout.setChannelPointer< Layout::ChannelPointerContainerType >( cp, Chan_Green, &green );
-		BOOST_CHECK_EQUAL( float( layout.channel< Layout::ChannelPointerContainerType >( cp, Chan_Green ) ), 3. );
-		BOOST_CHECK_THROW( layout.channel< Layout::ChannelPointerContainerType >( cp, Chan_Blue ), std::runtime_error );
+		BOOST_CHECK_EQUAL( ( layout.getChannel< Layout::ChannelPointerContainerType, float >( cp, Chan_Green ) ), 3. );
+		BOOST_CHECK_THROW( ( layout.getChannel< Layout::ChannelPointerContainerType, float >( cp, Chan_Blue ) ), std::runtime_error );
 		BOOST_CHECK_EQUAL( float( layout.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 0 ) ), 3. );
 		BOOST_CHECK_THROW( layout.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 1 ), std::runtime_error );
 		layout.channelAtIndex< Layout::ChannelPointerContainerType >( cp, 0 ) = 1.;

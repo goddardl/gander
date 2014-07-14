@@ -46,7 +46,7 @@
 #include "Gander/Tuple.h"
 
 #include "GanderImage/StaticAssert.h"
-#include "GanderImage/StaticLayoutBase.h"
+#include "GanderImage/LayoutBase.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
@@ -60,21 +60,22 @@ namespace Image
 {
 
 template< class T, ChannelDefault S >
-struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
+struct ChannelLayout : public LayoutBase< ChannelLayout< T, S >, T >
 {
 
 	public :
 
 		enum
 		{
-			NumberOfChannels = 1,
 			ChannelMask = ChannelToMask<S>::Value,
+			NumberOfChannels = 1,
+			ChannelPointerMask = ChannelMask,
 			NumberOfChannelPointers = 1,
 		};
 		
 		typedef ChannelLayout< T, S > Type;
 		typedef Type LayoutType;
-		typedef StaticLayoutBase< ChannelLayout< T, S >, T > BaseType;
+		typedef LayoutBase< ChannelLayout< T, S >, T > BaseType;
 		typedef typename BaseType::StorageType ChannelType;
 		typedef typename BaseType::StorageType StorageType;
 		typedef typename BaseType::PointerType PointerType;
@@ -119,12 +120,9 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		/// Increments all channel pointers in the container by v.
 		inline void increment( ChannelPointerContainerType &container, int v );
 		
-		using BaseType::contains;
-
 	private :
 
-		friend class StaticLayoutBase< ChannelLayout< T, S >, T >;	
-		friend class LayoutBase< ChannelLayout< T, S > >;	
+		friend class LayoutBase< ChannelLayout< T, S >, T >;	
 
 		/// Returns a reference to the given channel from the container which is specified by the "C" template argument.
 		template< ChannelDefault C >
@@ -153,10 +151,6 @@ struct ChannelLayout : public StaticLayoutBase< ChannelLayout< T, S >, T >
 		
 		template< EnumType Index >
 		inline ConstReferenceType _channelAtIndex( const ChannelPointerContainerType &container ) const;
-
-		/// Returns a ChannelSet of the channels that pointers are required for in order
-		/// to access all of the channels in this layout.
-		inline ChannelSet _requiredChannels() const;
 
 		/// Sets the value of the pointer to the given channel in the container.
 		/// Pointers can only be set for channels that are returned from the requiredChannels() method. By setting pointers

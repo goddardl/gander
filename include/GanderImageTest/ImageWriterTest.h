@@ -31,19 +31,12 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERIMAGETEST_ROWTEST_H__
-#define __GANDERIMAGETEST_ROWTEST_H__
-
-#include "GanderImage/Pixel.h"
-#include "GanderImage/Channel.h"
-#include "GanderImage/ChannelLayout.h"
-#include "GanderImage/BrothersLayout.h"
-#include "GanderImage/CompoundLayout.h"
+#ifndef __GANDERIMAGETEST_IMAGEWRITERTEST_H__
+#define __GANDERIMAGETEST_IMAGEWRITERTEST_H__
 
 #include <vector>
 
 #include "boost/test/unit_test.hpp"
-
 
 namespace Gander
 {
@@ -51,10 +44,10 @@ namespace Gander
 namespace ImageTest
 {
 
-void addRowTest( boost::unit_test::test_suite *test );
+void addImageWriterTest( boost::unit_test::test_suite *test );
 
 }; // namespace ImageTest
 
 }; // namespace Gander
 
-#endif // __GANDERIMAGETEST_ROWTEST_H__
+#endif // __GANDERIMAGETEST_IMAGEWRITERTEST_H__

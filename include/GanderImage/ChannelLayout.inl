@@ -41,7 +41,10 @@ namespace Image
 template< class T, ChannelDefault S >
 inline void ChannelLayout< T, S >::increment( ChannelPointerContainerType &container, Channel channel, int v )
 {
-	increment( container, v );
+	if( channel == S )
+	{
+		increment( container, v );
+	}
 }
 
 template< class T, ChannelDefault S >
@@ -56,56 +59,56 @@ inline void ChannelLayout< T, S >::increment( ChannelPointerContainerType &conta
 
 template< class T, ChannelDefault S >
 template< ChannelDefault C >
-inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channel( ChannelContainerType &container )
+inline typename LayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channel( ChannelContainerType &container )
 {
 	return container[0];
 }
 
 template< class T, ChannelDefault S >
 template< ChannelDefault C >
-inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ConstReferenceType ChannelLayout< T, S >::_channel( const ChannelContainerType &container ) const
+inline typename LayoutBase< ChannelLayout< T, S >, T >::ConstReferenceType ChannelLayout< T, S >::_channel( const ChannelContainerType &container ) const
 {
 	return container[0];
 }
 
 template< class T, ChannelDefault S >
 template< ChannelDefault C >
-inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channel( ChannelPointerContainerType &container )
+inline typename LayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channel( ChannelPointerContainerType &container )
 {
 	return *container[0];
 }
 
 template< class T, ChannelDefault S >
 template< ChannelDefault C >
-inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ConstReferenceType ChannelLayout< T, S >::_channel( const ChannelPointerContainerType &container ) const
+inline typename LayoutBase< ChannelLayout< T, S >, T >::ConstReferenceType ChannelLayout< T, S >::_channel( const ChannelPointerContainerType &container ) const
 {
 	return *container[0];
 }
 
 template< class T, ChannelDefault S >
 template< EnumType Index >
-inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channelAtIndex( ChannelContainerType &container )
+inline typename LayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channelAtIndex( ChannelContainerType &container )
 {
 	return container[0];
 }
 
 template< class T, ChannelDefault S >
 template< EnumType Index >
-inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ConstReferenceType ChannelLayout< T, S >::_channelAtIndex( const ChannelContainerType &container ) const
+inline typename LayoutBase< ChannelLayout< T, S >, T >::ConstReferenceType ChannelLayout< T, S >::_channelAtIndex( const ChannelContainerType &container ) const
 {
 	return container[0];
 }
 
 template< class T, ChannelDefault S >
 template< EnumType Index >
-inline typename StaticLayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channelAtIndex( ChannelPointerContainerType &container )
+inline typename LayoutBase< ChannelLayout< T, S >, T >::ReferenceType ChannelLayout< T, S >::_channelAtIndex( ChannelPointerContainerType &container )
 {
 	return *container[0];
 }
 
 template< class T, ChannelDefault S >
 template< EnumType Index >
-inline typename StaticLayoutBase< ChannelLayout< T, S >, T >:: ConstReferenceType ChannelLayout< T, S >::_channelAtIndex( const ChannelPointerContainerType &container ) const
+inline typename LayoutBase< ChannelLayout< T, S >, T >:: ConstReferenceType ChannelLayout< T, S >::_channelAtIndex( const ChannelPointerContainerType &container ) const
 {
 	return *container[0];
 }
@@ -114,14 +117,6 @@ template< class T, ChannelDefault S >
 inline void ChannelLayout< T, S >::_setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer )
 {
 	container[0] = pointer;
-}
-
-/// Returns a ChannelSet of the channels that pointers are required for in order
-/// to access all of the channels in this layout.
-template< class T, ChannelDefault S >
-inline ChannelSet ChannelLayout< T, S >::_requiredChannels() const
-{
-	return ChannelSet( S );
 }
 
 /// Returns the index of a channel in the layout when masked.

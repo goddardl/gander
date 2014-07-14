@@ -46,7 +46,7 @@
 
 #include "Gander/StaticAssert.h"
 #include "GanderImage/StaticAssert.h"
-#include "GanderImage/StaticLayoutBase.h"
+#include "GanderImage/LayoutBase.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
@@ -57,7 +57,7 @@ namespace Image
 {
 
 template< class T, ChannelBrothers B >
-struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
+struct BrothersLayout : public LayoutBase< BrothersLayout< T, B >, T >
 {
 
 	public :
@@ -66,12 +66,13 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		{
 			NumberOfChannels = BrotherTraits<B>::NumberOfBrothers,
 			ChannelMask = BrotherTraits<B>::BrothersMask,
+			ChannelPointerMask = 1 << ( BrotherTraits<B>::FirstBrotherInBrothers - 1 ),
 			NumberOfChannelPointers = 1,
 		};
 
 		typedef BrothersLayout< T, B > Type;
 		typedef Type LayoutType;
-		typedef StaticLayoutBase< BrothersLayout< T, B >, T > BaseType;
+		typedef LayoutBase< BrothersLayout< T, B >, T > BaseType;
 		typedef typename BaseType::StorageType ChannelType;
 		typedef typename BaseType::StorageType StorageType;
 		typedef typename BaseType::PointerType PointerType;
@@ -113,11 +114,9 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		/// Increments all channel pointers in the container by v.
 		inline void increment( ChannelPointerContainerType &container, int v );
 		
-		using BaseType::contains;
-
 	private :
 
-		friend class StaticLayoutBase< BrothersLayout< T, B >, T >;	
+		friend class LayoutBase< BrothersLayout< T, B >, T >;	
 		friend class LayoutBase< BrothersLayout< T, B > >;	
 	
 		/// Returns a reference to the given channel from the container which is specified by the "C" template argument.
@@ -147,10 +146,6 @@ struct BrothersLayout : public StaticLayoutBase< BrothersLayout< T, B >, T >
 		
 		template< EnumType Index >
 		inline ConstReferenceType _channelAtIndex( const ChannelPointerContainerType &container ) const;
-
-		/// Returns a ChannelSet of the channels that pointers are required for in order
-		/// to access all of the channels in this layout.
-		inline ChannelSet _requiredChannels() const;
 
 		/// Sets the value of the pointer to the given channel in the container.
 		/// Pointers can only be set for channels that are returned from the requiredChannels() method. By setting pointers

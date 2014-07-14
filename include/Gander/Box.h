@@ -73,6 +73,13 @@ class Box
 		bool intersects( const T &point ) const;
 		bool intersects( const Box<T> &box ) const;
 
+		/// Stream operator.	
+		friend std::ostream &operator << ( std::ostream &out, const Gander::Box<T> &box )
+		{
+			out << box.min(0) << ", " << box.min(1) << ", " << box.max(0) << ", " << box.max(1);
+			return out;
+		}
+
 		///	Classification.
 		bool isEmpty() const;
 		bool hasVolume() const;

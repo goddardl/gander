@@ -56,23 +56,18 @@ struct PixelIteratorTest
 {
 	void testPixelIteratorConstructors()
 	{
-		typedef CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > Layout;
+		typedef CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha > > Layout;
 		typedef PixelIterator< Layout > PixelIterator;
 		typedef Pixel< Layout > Pixel;
 		typedef ConstPixelIterator< Layout > ConstPixelIterator;
 		
 		PixelIterator it;
-		it->addChannels( Mask_U, Brothers_VU );
-		it->addChannels( Mask_Z );
+		BOOST_CHECK( ( it->channels() == ChannelSet( Mask_RGBA ) ) );
 		
 		float bgr[6] = { 3., 2., 1., 6., 5., 4. };
 		float alpha[2] = { 7., 8. };
-		float vu[4] = { 10., 9., 12., 11. };
-		float z[2] = { 13., 14. };
 		it->setChannelPointer( Chan_Blue, &bgr[0] );	
 		it->setChannelPointer( Chan_Alpha, &alpha );	
-		it->setChannelPointer( Chan_Z, &z );	
-		it->setChannelPointer( Chan_U, &vu[1] );	
 
 		// Test the copy constructor from a PixelIterator.
 		ConstPixelIterator it2( it );
@@ -88,11 +83,9 @@ struct PixelIteratorTest
 		
 		// Test assignment to and from the Pixel type.
 		Pixel p;
-		BOOST_CHECK_THROW( p = *it, std::runtime_error ); // Throws because the pixel hasn't had the dynamic channels added.
+		BOOST_CHECK( ( *it != p ) );
 
-		// So add the channels and try again...
-		p.addChannels( Mask_U, Brothers_VU );
-		p.addChannels( Mask_Z );
+		// Copy the values from the iterator. 
 		p = *it;
 		BOOST_CHECK( ( *it == p ) );
 
@@ -118,52 +111,44 @@ struct PixelIteratorTest
 	
 	void testConstPixelIterator()
 	{
-		typedef CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > Layout;
+		typedef CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha > > Layout;
 		typedef PixelIterator< Layout > PixelIterator;
 		typedef ConstPixelIterator< Layout > ConstPixelIterator;
 		
 		PixelIterator it;
-		it->addChannels( Mask_U, Brothers_VU );
-		it->addChannels( Mask_Z );
-		
 		float bgr[6] = { 3., 2., 1., 6., 5., 4. };
 		float alpha[2] = { 7., 8. };
-		float vu[4] = { 10., 9., 12., 11. };
-		float z[2] = { 13., 14. };
 		it->setChannelPointer( Chan_Blue, &bgr[0] );	
 		it->setChannelPointer( Chan_Alpha, &alpha );	
-		it->setChannelPointer( Chan_Z, &z );	
-		it->setChannelPointer( Chan_U, &vu[1] );	
 		
-		BOOST_CHECK_EQUAL( it->channels(), ChannelSet( Mask_RGBA | Mask_U | Mask_Z ) );
-		BOOST_CHECK_EQUAL( it->requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha | Mask_Z | Mask_U ) );
+		BOOST_CHECK_EQUAL( it->channels(), ChannelSet( Mask_RGBA ) );
+		BOOST_CHECK_EQUAL( it->requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha ) );
 		
 		ConstPixelIterator cit( it );
-		BOOST_CHECK_EQUAL( cit->channels(), ChannelSet( Mask_RGBA | Mask_U | Mask_Z ) );
-		BOOST_CHECK_EQUAL( cit->requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha | Mask_Z | Mask_U ) );
+		BOOST_CHECK_EQUAL( cit->channels(), ChannelSet( Mask_RGBA ) );
+		BOOST_CHECK_EQUAL( cit->requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha ) );
 
 		BOOST_CHECK_EQUAL( cit->channel<Chan_Red>(), 1. );
 		BOOST_CHECK_EQUAL( (*cit).channel<Chan_Green>(), 2. );
 		BOOST_CHECK_EQUAL( cit->channel<Chan_Blue>(), 3. );
 		BOOST_CHECK_EQUAL( cit->channel<Chan_Alpha>(), 7. );
-		BOOST_CHECK_EQUAL( cit->channel<Chan_Z>(), 13. );
-		BOOST_CHECK_EQUAL( cit->channel<Chan_U>(), 9. );
+
+		BOOST_CHECK_EQUAL( (*cit)[Chan_Red], 1. );
+		BOOST_CHECK_EQUAL( (*cit)[Chan_Green], 2. );
+		BOOST_CHECK_EQUAL( (*cit)[Chan_Blue], 3. );
+		BOOST_CHECK_EQUAL( (*cit)[Chan_Alpha], 7. );
 
 		cit++;
 		BOOST_CHECK_EQUAL( cit->channel<Chan_Red>(), 4. );
 		BOOST_CHECK_EQUAL( (*cit).channel<Chan_Green>(), 5. );
 		BOOST_CHECK_EQUAL( cit->channel<Chan_Blue>(), 6. );
 		BOOST_CHECK_EQUAL( cit->channel<Chan_Alpha>(), 8. );
-		BOOST_CHECK_EQUAL( cit->channel<Chan_Z>(), 14. );
-		BOOST_CHECK_EQUAL( cit->channel<Chan_U>(), 11. );
 
 		--cit;
 		BOOST_CHECK_EQUAL( cit->channel<Chan_Red>(), 1. );
 		BOOST_CHECK_EQUAL( (*cit).channel<Chan_Green>(), 2. );
 		BOOST_CHECK_EQUAL( cit->channel<Chan_Blue>(), 3. );
 		BOOST_CHECK_EQUAL( cit->channel<Chan_Alpha>(), 7. );
-		BOOST_CHECK_EQUAL( cit->channel<Chan_Z>(), 13. );
-		BOOST_CHECK_EQUAL( cit->channel<Chan_U>(), 9. );
 		
 		float bgr2[6] = { 3., 2., 1., 6., 5., 4. };
 		PixelIterator it2( *it ); // Test the constructor from a PixelAccessor.
@@ -210,30 +195,21 @@ struct PixelIteratorTest
 
 	void testCompoundPixelIterator()
 	{
-		typedef PixelIterator< CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha >, DynamicLayout< float > > > PixelIterator;
+		typedef PixelIterator< CompoundLayout< BrothersLayout< float, Brothers_BGR >, ChannelLayout< float, Chan_Alpha > > > PixelIterator;
 		PixelIterator it;
 		
-		it->addChannels( Mask_U, Brothers_VU );
-		it->addChannels( Mask_Z );
-
-		BOOST_CHECK_EQUAL( it->channels(), ChannelSet( Mask_RGBA | Mask_U | Mask_Z ) );
-		BOOST_CHECK_EQUAL( it->requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha | Mask_Z | Mask_U ) );
+		BOOST_CHECK_EQUAL( it->channels(), ChannelSet( Mask_RGBA ) );
+		BOOST_CHECK_EQUAL( it->requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha ) );
 	
 		float bgr[6] = { 3., 2., 1., 6., 5., 4. };
 		float alpha[2] = { 7., 8. };
-		float vu[4] = { 10., 9., 12., 11. };
-		float z[2] = { 13., 14. };
 		it->setChannelPointer( Chan_Blue, &bgr[0] );	
 		it->setChannelPointer( Chan_Alpha, &alpha );	
-		it->setChannelPointer( Chan_Z, &z );	
-		it->setChannelPointer( Chan_U, &vu[1] );	
 
 		BOOST_CHECK_EQUAL( it->channel<Chan_Red>(), 1. );
 		BOOST_CHECK_EQUAL( (*it).channel<Chan_Green>(), 2. );
 		BOOST_CHECK_EQUAL( it->channel<Chan_Blue>(), 3. );
 		BOOST_CHECK_EQUAL( it->channel<Chan_Alpha>(), 7. );
-		BOOST_CHECK_EQUAL( it->channel<Chan_Z>(), 13. );
-		BOOST_CHECK_EQUAL( it->channel<Chan_U>(), 9. );
 
 		it->channel<Chan_Green>() = 0.;
 		BOOST_CHECK_EQUAL( it->channel<Chan_Green>(), 0. );
@@ -245,16 +221,17 @@ struct PixelIteratorTest
 		BOOST_CHECK_EQUAL( (*it).channel<Chan_Green>(), 5. );
 		BOOST_CHECK_EQUAL( it->channel<Chan_Blue>(), 6. );
 		BOOST_CHECK_EQUAL( it->channel<Chan_Alpha>(), 8. );
-		BOOST_CHECK_EQUAL( it->channel<Chan_Z>(), 14. );
-		BOOST_CHECK_EQUAL( it->channel<Chan_U>(), 11. );
+		
+		BOOST_CHECK_EQUAL( (*it)[Chan_Red], 4. );
+		BOOST_CHECK_EQUAL( (*it)[Chan_Green], 5. );
+		BOOST_CHECK_EQUAL( (*it)[Chan_Blue], 6. );
+		BOOST_CHECK_EQUAL( (*it)[Chan_Alpha], 8. );
 
 		--it;
 		BOOST_CHECK_EQUAL( it->channel<Chan_Red>(), 1. );
 		BOOST_CHECK_EQUAL( (*it).channel<Chan_Green>(), 2. );
 		BOOST_CHECK_EQUAL( it->channel<Chan_Blue>(), 3. );
 		BOOST_CHECK_EQUAL( it->channel<Chan_Alpha>(), 7. );
-		BOOST_CHECK_EQUAL( it->channel<Chan_Z>(), 13. );
-		BOOST_CHECK_EQUAL( it->channel<Chan_U>(), 9. );
 		
 		float bgr2[6] = { 3., 2., 1., 6., 5., 4. };
 		PixelIterator it2( it );

@@ -93,44 +93,43 @@ struct ChannelContainerWrapper : public Container
 /// 
 /// The LayoutBase class defines an interface for the derived classes, forcing them to implement both enum values and methods.
 /// Layouts are a fundamental concept in Gander::Image. A Layout defines how a set of channels are laid out in memory along
-/// with their names, storage type and whether they are dynamic - and can have more channels added to them at runtime - or not.
-/// Derived classes are forced to implement a set of methods and enum values, defining a common interface that describes how
-/// a set of channels should be laid out in memory. 
-/// Derived classes should first decide whether they are Dynamic or Static and define the IsDynamic enum accordingly. 
-/// If they are static, then they also need to define NumberOfChannels, ChannelMask and NumberOfChannelPointers.
-/// If the layout is Dynamic, then it needs to override the numberOfChannels, channels and numberOfChannelPointers methods.
-template< class Derived >
+/// with their names and storage type. Derived classes are forced to implement a set of methods and enum values, defining a
+/// common interface that describes how a set of channels should be laid out in memory. 
+template< class Derived, class DataType = float >
 struct LayoutBase
 {
 		
 		enum
 		{
-			NumberOfChannels = 0,		// Required if IsDynamic == false
-			ChannelMask = Mask_None,	// Required if IsDynamic == false
-			NumberOfChannelPointers = 0,// Required if IsDynamic == false
-			IsCompound = 0,				// Required if the derived type holds both static and dynamic layouts.
+			NumberOfChannels = 0,
+			ChannelMask = Mask_None,
+			NumberOfChannelPointers = 0,
+			IsCompound = 0,
 		};
 
 	public :
 		
+		typedef typename Gander::template TypeTraits< DataType >::Type ChannelType;
+		typedef typename Gander::template TypeTraits< DataType >::StorageType StorageType;
+		typedef typename Gander::template TypeTraits< DataType >::PointerType PointerType;
+		typedef typename Gander::template TypeTraits< DataType >::ReferenceType ReferenceType;
+		typedef typename Gander::template TypeTraits< DataType >::ConstReferenceType ConstReferenceType;
+		
 		enum
 		{
 			NumberOfLayouts = 1,
-			IsDynamic = false,
 		};
 
 		LayoutBase();
 		
-		//! @name Methods that need overloading by dynamic derived classes.
-		/// All of theses methods need to be declared in the derived class if it is dynamic ( and therefore has set the enum value IsDynamic ).
-		/// These methods do not need to be implemented if the derived class is static. 
+		//! @name Channel methods.
 		//@{
-		inline unsigned int numberOfChannels() const;
-		inline unsigned int numberOfChannelPointers() const;
-		inline ChannelSet channels() const;
-		inline ChannelSet requiredChannels() const;
-		/// Returns the size in bytes of one pixel using this layout.
-		inline size_t sizeOf() const;
+		static inline unsigned int numberOfChannels();
+		static inline unsigned int numberOfChannelPointers();
+		static inline ChannelSet channels();
+		static inline ChannelSet requiredChannels();
+		/// Returns whether the layout represents the given set of channels.
+		static inline bool contains( ChannelSet channels );
 		//@}
 		
 		//! @name Compound methods.
@@ -146,21 +145,39 @@ struct LayoutBase
 		inline ReturnType &child();
 		//@}
 		
-		/// Returns whether the layout represents the given set of channels.
-		inline bool contains( ChannelSet channels ) const;
-		
-		/// Returns whether the layout contains the given channel. This method can be passed either a template argument or a function argument.
-		/// If the template argument is different to Chan_None then the template argument should be used. If it is equal to Chan_None, the 
-		/// function argument should be used.
-		template< EnumType C = Chan_None >
-		inline bool containsChannel( Gander::Image::Channel c = Chan_None ) const;
-		
-		/// Returns true if the Layout contains other layouts.
-		inline bool isCompound() const;
+		template< class ContainerType, ChannelDefault C, bool DisableStaticAsserts = false >
+		inline ReferenceType channel( ContainerType &container );
 
-		/// Returns true if the Layout supports the Dynamic methods that allow the number of channels and their structure to be manipulated.
-		inline bool isDynamic() const;
+		template< class ContainerType, ChannelDefault C, bool DisableStaticAsserts = false >
+		inline ConstReferenceType channel( const ContainerType &container ) const;
 
+		template< class ContainerType, EnumType Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
+		inline ReferenceType channelAtIndex( ContainerType &container );
+		
+		template< class ContainerType, EnumType Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
+		inline ConstReferenceType channelAtIndex( const ContainerType &container ) const;
+		
+		template< class ContainerType, EnumType Mask = Mask_All >
+		inline ReferenceType channelAtIndex( ContainerType &container, unsigned int index );
+		
+		template< class ContainerType, EnumType Mask = Mask_All >
+		inline ConstReferenceType channelAtIndex( const ContainerType &container, unsigned int index ) const;
+		
+		template< class ContainerType, class Type >
+		inline void setChannel( ContainerType &container, Channel c, const Type &value );
+		
+		template< class ContainerType, class Type >
+		inline Type getChannel( const ContainerType &container, Channel c ) const;
+
+		template< class ContainerType >
+		inline void setChannelPointer( ContainerType &container, Channel channel, PointerType pointer );
+
+		template< class ContainerType >
+		inline void setChannelPointer( ContainerType &container, Channel channel, void *pointer );
+
+		template< EnumType MaskedIndex, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
+		struct MaskedChannelIndex;
+		
 		template< class L > inline bool operator == ( L const &rhs ) const { return static_cast< Derived const * >( this )->equalTo( rhs ); }
 		template< class L > inline bool operator != ( L const &rhs ) const { return !static_cast< Derived const * >( this )->equalTo( rhs ); }
 
@@ -215,13 +232,6 @@ struct LayoutBase
 		};
 		
 	private :	
-
-		/// Returns a ChannelSet of the channels that pointers are required for in order
-		/// to access all of the channels in this layout.
-		inline ChannelSet _requiredChannels() const;
-
-		/// Adds the channel to the Layout and logs all pertenant information.
-		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None );
 
 		/// A function for comparing two Layouts. The overloaded equality operators call this method on the Derived class,
 		/// allowing the Derived class to overload this function.

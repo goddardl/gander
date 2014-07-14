@@ -40,7 +40,7 @@ BUILD_DIR = os.path.expanduser( "~/dev/lg/build/Gander" )
 BUILD_CACHEDIR = os.path.expanduser( "~/dev/lg/buildCache" )
 INSTALL_DIR = os.path.expanduser( "~/dev/lg/install/Gander-${GANDER_MAJOR_VERSION}.${GANDER_MINOR_VERSION}.${GANDER_PATCH_VERSION}-${PLATFORM}" )
 
-CXXFLAGS = ['-std=gnu++0x', "-fPIC", "-pipe", "-Wall", "-Werror", "-O2", "-DNDEBUG" ] # "-DBOOST_DISABLE_ASSERTS"
+CXXFLAGS = ['-std=gnu++0x', "-fPIC", "-pipe", "-Wall", "-Werror", "-O0", "-DNDEBUG" ] # "-DBOOST_DISABLE_ASSERTS"
 if BUILD_DEPENDENCIES == True :
 	DEPENDENCIES_SRC_DIR = os.path.expanduser( "~/dev/lg/GanderDependencies" )
 	
@@ -57,12 +57,14 @@ else :
 
 	LOCATE_DEPENDENCY_LIBPATH = [
 		"/home/luke/build/boost/1.51.0/lib",
+		"/home/luke/build/OpenImageIO/1.2.0/lib/"
 	]
 
 	LOCATE_DEPENDENCY_SYSTEMPATH = [
 		'$BUILD_DIR'+'/include',
 		"/home/luke/build/boost/1.51.0/include",
 		"/home/luke/build/Eigen",
+		"/home/luke/build/OpenImageIO/1.2.0/include/"
 	]
 
 

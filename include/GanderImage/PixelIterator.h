@@ -60,13 +60,11 @@ namespace Image
 // Forward declarations.
 template< class > class ConstPixelIterator;
 template< class > class PixelIterator;
+template< class > class Image;
 
 template< class Layout >
 class ConstPixelIterator :
-	protected PixelAccessor< Layout >,
-	public IncrementOperators< ConstPixelIterator< Layout > >,
-	public DecrementOperators< ConstPixelIterator< Layout > >,
-	public IntegerArithmeticOperators< ConstPixelIterator< Layout > >
+	protected PixelAccessor< Layout >
 {
 	private :
 		
@@ -80,7 +78,7 @@ class ConstPixelIterator :
 		typedef typename BaseType::ContainerType ContainerType;
 		typedef Layout LayoutType;
 		typedef ConstPixelIterator< Layout > Type;
-		
+	
 		inline ConstPixelIterator() {};
 		
 		ConstPixelIterator( const PixelIterator< Layout > &it );
@@ -119,6 +117,59 @@ class ConstPixelIterator :
 		{
 			BaseType::m_layout.increment( BaseType::m_container, v );
 			return *this;
+		}
+	
+		inline Type &operator -- ()
+		{	
+			return increment( -1 );
+		}
+
+		inline Type operator -- ( int )
+		{
+			Type d( *this );
+			increment( -1 );
+			return d;
+		}
+
+		inline Type &operator ++ () {
+			return increment( 1 );
+		}
+	
+		inline Type operator ++ ( int )
+		{
+			Type d( *this );
+			increment( 1 );
+			return d;
+		}
+		
+		/// The add-accumulate operator.
+		inline Type &operator += ( int i )
+		{
+			increment( i );
+			return *this;
+		}
+
+		/// The subtract-accumulate operator.
+		inline Type &operator -= ( int i )
+		{
+			increment( -i );
+			return *this;
+		}
+
+		/// Addition operator.
+		inline Type operator + ( int i ) const
+		{
+			Type b( *this );
+			b += i;
+			return b;
+		}
+
+		/// Subtraction operator.
+		inline Type operator - ( int i ) const
+		{
+			Type b( *this );
+			b -= i;
+			return b;
 		}
 
 		template< class T >		
@@ -204,7 +255,63 @@ class PixelIterator :
 		{
 			return static_cast< const PixelAccessorType * >( this );
 		}
+		
+		inline Type &operator -- ()
+		{
+			BaseType::increment( -1 );
+			return *this;
+		}
+
+		inline Type operator -- ( int )
+		{
+			Type d( *this );
+			BaseType::increment( -1 );
+			return d;
+		}
+
+		inline Type &operator ++ ()
+		{
+			BaseType::increment( 1 );
+			return *this;
+		}
 	
+		inline Type operator ++ ( int )
+		{
+			Type d( *this );
+			BaseType::increment( 1 );
+			return d;
+		}
+
+		/// The add-accumulate operator.
+		inline Type &operator += ( int i )
+		{
+			BaseType::increment( i );
+			return *this;
+		}
+
+		/// The subtract-accumulate operator.
+		inline Type &operator -= ( int i )
+		{
+			BaseType::increment( -i );
+			return *this;
+		}
+
+		/// Addition operator.
+		inline Type operator + ( int i ) const
+		{
+			Type b( *this );
+			b += i;
+			return b;
+		}
+
+		/// Subtraction operator.
+		inline Type operator - ( int i ) const
+		{
+			Type b( *this );
+			b -= i;
+			return b;
+		}
+
 	private :
 
 		template< class, class, class > friend class PixelBase;
@@ -213,6 +320,7 @@ class PixelIterator :
 		template< class > friend class Gander::Image::PixelAccessor;
 		template< class > friend class Gander::Image::ConstPixelIterator;
 		template< class > friend class Gander::Image::PixelIterator;
+		template< class > friend class Gander::Image::Image;
 };
 
 }; // namespace Image

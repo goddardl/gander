@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Luke Goddard. All rights reserved.
+//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,23 +31,21 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef __GANDERTEST_DYNAMICLAYOUTTEST_H__
-#define __GANDERTEST_DYNAMICLAYOUTTEST_H__
+#ifndef __GANDERIMAGE_COMMON_H__
+#define __GANDERIMAGE_COMMON_H__
 
-#include <vector>
-
-#include "boost/test/unit_test.hpp"
+#include "Gander/Common.h"
 
 namespace Gander
 {
 
-namespace ImageTest
+namespace Image
 {
 
-void addDynamicLayoutTest( boost::unit_test::test_suite *test );
+typedef float DefaultChannelType;
 
-}; // namespace ImageTest
+}; // namespace GanderImage
 
 }; // namespace Gander
 
-#endif // __GANDERTEST_DYNAMICLAYOUTTEST_H__
+#endif

@@ -36,7 +36,6 @@
 
 #include "GanderImage/Pixel.h"
 #include "GanderImage/Channel.h"
-#include "GanderImage/DynamicLayout.h"
 #include "GanderImage/ChannelLayout.h"
 #include "GanderImage/BrothersLayout.h"
 #include "GanderImage/CompoundLayout.h"
@@ -51,24 +50,6 @@ namespace Gander
 
 namespace ImageTest
 {
-
-namespace Detail
-{
-
-template< class Pixel >
-void initPixel( Pixel &pixel )
-{
-	pixel.template channel< Gander::Image::Chan_Red >() = 1.;
-	pixel.template channel< Gander::Image::Chan_Green >() = 2.;
-	pixel.template channel< Gander::Image::Chan_Blue >() = 3.;
-	pixel.template channel< Gander::Image::Chan_Alpha >() = 4.;
-	pixel.template channel< Gander::Image::Chan_Z >() = 5.;
-	pixel.template channel< Gander::Image::Chan_U >() = 6.;
-	pixel.template channel< Gander::Image::Chan_V >() = 7.;
-	pixel.template channel< Gander::Image::Chan_Backward >() = 8.;
-}
-
-}; // namespace Detail
 
 void addPixelTest( boost::unit_test::test_suite *test );
 

@@ -39,10 +39,10 @@
 
 #include "boost/format.hpp"
 
-#include "Gander/Common.h"
 #include "Gander/EnumHelper.h"
 #include "Gander/Interfaces.h"
 
+#include "GanderImage/Common.h"
 #include "GanderImage/StaticAssert.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
@@ -83,10 +83,8 @@ class PixelBase
 		template< ChannelDefault C, bool DisableStaticAsserts = false > struct ChannelTraits : public Layout::template ChannelTraits< C, DisableStaticAsserts > {};
 		template< EnumType Index > struct ChannelTraitsAtIndex : public Layout::template ChannelTraitsAtIndex< Index > {};
 		
-		inline unsigned int numberOfChannels() const { return m_layout.numberOfChannels(); }
-		inline ChannelSet channels() const { return m_layout.channels(); }
-		inline bool isDynamic() const { return m_layout.isDynamic(); }
-		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None ) { m_layout.template addChannels< ContainerType >( m_container, c, b ); };
+		static inline unsigned int numberOfChannels() { return Layout::numberOfChannels(); }
+		static inline ChannelSet channels() { return Layout::channels(); }
 		
 		template< class T >
 		inline bool operator == ( const T &rhs ) const
@@ -109,6 +107,18 @@ class PixelBase
 			);
 			forEachChannel( *this, rhs, Copy() );
 			return *static_cast< const Derived * >( this );
+		}
+		
+		template< class Type = DefaultChannelType >
+		inline void setChannel( Channel channel, const Type &value )
+		{
+			return m_layout.template setChannel< typename Derived::ContainerType, Type >( m_container, channel, value );
+		}
+
+		template< class Type = DefaultChannelType >
+		inline Type getChannel( Channel channel ) const
+		{
+			return m_layout.template getChannel< typename Derived::ContainerType, Type >( m_container, channel );
 		}
 
 		template< ChannelDefault C, class ReturnType = typename Type::template ChannelTraits< C, true >::ReferenceType >
@@ -133,6 +143,12 @@ class PixelBase
 		inline ReturnType channelAtIndex() const
 		{
 			return m_layout.template channelAtIndex< typename Derived::ContainerType, Index >( m_container );
+		}
+		
+		template< class Type = DefaultChannelType >
+		inline Type operator [] ( Channel channel ) const
+		{
+			return getChannel< Type >( channel );
 		}
 
 	protected :
@@ -200,8 +216,8 @@ struct ConstPixelAccessor : public PixelBase< ConstPixelAccessor< Layout >, Layo
 		typedef Layout LayoutType;
 		typedef ConstPixelAccessor< Layout > Type;
 
-		inline unsigned int numberOfChannelPointers() const { return BaseType::m_layout.numberOfChannelPointers(); };
-		inline ChannelSet requiredChannels() const { return BaseType::m_layout.requiredChannels(); };
+		static inline unsigned int numberOfChannelPointers() { return Layout::numberOfChannelPointers(); };
+		static inline ChannelSet requiredChannels() { return Layout::requiredChannels(); };
 
 		inline void setChannelPointer( Channel channel, void *pointer )
 		{

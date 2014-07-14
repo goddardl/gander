@@ -41,7 +41,10 @@ namespace Image
 template< class T, ChannelBrothers B >
 inline void BrothersLayout< T, B >::increment( ChannelPointerContainerType &container, Channel channel, int v )
 {
-	increment( container, v );
+	if( BaseType::contains( channel ) )
+	{
+		increment( container, v );
+	}
 }
 
 template< class T, ChannelBrothers B >
@@ -55,49 +58,43 @@ inline void BrothersLayout< T, B >::increment( ChannelPointerContainerType &cont
 }
 
 template< class T, ChannelBrothers B >
-inline ChannelSet BrothersLayout< T, B >::_requiredChannels() const
-{
-	return ChannelSet( ChannelDefault( BrotherTraits<B>::FirstBrotherInBrothers ) );
-}
-
-template< class T, ChannelBrothers B >
 template< ChannelDefault C >
-inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channel( ChannelPointerContainerType &container )
+inline typename LayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channel( ChannelPointerContainerType &container )
 {
 	return *( container[0] + BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value );
 }
 
 template< class T, ChannelBrothers B >
 template< ChannelDefault C >
-inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channel( const ChannelPointerContainerType &container ) const
+inline typename LayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channel( const ChannelPointerContainerType &container ) const
 {
 	return *( container[0] + BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value );
 }
 
 template< class T, ChannelBrothers B >
 	template< ChannelDefault C >
-inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channel( ChannelContainerType &container )
+inline typename LayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channel( ChannelContainerType &container )
 {
 	return container[ BrotherTraits<B>::template BrotherIndexToChannelIndex< BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value >::Value ];
 }
 
 template< class T, ChannelBrothers B >
 template< ChannelDefault C >
-inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channel( const ChannelContainerType &container ) const
+inline typename LayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channel( const ChannelContainerType &container ) const
 {
 	return container[ BrotherTraits<B>::template BrotherIndexToChannelIndex< BrotherTraits<B>::template IndexOfChannelInBrothers< C >::Value >::Value ];
 }
 
 template< class T, ChannelBrothers B >
 template< EnumType Index >
-inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channelAtIndex( ChannelPointerContainerType &container )
+inline typename LayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channelAtIndex( ChannelPointerContainerType &container )
 {
 	return *( container[0] + BrotherTraits<B>::template ChannelIndexToBrotherIndex< Index >::Value );
 }
 
 template< class T, ChannelBrothers B >
 template< EnumType Index >
-inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channelAtIndex( const ChannelPointerContainerType &container ) const
+inline typename LayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channelAtIndex( const ChannelPointerContainerType &container ) const
 {
 	return *( container[0] + BrotherTraits<B>::template ChannelIndexToBrotherIndex< Index >::Value );
 }
@@ -105,14 +102,14 @@ inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ConstReferenceTyp
 
 template< class T, ChannelBrothers B >
 template< EnumType Index >
-inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channelAtIndex( ChannelContainerType &container )
+inline typename LayoutBase< BrothersLayout< T, B >, T >::ReferenceType BrothersLayout< T, B >::_channelAtIndex( ChannelContainerType &container )
 {
 	return container[ Index ];
 }
 
 template< class T, ChannelBrothers B >
 template< EnumType Index >
-inline typename StaticLayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channelAtIndex( const ChannelContainerType &container ) const
+inline typename LayoutBase< BrothersLayout< T, B >, T >::ConstReferenceType BrothersLayout< T, B >::_channelAtIndex( const ChannelContainerType &container ) const
 {
 	return container[ Index ];
 }

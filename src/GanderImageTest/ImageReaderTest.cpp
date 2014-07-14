@@ -37,6 +37,10 @@
 #include "GanderTest/TestTools.h"
 
 #include "GanderImage/ImageReader.h"
+#include "GanderImage/ImageWriter.h"
+#include "GanderImage/Row.h"
+#include "GanderImage/ChannelLayout.h"
+#include "GanderImage/CompoundLayout.h"
 
 #include "GanderImageTest/ImageReaderTest.h"
 
@@ -57,8 +61,69 @@ namespace ImageTest
 
 struct ImageReaderTest
 {
+	void testSimpleRead()
+	{
+		typedef Gander::Image::CompoundLayout< ChannelLayout< float, Chan_Red >, ChannelLayout< float, Chan_Green >, ChannelLayout< float, Chan_Blue > > LayoutType;
+		typedef Gander::Image::Image< LayoutType > ImageType;
+		ImageType image;
+
+		readImage< ImageType >( image, "data/images/blueWithDataWindow.100x100.exr" );
+		
+		BOOST_CHECK( image.isValid() );
+		BOOST_CHECK( image.getDisplayWindow() == Gander::Box2i( Eigen::Vector2i( -1, -1 ), Eigen::Vector2i( 1, 1 ) ) );
+		BOOST_CHECK( image.getDataWindow() == Gander::Box2i( Eigen::Vector2i( 1, 1 ), Eigen::Vector2i( 2, 2 ) ) );
+			
+		BOOST_CHECK_EQUAL( image[1][1].channel<Chan_Red>(), 1. );
+		BOOST_CHECK_EQUAL( image[1][2].channel<Chan_Red>(), 0. );
+		BOOST_CHECK_EQUAL( image[2][1].channel<Chan_Red>(), 0. );
+		BOOST_CHECK_EQUAL( image[2][2].channel<Chan_Red>(), 1. );
+		BOOST_CHECK_EQUAL( image[1][1].channel<Chan_Green>(), .0 );
+		BOOST_CHECK_EQUAL( image[1][2].channel<Chan_Green>(), 1. );
+		BOOST_CHECK_EQUAL( image[2][1].channel<Chan_Green>(), 0. );
+		BOOST_CHECK_EQUAL( image[2][2].channel<Chan_Green>(), 1. );
+		BOOST_CHECK_EQUAL( image[1][1].channel<Chan_Blue>(), .0 );
+		BOOST_CHECK_EQUAL( image[1][2].channel<Chan_Blue>(), .0 );
+		BOOST_CHECK_EQUAL( image[2][1].channel<Chan_Blue>(), 1. );
+		BOOST_CHECK_EQUAL( image[2][2].channel<Chan_Blue>(), 1. );
+
+		std::cerr << "Things appear to work when using a bitmap... Just use the reader to try to read an EXR and just sample the raw data make sure it is as expected.." << std::endl;
+		std::cerr << "Get the image reader working. It is almost there but it may be flipped etc." << std::endl;
+		std::cerr << "Get the image writer working" << std::endl;
+		std::cerr << "Get the image reader and writer working with different channel types such as half and int" << std::endl;
+		std::cerr << "Write a thorough set of tests" << std::endl;
+	}
+
 	void testImageReader()
 	{
+		typedef Gander::Image::CompoundLayout< ChannelLayout< float, Chan_Red >, ChannelLayout< float, Chan_Green >, ChannelLayout< float, Chan_Blue >, ChannelLayout< float, Chan_Alpha > > LayoutType;
+		typedef Gander::Image::Image< LayoutType > ImageType;
+		ImageType image;
+		readImage< ImageType >( image, "data/images/blueWithDataWindow.100x100.exr" );
+		
+		BOOST_CHECK( image.isValid() );
+		BOOST_CHECK( image.getDataWindow() == Gander::Box2i( Eigen::Vector2i( 30, 30 ), Eigen::Vector2i( 79, 79 ) ) );
+		BOOST_CHECK( image.getDisplayWindow() == Gander::Box2i( Eigen::Vector2i( 0, 0 ), Eigen::Vector2i( 99, 99 ) ) );
+
+		// The image is just a blue window so we can just check that every pixel is blue...
+		ImageType::Pixel expectedResult;
+		expectedResult.channel<Chan_Red>() = .0;
+		expectedResult.channel<Chan_Green>() = .0;
+		expectedResult.channel<Chan_Blue>() = .5;
+		expectedResult.channel<Chan_Alpha>() = .5;
+		for( int i = image.getDataWindow().min(1); i <= image.getDataWindow().max(1); ++i )
+		{
+			for( int j = image.getDataWindow().min(0); j <= image.getDataWindow().max(0); ++j )
+			{
+				BOOST_CHECK( image[i][j] == expectedResult );
+			}
+		}
+
+		writeImage< ImageType >( image, "test/GanderImageTest/testImage2.exr" );
+		
+		ImageType image2;
+		readImage< ImageType >( image2, "test/GanderImageTest/testImage2.exr" );
+
+		BOOST_CHECK( image2 == image );
 	}
 };
 
@@ -68,6 +133,7 @@ struct ImageReaderTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<ImageReaderTest> instance( new ImageReaderTest() );
 		add( BOOST_CLASS_TEST_CASE( &ImageReaderTest::testImageReader, instance ) );
+//		add( BOOST_CLASS_TEST_CASE( &ImageReaderTest::testSimpleRead, instance ) );
 	}
 };
 

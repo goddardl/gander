@@ -64,12 +64,12 @@ class Row : public Gander::EqualComparisonOperators< Row< Layout > >
 		typedef typename Gander::Image::template Pixel< LayoutType > Pixel;
 		typedef typename Gander::Image::template PixelIterator< LayoutType > PixelIterator;
 		typedef typename Gander::Image::template ConstPixelIterator< LayoutType > ConstPixelIterator;
-
-		typedef PixelIterator iterator;
-		typedef ConstPixelIterator const_iterator;
+		typedef typename Gander::Image::template PixelAccessor< LayoutType > PixelAccessor;
+		typedef typename Gander::Image::template ConstPixelAccessor< LayoutType > ConstPixelAccessor;
 
 		inline Row() :
-			m_width( 0 )
+			m_width( 0 ),
+			m_x( 0 )
 		{
 		}
 		
@@ -88,38 +88,54 @@ class Row : public Gander::EqualComparisonOperators< Row< Layout > >
 			return m_start.numberOfChannels();
 		}
 
-		const const_iterator &begin() const
+		inline ConstPixelIterator &begin() const
 		{
 			return m_start;
 		}
 
-		iterator &begin() 
+		inline PixelIterator &begin() 
 		{
 			return m_start;
 		}
 
-		const_iterator end() const
+		inline ConstPixelIterator end() const
 		{
-			return iterator( m_start ).increment( m_width );
+			return PixelIterator( m_start ).increment( m_width );
 		}
 		
 		template< class RhsLayoutType >
 		inline bool equalTo( const Row< RhsLayoutType > &rhs ) const
 		{
-			return m_start == rhs.m_start && m_width == rhs.m_width;
+			return m_start == rhs.m_start && m_width == rhs.m_width && m_x == rhs.m_x;
 		}
 
-		void get( const ImageType &image, int y )
+		inline void get( const ImageType &image, int y )
 		{
 			image.set( *this, y );
+		}
+
+		inline PixelAccessor operator [] ( int x )
+		{
+			return *( m_start + ( x - m_x ) );
+		}
+		
+		inline ConstPixelAccessor operator [] ( int x ) const
+		{
+			return *( m_start + ( x - m_x ) );
+		}
+		
+		inline int x() const
+		{
+			return m_x;
 		}
 
 	protected :
 		
 		template< class > friend class Image;
 		
-		iterator m_start;
+		PixelIterator m_start;
 		unsigned int m_width;
+		int m_x;
 
 };
 

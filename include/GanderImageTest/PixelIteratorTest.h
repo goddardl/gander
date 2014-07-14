@@ -36,7 +36,6 @@
 
 #include "GanderImage/Pixel.h"
 #include "GanderImage/Channel.h"
-#include "GanderImage/DynamicLayout.h"
 #include "GanderImage/ChannelLayout.h"
 #include "GanderImage/BrothersLayout.h"
 #include "GanderImage/CompoundLayout.h"
