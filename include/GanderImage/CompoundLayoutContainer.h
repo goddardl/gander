@@ -106,9 +106,6 @@ struct CompoundLayoutContainerRecurse< CompoundLayout, 0, Container >
 			return r; // Return it.
 		};
 		
-		inline void _addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-		}
 };
 
 template< class CompoundLayout, EnumType N, ContainerName Container >
@@ -144,18 +141,6 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 			return m_container.size() + BaseType::size();
 		}
 
-		inline void _addChannels( CompoundLayout &layout, ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			if( !LayoutType::IsDynamic )
-			{
-				BaseType::_addChannels( c, b );
-			}
-			else
-			{
-				layout.template child< LayoutIndex, true, LayoutType >().template addChannels< ContainerType >( m_container, c, b );
-			}
-		}
-		
 		template< class ReturnType, EnumType Index >
 		inline ReturnType &child()
 		{
@@ -247,11 +232,6 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 			return ( ChannelType & ) child< ChildIndex >().template channelAtIndex< ChannelIndexInLayout, Mask, DisableStaticAsserts >();
 		}
 	
-		inline void addChannels( ChannelSet c, ChannelBrothers b = Brothers_None )
-		{
-			BaseType::_addChannels( c, b );
-		}
-
 };
 
 }; // namespace Detail

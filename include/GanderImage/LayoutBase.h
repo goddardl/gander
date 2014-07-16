@@ -195,6 +195,15 @@ struct LayoutBase
 			};
 		};
 		
+		template< ChannelDefault C >
+		struct ChannelToLayoutIndex
+		{
+			enum
+			{
+				Value = 0
+			};
+		};
+		
 		template< ChannelDefault C = Chan_None >
 		struct ChannelTraits
 		{

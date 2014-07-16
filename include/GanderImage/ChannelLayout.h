@@ -113,7 +113,7 @@ struct ChannelLayout : public LayoutBase< ChannelLayout< T, S >, T >
 				ChannelIndexInLayout = Index,
 			};
 		};
-		
+	
 		/// Increments the specified channel pointer in the container by v.
 		inline void increment( ChannelPointerContainerType &container, Channel c, int v );
 
