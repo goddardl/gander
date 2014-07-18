@@ -63,17 +63,30 @@ struct CompoundLayoutContainerTest
 		typedef Gander::Image::CompoundLayout< BrothersLayout< float, Brothers_BGRA >, ChannelLayout< int, Chan_Z >, ChannelLayout< int, Chan_V > > CompoundLayout;
 		typedef Gander::Image::Detail::CompoundLayoutContainer< CompoundLayout, Gander::Image::Detail::ChannelContainer > CompoundLayoutContainer;
 		
-		CompoundLayout compoundLayout;
-		CompoundLayoutContainer cc( compoundLayout );
+		CompoundLayoutContainer cc;
+		BOOST_CHECK_EQUAL( cc.size(), CompoundLayout::channels().size() );
 
-		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ChildTraitsAtIndex<0>::ContainerType, BrothersLayout< float, Brothers_BGRA >::ChannelContainerType >::value ) );
-		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ChildTraitsAtIndex<1>::ContainerType, ChannelLayout< int, Chan_Z >::ChannelContainerType >::value ) );
-		BOOST_CHECK( ( std::is_same< CompoundLayoutContainer::ChildTraitsAtIndex<2>::ContainerType, ChannelLayout< int, Chan_V >::ChannelContainerType >::value ) );
-		BOOST_CHECK( ( compoundLayout.child<0>() == BrothersLayout< float, Brothers_BGRA >() ) );
-		BOOST_CHECK( ( compoundLayout.child<1>() == ChannelLayout< int, Chan_Z >() ) );
-		BOOST_CHECK( ( compoundLayout.child<2>() == ChannelLayout< int, Chan_V >() ) );
+		// Check the size of the container's children.
+		BOOST_CHECK_EQUAL( cc.child<0>().size(), 4 );
+		BOOST_CHECK_EQUAL( cc.child<1>().size(), 1 );
+		BOOST_CHECK_EQUAL( cc.child<2>().size(), 1 );
 
-		BOOST_CHECK_EQUAL( cc.size(), compoundLayout.channels().size() );		
+		// Set their values.
+		cc.child<0>()[0] = 1.25; 
+		cc.child<0>()[1] = 2.5; 
+		cc.child<0>()[2] = 3.125; 
+		cc.child<0>()[3] = 4.; 
+		cc.child<1>()[0] = 5.5; 
+		cc.child<2>()[0] = 6.25; 
+		
+		// Check their values.	
+		BOOST_CHECK_EQUAL( cc.child<0>()[0], 1.25 );
+		BOOST_CHECK_EQUAL( cc.child<0>()[1], 2.5 );
+		BOOST_CHECK_EQUAL( cc.child<0>()[2], 3.125 );
+		BOOST_CHECK_EQUAL( cc.child<0>()[3], 4 );
+		BOOST_CHECK_EQUAL( cc.child<1>()[0], 5 ); // These values are stored as an int and so their precision is limited.
+		BOOST_CHECK_EQUAL( cc.child<2>()[0], 6 );
+
 	}
 };
 

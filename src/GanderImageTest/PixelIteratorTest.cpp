@@ -122,11 +122,9 @@ struct PixelIteratorTest
 		it->setChannelPointer( Chan_Alpha, &alpha );	
 		
 		BOOST_CHECK_EQUAL( it->channels(), ChannelSet( Mask_RGBA ) );
-		BOOST_CHECK_EQUAL( it->requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha ) );
 		
 		ConstPixelIterator cit( it );
 		BOOST_CHECK_EQUAL( cit->channels(), ChannelSet( Mask_RGBA ) );
-		BOOST_CHECK_EQUAL( cit->requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha ) );
 
 		BOOST_CHECK_EQUAL( cit->channel<Chan_Red>(), 1. );
 		BOOST_CHECK_EQUAL( (*cit).channel<Chan_Green>(), 2. );
@@ -161,8 +159,6 @@ struct PixelIteratorTest
 	{
 		typedef PixelIterator< BrothersLayout< float, Brothers_BGR > > PixelIterator;
 		PixelIterator it;
-		
-		BOOST_CHECK_EQUAL( it->requiredChannels(), ChannelSet( Mask_Blue ) );
 	
 		float bgr[6] = { 3., 2., 1., 6., 5., 4. };
 		it->setChannelPointer( Chan_Blue, &bgr[0] );	
@@ -199,7 +195,6 @@ struct PixelIteratorTest
 		PixelIterator it;
 		
 		BOOST_CHECK_EQUAL( it->channels(), ChannelSet( Mask_RGBA ) );
-		BOOST_CHECK_EQUAL( it->requiredChannels(), ChannelSet( Mask_Blue | Mask_Alpha ) );
 	
 		float bgr[6] = { 3., 2., 1., 6., 5., 4. };
 		float alpha[2] = { 7., 8. };

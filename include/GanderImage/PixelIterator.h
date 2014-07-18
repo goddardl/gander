@@ -107,15 +107,9 @@ class ConstPixelIterator :
 			return static_cast< const ConstPixelAccessorType * >( this );
 		}
 		
-		inline Type &increment( int v, Channel channel )
-		{
-			BaseType::m_layout.increment( BaseType::m_container, channel, v );
-			return *this;
-		}
-
 		inline Type &increment( int v )
 		{
-			BaseType::m_layout.increment( BaseType::m_container, v );
+			BaseType::LayoutType::increment( BaseType::m_container, v );
 			return *this;
 		}
 	
@@ -180,8 +174,7 @@ class ConstPixelIterator :
 				PIXELITERATORS_CAN_ONLY_BE_COMPARED_TO_OTHER_PIXELITERATORS__DEREFERENCE_IT_IN_ORDER_TO_COMPARE_BY_VALUE
 			);
 
-			return &BaseType::template channelAtIndex<0, typename BaseType::template ChannelTraitsAtIndex<0>::ConstReferenceType >() ==
-				&rhs.template channelAtIndex<0, typename T::template ChannelTraitsAtIndex<0>::ConstReferenceType >();
+			return &BaseType::m_container.template child<0>() == &rhs.m_container.template child<0>();
 		}
 		
 		template< class T >		

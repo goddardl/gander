@@ -75,10 +75,6 @@ struct CompoundLayoutContainerRecurse< CompoundLayout, 0, Container >
 {
 	protected :
 
-		inline CompoundLayoutContainerRecurse( CompoundLayout &layout )
-		{
-		}
-		
 		inline unsigned int size() const
 		{
 			return 0;
@@ -89,9 +85,8 @@ struct CompoundLayoutContainerRecurse< CompoundLayout, 0, Container >
 		{
 			GANDER_ASSERT( Index >= 0 || Index < CompoundLayout::NumberOfLayouts, "Index is out of bounds." );
 
-			// We never get here but we still need to return something to appease the compiler. So...
-			static typename ReturnType::LayoutType layout; // Create an instance of a layout.
-			static ReturnType r( layout ); // Initialize the container with it.
+			// We never get here but we still need to return something to appease the compiler.
+			static ReturnType r;
 			return r; // Return it.
 		};
 		
@@ -100,9 +95,8 @@ struct CompoundLayoutContainerRecurse< CompoundLayout, 0, Container >
 		{
 			GANDER_ASSERT( Index >= 0 || Index < CompoundLayout::NumberOfLayouts, "Index is out of bounds." );
 
-			// We never get here but we still need to return something to appease the compiler. So...
-			static typename ReturnType::LayoutType layout; // Create an instance of a layout.
-			static ReturnType r( layout ); // Initialize the container with it.
+			// We never get here but we still need to return something to appease the compiler.
+			static ReturnType r;
 			return r; // Return it.
 		};
 		
@@ -118,8 +112,7 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 		typedef CompoundLayoutContainerRecurse< CompoundLayout, N, Container > Type;
 		typedef CompoundLayoutContainerRecurse< CompoundLayout, N - 1, Container > BaseType;
 		typedef typename CompoundLayout::template LayoutTraits< LayoutIndex >::LayoutType LayoutType;	
-		typedef typename LayoutType::StorageType ChannelType;
-		typedef typename LayoutType::StorageType StorageType;
+		typedef typename LayoutType::ChannelType ChannelType;
 		typedef typename LayoutType::PointerType PointerType;
 		typedef typename LayoutType::ReferenceType ReferenceType;
 		typedef typename LayoutType::ConstReferenceType ConstReferenceType;
@@ -130,12 +123,6 @@ struct CompoundLayoutContainerRecurse : public CompoundLayoutContainerRecurse< C
 
 	protected :
 	
-		inline CompoundLayoutContainerRecurse( CompoundLayout &layout ) :
-			BaseType( layout ),
-			m_container( layout.child< LayoutIndex >() )
-		{
-		}
-		
 		inline unsigned int size() const
 		{
 			return m_container.size() + BaseType::size();
@@ -193,11 +180,6 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 			>::type ContainerType;
 		};
 	
-		inline CompoundLayoutContainer( CompoundLayout &layout ) :
-			BaseType( layout )
-		{
-		}
-		
 		template< EnumType Index >
 		inline typename ChildTraitsAtIndex< Index >::ContainerType &child()
 		{
@@ -213,23 +195,6 @@ class CompoundLayoutContainer : public Gander::Image::Detail::CompoundLayoutCont
 		inline unsigned int size() const
 		{
 			return BaseType::size();
-		}
-
-		template< EnumType Index, ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false, class ChannelType = typename CompoundLayout::template ChannelTraitsAtIndex< Index, Mask >::StorageType >
-		inline ChannelType &channelAtIndex( CompoundLayout &layout )
-		{
-			enum
-			{
-				ChildIndex = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::LayoutIndex,
-				ChannelIndexInLayout = CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::ChannelIndexInLayout,
-			};
-			
-			GANDER_ASSERT(
-				( std::is_same< ChannelType, typename CompoundLayout::template ChannelTraitsAtIndex< Index, Mask, DisableStaticAsserts >::StorageType >::value ),
-				"Incorrect return type specified."
-			);
-		
-			return ( ChannelType & ) child< ChildIndex >().template channelAtIndex< ChannelIndexInLayout, Mask, DisableStaticAsserts >();
 		}
 	
 };

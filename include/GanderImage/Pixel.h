@@ -56,6 +56,9 @@ namespace Gander
 namespace Image
 {
 
+// Forward declaration of the Iterator class.
+template< class > class ConstPixelIterator;
+
 template< class Derived, class Layout, class Container >
 class PixelBase
 {
@@ -68,10 +71,7 @@ class PixelBase
 		typedef Layout LayoutType;
 		typedef PixelBase< Derived, Layout, Container > Type;
 		
-		PixelBase() :
-			m_container( m_layout )
-		{
-		}
+		inline PixelBase() {}
 
 		template< class T >
 		inline const Derived &operator = ( const T &rhs )
@@ -81,8 +81,6 @@ class PixelBase
 		
 		template< EnumType Index > struct LayoutTraits : public Layout::template LayoutTraits< Index > {};
 		template< ChannelDefault C, bool DisableStaticAsserts = false > struct ChannelTraits : public Layout::template ChannelTraits< C, DisableStaticAsserts > {};
-		template< EnumType Index > struct ChannelTraitsAtIndex : public Layout::template ChannelTraitsAtIndex< Index > {};
-		
 		static inline unsigned int numberOfChannels() { return Layout::numberOfChannels(); }
 		static inline ChannelSet channels() { return Layout::channels(); }
 		
@@ -112,37 +110,25 @@ class PixelBase
 		template< class Type = DefaultChannelType >
 		inline void setChannel( Channel channel, const Type &value )
 		{
-			return m_layout.template setChannel< typename Derived::ContainerType, Type >( m_container, channel, value );
+			return LayoutType::template setChannel< Type >( &m_container, channel, value );
 		}
 
 		template< class Type = DefaultChannelType >
 		inline Type getChannel( Channel channel ) const
 		{
-			return m_layout.template getChannel< typename Derived::ContainerType, Type >( m_container, channel );
+			return LayoutType::template getChannel< Type >( &m_container, channel );
 		}
 
-		template< ChannelDefault C, class ReturnType = typename Type::template ChannelTraits< C, true >::ReferenceType >
+		template< ChannelDefault C, bool DisableStaticAsserts = false, class ReturnType = typename Type::template ChannelTraits< C, DisableStaticAsserts >::ReferenceType >
 		inline ReturnType channel()
 		{
-			return m_layout.template channel< typename Derived::ContainerType, C, true >( m_container );
+			return LayoutType::template channel< C, DisableStaticAsserts >( &m_container );
 		}
 
-		template< ChannelDefault C, class ReturnType = typename Type::template ChannelTraits< C, true >::ConstReferenceType >
+		template< ChannelDefault C, bool DisableStaticAsserts = false, class ReturnType = typename Type::template ChannelTraits< C, DisableStaticAsserts >::ConstReferenceType >
 		inline ReturnType channel() const
 		{
-			return m_layout.template channel< typename Derived::ContainerType, C, true >( m_container );
-		}
-
-		template< EnumType Index, class ReturnType = typename Type::template ChannelTraitsAtIndex< Index >::ReferenceType >
-		inline ReturnType channelAtIndex()
-		{
-			return m_layout.template channelAtIndex< typename Derived::ContainerType, Index >( m_container );
-		}
-
-		template< EnumType Index, class ReturnType = typename Type::template ChannelTraitsAtIndex< Index >::ConstReferenceType >
-		inline ReturnType channelAtIndex() const
-		{
-			return m_layout.template channelAtIndex< typename Derived::ContainerType, Index >( m_container );
+			return LayoutType::template channel< C, DisableStaticAsserts >( &m_container );
 		}
 		
 		template< class Type = DefaultChannelType >
@@ -151,13 +137,15 @@ class PixelBase
 			return getChannel< Type >( channel );
 		}
 
+		template< class > friend class ConstPixelIterator;
+
 	protected :
 
 		/// The equalTo method is the implementation of the equality interface.	
 		template< class T >
 		bool equalTo( T const &rhs ) const
 		{
-			if( m_layout != rhs.m_layout )
+			if( std::is_same< LayoutType, typename T::LayoutType >::value )
 			{
 				return false;
 			}
@@ -167,7 +155,6 @@ class PixelBase
 			return op.value();
 		}
 
-		LayoutType m_layout;
 		ContainerType m_container;
 
 		template< class, class, class > friend class PixelBase;
@@ -216,12 +203,9 @@ struct ConstPixelAccessor : public PixelBase< ConstPixelAccessor< Layout >, Layo
 		typedef Layout LayoutType;
 		typedef ConstPixelAccessor< Layout > Type;
 
-		static inline unsigned int numberOfChannelPointers() { return Layout::numberOfChannelPointers(); };
-		static inline ChannelSet requiredChannels() { return Layout::requiredChannels(); };
-
 		inline void setChannelPointer( Channel channel, void *pointer )
 		{
-			BaseType::m_layout.template setChannelPointer< ContainerType >( BaseType::m_container, channel, pointer );
+//			BaseType::LayoutType::template setChannelPointer< ContainerType >( BaseType::m_container, channel, pointer );
 		}
 		
 		template< class T >		

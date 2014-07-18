@@ -118,6 +118,18 @@ struct Tuple< T, NumberOfElements, false >
 			GANDER_STATIC_ASSERT_ERROR( THIS_METHOD_CANNOT_BE_CALLED_ON_A_STATIC_TUPLE );
 		}
 
+		template< EnumType Index >
+		inline ReferenceType child()
+		{
+			return this->operator[]( Index );
+		}
+
+		template< EnumType Index >
+		inline ConstReferenceType child() const
+		{
+			return this->operator[]( Index );
+		}
+
 	private :
 
 		StorageType m_data[ NumberOfElements ];
@@ -193,6 +205,18 @@ struct Tuple< T, NumberOfElements, true >
 		inline iterator erase( iterator it )
 		{
 			return m_data.erase( it );
+		}
+		
+		template< EnumType Index >
+		inline ReferenceType child()
+		{
+			return this->operator[]( Index );
+		}
+
+		template< EnumType Index >
+		inline ConstReferenceType child() const
+		{
+			return this->operator[]( Index );
 		}
 
 	private :

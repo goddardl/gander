@@ -176,6 +176,17 @@ options.Add(
 	"$DEPENDENCIES_SRC_DIR/oiio-Release-1.2.1",
 )
 
+# TBB
+options.Add(
+	BoolVariable( "BUILD_DEPENDENCY_TBB", "Set this to build TBB.", "$BUILD_DEPENDENCIES" )
+)
+
+options.Add(
+	"TBB_SRC_DIR",
+	"The location of the TBB source to be used if BUILD_DEPENDENCY_TBB is specified.",
+	"$DEPENDENCIES_SRC_DIR/tbb22_004oss",
+)
+
 # variables to be used when making a build which will use dependencies previously
 # installed in some central location. these are mutually exclusive with the BUILD_*
 # variables above, which are all about building the dependencies and packaging them
@@ -308,6 +319,13 @@ if depEnv["BUILD_DEPENDENCY_BOOST"] :
 if depEnv["BUILD_DEPENDENCY_EIGEN"] :
 	runCommand( "mkdir -p $BUILD_DIR/Eigen && cp -R $EIGEN_SRC_DIR/Eigen $BUILD_DIR/Eigen/ && cp -R $EIGEN_SRC_DIR/unsupported $BUILD_DIR/Eigen/" )
 
+if depEnv["BUILD_DEPENDENCY_TBB"] :
+	runCommand( "cd $TBB_SRC_DIR; make clean; make" )
+	if depEnv["PLATFORM"]=="darwin" :
+		runCommand( "cd $TBB_SRC_DIR; cp build/macos_*_release/*.dylib $BUILD_DIR/lib; cp -r include/tbb $BUILD_DIR/include" )
+	else :
+		runCommand( "cd $TBB_SRC_DIR; cp build/*_release/*.so* $BUILD_DIR/lib; cp -r include/tbb $BUILD_DIR/include" )
+
 if depEnv["BUILD_DEPENDENCY_OIIO"] :
 	runCommand( "cd $OIIO_SRC_DIR && make clean && make THIRD_PARTY_TOOLS_HOME=$BUILD_DIR OCIO_PATH=$BUILD_DIR USE_OPENJPEG=0" )
 	if depEnv["PLATFORM"]=="darwin" :
@@ -352,6 +370,7 @@ baseLibEnv.Append(
 		"boost_wave" + boostLibSuffix,
 		"boost_regex" + boostLibSuffix,
 		"boost_system" + boostLibSuffix,
+		"tbb",
 	],
 	
 )
@@ -542,6 +561,7 @@ if buildingDependencies :
 		( "boost", "$BOOST_SRC_DIR/LICENSE_1_0.txt" ),
 		( "ilmbase", "$ILMBASE_SRC_DIR/COPYING" ),
 		( "openImageIO", "$OIIO_SRC_DIR/LICENSE" ),
+		( "tbb", "$TBB_SRC_DIR/COPYING" ),
 	]
 
 	for l in licenses :
@@ -568,6 +588,7 @@ dependenciesManifest = [
 	"lib/libImath*$SHLIBSUFFIX*",
 	"lib/libIlmImf*$SHLIBSUFFIX*",
 	"lib/libIlmThread*$SHLIBSUFFIX*",
+	"lib/libtbb*$SHLIBSUFFIX*",
 	"include/boost",
 ]
 
@@ -577,6 +598,7 @@ manifest = dependenciesManifest + [
 	"lib/libGander*$SHLIBSUFFIX",
 	"lib/libGander*",
 	"include/Gander*",
+	"include/tbb",
 ]
 
 def installer( target, source, env ) :

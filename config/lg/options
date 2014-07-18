@@ -57,14 +57,16 @@ else :
 
 	LOCATE_DEPENDENCY_LIBPATH = [
 		"/home/luke/build/boost/1.51.0/lib",
-		"/home/luke/build/OpenImageIO/1.2.0/lib/"
+		"/home/luke/build/OpenImageIO/1.2.0/lib/",
+		"/home/luke/build/tbb/4.1.3/lib/"
 	]
 
 	LOCATE_DEPENDENCY_SYSTEMPATH = [
 		'$BUILD_DIR'+'/include',
 		"/home/luke/build/boost/1.51.0/include",
 		"/home/luke/build/Eigen",
-		"/home/luke/build/OpenImageIO/1.2.0/include/"
+		"/home/luke/build/OpenImageIO/1.2.0/include/",
+		"/home/luke/build/tbb/4.1.3/include/"
 	]
 
 

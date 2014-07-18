@@ -84,14 +84,6 @@ struct PixelTest
 		BOOST_CHECK_EQUAL( pixel.channel<Chan_U>(), 6. );
 		BOOST_CHECK_EQUAL( pixel.channel<Chan_V>(), 7. );
 
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<0>(), 1. );
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<1>(), 2. );
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<2>(), 3. );
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<3>(), 4. );
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<4>(), 5. );
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<5>(), 6. );
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<6>(), 7. );
-		
 		BOOST_CHECK_EQUAL( pixel.getChannel( Chan_Red ), 1. );
 		BOOST_CHECK_EQUAL( pixel.getChannel( Chan_Green ), 2. );
 		BOOST_CHECK_EQUAL( pixel.getChannel( Chan_Blue ), 3. );
@@ -106,7 +98,6 @@ struct PixelTest
 		
 		PixelAccessor pixelAccessor;
 		BOOST_CHECK_EQUAL( pixelAccessor.channels(), ChannelSet( Mask_RGBA | Mask_Z | Mask_UV ) );
-		BOOST_CHECK_EQUAL( pixelAccessor.requiredChannels(), ChannelSet( Mask_Blue | Mask_V | Mask_Z ) );
 		BOOST_CHECK_THROW( pixelAccessor.setChannelPointer( Chan_Red, &bgra[0] ), std::runtime_error );
 		BOOST_CHECK_THROW( pixelAccessor.setChannelPointer( Chan_Blue, 0 ), std::runtime_error );
 		
@@ -122,14 +113,6 @@ struct PixelTest
 		BOOST_CHECK_EQUAL( pixelAccessor.channel<Chan_U>(), 6. );
 		BOOST_CHECK_EQUAL( pixelAccessor.channel<Chan_V>(), 7. );
 
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<0>(), 1. );
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<1>(), 2. );
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<2>(), 3. );
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<3>(), 4. );
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<4>(), 5. );
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<5>(), 6. );
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<6>(), 7. );
-	
 		// These the comparison and assignment operators.
 		BOOST_CHECK( pixel == pixel2 );
 		BOOST_CHECK( pixelAccessor == pixel2 );
@@ -178,10 +161,6 @@ struct PixelTest
 		BOOST_CHECK_EQUAL( pixel.channel<Chan_Green>(), 2. );
 		BOOST_CHECK_EQUAL( pixel.channel<Chan_Blue>(), 3. );
 		BOOST_CHECK_EQUAL( pixel.channel<Chan_Alpha>(), 4. );
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<0>(), 1. );
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<1>(), 2. );
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<2>(), 3. );
-		BOOST_CHECK_EQUAL( pixel.channelAtIndex<3>(), 4. );
 		
 		// Test the runtime accessors.
 		BOOST_CHECK_EQUAL( pixel.getChannel( Chan_Red ), 1. );
@@ -202,7 +181,6 @@ struct PixelTest
 		float bgra[4] = { 3., 2., 1., 4. };
 		PixelAccessor pixelAccessor;
 		BOOST_CHECK_EQUAL( pixelAccessor.channels(), ChannelSet( Mask_RGBA ) );
-		BOOST_CHECK_EQUAL( pixelAccessor.requiredChannels(), ChannelSet( Mask_Blue ) );
 		BOOST_CHECK_THROW( pixelAccessor.setChannelPointer( Chan_Red, &bgra[0] ), std::runtime_error );
 		BOOST_CHECK_THROW( pixelAccessor.setChannelPointer( Chan_Blue, 0 ), std::runtime_error );
 		
@@ -211,10 +189,6 @@ struct PixelTest
 		BOOST_CHECK_EQUAL( pixelAccessor.channel<Chan_Green>(), 2. );
 		BOOST_CHECK_EQUAL( pixelAccessor.channel<Chan_Blue>(), 3. );
 		BOOST_CHECK_EQUAL( pixelAccessor.channel<Chan_Alpha>(), 4. );
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<0>(), 1. );
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<1>(), 2. );
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<2>(), 3. );
-		BOOST_CHECK_EQUAL( pixelAccessor.channelAtIndex<3>(), 4. );
 		
 		// Test the equality operator.
 		BOOST_CHECK( pixel == pixel2 );

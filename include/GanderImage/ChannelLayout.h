@@ -46,7 +46,7 @@
 #include "Gander/Tuple.h"
 
 #include "GanderImage/StaticAssert.h"
-#include "GanderImage/LayoutBase.h"
+#include "GanderImage/Layout.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/ChannelBrothers.h"
 
@@ -60,117 +60,79 @@ namespace Image
 {
 
 template< class T, ChannelDefault S >
-struct ChannelLayout : public LayoutBase< ChannelLayout< T, S >, T >
+struct ChannelLayout : public Layout< ChannelLayout< T, S > >
 {
-
 	public :
 
 		enum
 		{
 			ChannelMask = ChannelToMask<S>::Value,
 			NumberOfChannels = 1,
-			ChannelPointerMask = ChannelMask,
-			NumberOfChannelPointers = 1,
 		};
-		
-		typedef ChannelLayout< T, S > Type;
-		typedef Type LayoutType;
-		typedef LayoutBase< ChannelLayout< T, S >, T > BaseType;
-		typedef typename BaseType::StorageType ChannelType;
-		typedef typename BaseType::StorageType StorageType;
-		typedef typename BaseType::PointerType PointerType;
-		typedef typename BaseType::ReferenceType ReferenceType;
-		typedef typename BaseType::ConstReferenceType ConstReferenceType;
-		typedef Detail::ChannelContainerWrapper< Type, Gander::template Tuple< StorageType, NumberOfChannels, false > > ChannelContainerType;
-		typedef Detail::ChannelPointerContainerWrapper< Type, Gander::template Tuple< PointerType, NumberOfChannelPointers, false > > ChannelPointerContainerType;
 
+		typedef ChannelLayout< T, S > Type;
+		typedef Layout< ChannelLayout< T, S > > BaseType;
+		typedef typename Gander::template TypeTraits< T >::Type ChannelType; 
+		typedef typename Gander::template TypeTraits< T >::PointerType PointerType;
+		typedef typename Gander::template TypeTraits< T >::ReferenceType ReferenceType;
+		typedef typename Gander::template TypeTraits< T >::ConstReferenceType ConstReferenceType;
+		typedef Gander::template Tuple< ChannelType, NumberOfChannels, false > ChannelContainerType;
+		typedef Gander::template Tuple< PointerType, BaseType::NumberOfLayouts, false > ChannelPointerContainerType;
+		
 		template< ChannelDefault C = Chan_None, bool DisableStaticAsserts = false >
 		struct ChannelTraits
 		{
 			typedef Type LayoutType;
-			typedef T ChannelType;
-			typedef typename LayoutType::StorageType StorageType;
-			typedef typename LayoutType::PointerType PointerType;
-			typedef typename LayoutType::ReferenceType ReferenceType;
-			typedef typename LayoutType::ConstReferenceType ConstReferenceType;
-			typedef typename LayoutType::ChannelContainerType ChannelContainerType;
-			typedef typename LayoutType::ChannelPointerContainerType ChannelPointerContainerType;
-			
-			enum
-			{
-				LayoutIndex = 0,
-			};
+			typedef typename Type::ChannelType ChannelType;
+			typedef typename Type::PointerType PointerType;
+			typedef typename Type::ReferenceType ReferenceType;
+			typedef typename Type::ConstReferenceType ConstReferenceType;
+			typedef typename Type::ChannelContainerType ChannelContainerType;
+			typedef typename Type::ChannelPointerContainerType ChannelPointerContainerType;
 		};
-		
-		template< int Index, EnumType Mask = Mask_All, bool DisableStaticAsserts = false   >
-		struct ChannelTraitsAtIndex : public ChannelTraits<Chan_None, DisableStaticAsserts>
+
+		template< ChannelDefault C, bool DisableStaticAsserts = false >
+		static inline ReferenceType channel( ChannelContainerType *container )
 		{
-			GANDER_IMAGE_STATIC_ASSERT( ( Mask & BaseType::template LayoutTraits< 0 >::LayoutType::ChannelMask ) != 0 || DisableStaticAsserts,  CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-			GANDER_STATIC_ASSERT( Index == 0 || DisableStaticAsserts, VALUE_IS_OUT_OF_BOUNDS );
-			
-			enum
-			{	
-				ChannelIndexInLayout = Index,
-			};
-		};
-	
-		/// Increments the specified channel pointer in the container by v.
-		inline void increment( ChannelPointerContainerType &container, Channel c, int v );
+			GANDER_IMAGE_STATIC_ASSERT( ( MaskContainsChannel< ChannelMask, C >::Value || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			return (*container)[0];
+		}
 
-		/// Increments all channel pointers in the container by v.
-		inline void increment( ChannelPointerContainerType &container, int v );
+		template< ChannelDefault C, bool DisableStaticAsserts = false >
+		static inline ConstReferenceType channel( const ChannelContainerType * const container )
+		{
+			GANDER_IMAGE_STATIC_ASSERT( ( MaskContainsChannel< ChannelMask, C >::Value || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			return (*container)[0];
+		}
 		
-	private :
+		template< ChannelDefault C, bool DisableStaticAsserts = false >
+		static inline ReferenceType channel( ChannelPointerContainerType *ptrContainer )
+		{
+			GANDER_IMAGE_STATIC_ASSERT( ( MaskContainsChannel< ChannelMask, C >::Value || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			return *(*ptrContainer)[0];
+		}
+		
+		template< ChannelDefault C, bool DisableStaticAsserts = false >
+		static inline ConstReferenceType channel( const ChannelPointerContainerType * const ptrContainer )
+		{
+			GANDER_IMAGE_STATIC_ASSERT( ( MaskContainsChannel< ChannelMask, C >::Value || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
+			return *(*ptrContainer)[0];
+		}
 
-		friend class LayoutBase< ChannelLayout< T, S >, T >;	
-
-		/// Returns a reference to the given channel from the container which is specified by the "C" template argument.
-		template< ChannelDefault C >
-		inline ReferenceType _channel( ChannelContainerType &container );
+		static inline void increment( ChannelPointerContainerType * ptrContainer, int i = 1 )
+		{
+			(*ptrContainer)[0] += i;
+		}
 		
-		template< ChannelDefault C >
-		inline ConstReferenceType _channel( const ChannelContainerType &container ) const;
-		
-		/// Returns a reference to the given channel from the container which is specified by the "C" template argument.
-		template< ChannelDefault C >
-		inline ReferenceType _channel( ChannelPointerContainerType &container );
-		
-		template< ChannelDefault C >
-		inline ConstReferenceType _channel( const ChannelPointerContainerType &container ) const;
-
-		/// Returns a reference to the channel found at the given index into the number of channels in the layout from the container.
-		template< EnumType Index >
-		inline ReferenceType _channelAtIndex( ChannelContainerType &container );
-		
-		template< EnumType Index >
-		inline ConstReferenceType _channelAtIndex( const ChannelContainerType &container ) const;
-		
-		/// Returns a reference to the channel found at the given index into the number of channels in the layout from the container.
-		template< EnumType Index >
-		inline ReferenceType _channelAtIndex( ChannelPointerContainerType &container );
-		
-		template< EnumType Index >
-		inline ConstReferenceType _channelAtIndex( const ChannelPointerContainerType &container ) const;
-
-		/// Sets the value of the pointer to the given channel in the container.
-		/// Pointers can only be set for channels that are returned from the requiredChannels() method. By setting pointers
-		/// for every channel in the requiredChannels() set, the layout can provide access through the channel() and channelAtIndex()
-		/// methods for every channel represented by the layout.
-		inline void _setChannelPointer( ChannelPointerContainerType &container, Channel channel, PointerType pointer );
-		
-		/// Returns the index of a channel in the layout when masked.
-		template< EnumType Index, Gander::Image::ChannelMask Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline int _maskedChannelIndex() const;
-		
-		/// Returns the index of a channel within the layout.	
-		template< EnumType Channel, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
-		inline unsigned int _indexOfChannel() const;
+		static inline void increment( ChannelPointerContainerType & ptrContainer, int i = 1 )
+		{
+			ptrContainer[0] += i;
+		}
+				
 };
 
 }; // namespace Image
 
 }; // namespace Gander
-
-#include "GanderImage/ChannelLayout.inl"
 
 #endif

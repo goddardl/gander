@@ -52,10 +52,10 @@
 #include "GanderImageTest/BrothersLayoutTest.h"
 #include "GanderImageTest/PixelTest.h"
 #include "GanderImageTest/PixelIteratorTest.h"
-#include "GanderImageTest/RowTest.h"
-#include "GanderImageTest/ImageTest.h"
-#include "GanderImageTest/ImageReaderTest.h"
-#include "GanderImageTest/ImageWriterTest.h"
+//#include "GanderImageTest/RowTest.h"
+//#include "GanderImageTest/ImageTest.h"
+//#include "GanderImageTest/ImageReaderTest.h"
+//#include "GanderImageTest/ImageWriterTest.h"
 #include "GanderImageTest/CoordinateSystemsTest.h"
 
 using namespace boost::unit_test;
@@ -80,10 +80,10 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addOpTest(test);
 		addPixelTest(test);
 		addPixelIteratorTest(test);
-		addRowTest(test);
-		addImageTest(test);
-		addImageReaderTest(test);
-		addImageWriterTest(test);
+//		addRowTest(test);
+//		addImageTest(test);
+//		addImageReaderTest(test);
+//		addImageWriterTest(test);
 		addCoordinateSystemsTest(test);
 	}
 	catch (std::exception &ex)

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,57 +31,42 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream>
+#ifndef __GANDERIMAGE_CACHE__
+#define __GANDERIMAGE_CACHE__
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
-
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/AngleConversionTest.h"
-#include "GanderTest/DecomposeRQ3x3Test.h"
-#include "GanderTest/CommonTest.h"
-#include "GanderTest/EnumHelperTest.h"
-#include "GanderTest/BitTwiddlerTest.h"
-#include "GanderTest/TupleTest.h"
-#include "GanderTest/BoxTest.h"
-#include "GanderTest/InterfacesTest.h"
-#include "GanderTest/MurmurHashTest.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace Gander;
-using namespace Gander::Test;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-		addDecomposeRQ3x3Test(test);
-		addAngleConversionTest(test);
-		addCommonTest(test);
-		addEnumHelperTest(test);
-		addBitTwiddlerTest(test);
-		addTupleTest(test);
-		addInterfacesTest(test);
-		addBoxTest(test);
-		addMurmurHashTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+// The cache manages accesses to shared memory. Data can be requested using the read() and write() methods.
+// Theses methods return a reference counted accessor that grants access to the data. A write accessor
+// cannot be granted for any data entry that is already being read. The allocate() method creates entries in the
+// cache and deallocate() removes them. The cache should copy data between devices as required. For example, if
+// data is requested (using request()) or read from a device that is not the cpu, the data has to be copied.
+// Memory limits should be able to be set for each device and an LRU system used when copying data to and from them.
+// The hashes supplied with the methods are appended to the size of the data that is required.
+class Cache
+{
 
-	return test;
-}
+	enum
+	{
+		DEVICE_CPU = 0,
+		DEVICE_GPU0 = 1,
+		DEVICE_GPU1 = 2,
+		DEVICE_GPU2 = 3,
+		DEVICE_GPU3 = 4,
+	};
+
+	/*
+	void deallocate( MurmurHash hash = MurmurHash() );
+	void allocate( size_t sizeInBytes, MurmurHash hash = MurmurHash(), int deviceID = DEVICE_CPU );
+	WriteAccessor write( MurmurHash hash, int deviceID = DEVICE_CPU );
+	ReadAccessor read( MurmurHash hash, int deviceID = DEVICE_CPU );
+	void request( MurmurHash hash, int deviceID = DEVICE_CPU );
+	*/
+
+}; // namespace Cache
+
+}; // namespace Gander
+
+#endif
+

@@ -44,6 +44,9 @@ namespace Image
 
 typedef float DefaultChannelType;
 
+/// An empty struct for use as a default template argument to the CompoundLayout and other classes.
+namespace Detail { struct None { struct LayoutTraits { }; enum { ChannelMask = 0 }; }; };
+
 }; // namespace GanderImage
 
 }; // namespace Gander
