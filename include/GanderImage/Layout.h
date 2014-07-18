@@ -43,15 +43,25 @@
 #include "Gander/Assert.h"
 #include "Gander/Common.h"
 #include "Gander/Tuple.h"
-
 #include "Gander/StaticAssert.h"
+#include "Gander/Cache.h"
+
+#include "GanderImage/Common.h"
 #include "GanderImage/StaticAssert.h"
 #include "GanderImage/Channel.h"
 #include "GanderImage/CompoundLayout.h"
 #include "GanderImage/ChannelBrothers.h"
+#include "GanderImage/TestCompoundLayoutContainer.h"
 
 namespace Gander
 {
+
+namespace ImageTest
+{
+
+struct ChannelLayoutTest;
+ 
+}; // namespace ImageTest
 
 namespace Image
 {
@@ -72,6 +82,8 @@ struct TestLayoutBase
 			NumberOfLayouts = 0
 		};
 
+		typedef TestLayoutBase< Derived > Type;
+		
 		template< EnumType Index, bool DisableStaticAsserts = false >
 		struct LayoutTraits
 		{
@@ -120,20 +132,56 @@ struct TestLayoutBase
 			// };
 		};
 		
-		template< int Index = -1, EnumType Mask = Mask_All, bool DisableStaticAsserts = false >
-		struct ChannelTraitsAtIndex
+		//! @name Channel methods.
+		//@{
+		static inline unsigned int numberOfChannels() { return Gander::template EnumHelper<Derived::ChannelMask>::NumberOfSetBits; }
+		static inline ChannelSet channels() { return ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ); }
+		static inline bool contains( Channel channel ) { return ChannelSet( Gander::Image::ChannelMask( Derived::ChannelMask ) ).contains( channel ); }
+		//@}
+		
+		// Note: We set the ContainerType argument to None as it is resolved by the type of the argument that is passed
+		// into it. Doing this allows the return type to be optionally specified without having to set the ContainerType
+		template< class Type = DefaultChannelType, class ContainerType = float >
+		inline static void setChannel( ContainerType *container, Channel c, const Type &value )
 		{
-			GANDER_IMAGE_STATIC_ASSERT( ( Index != -1 ), DERIVED_CLASS_HAS_NOT_IMPLEMENTED_ALL_TRAITS_STRUCTS_REQUIRED_BY_THE_BASE_CLASS );
-			
-			// Derived classes of Layout need to implement this struct and provide the following:
-			//
-			// - An enum that maps the index ( the 'Index' template argument ) of a channel in set of channels
-			// ( defined by the 'Mask' template argument ) into the index of the same channel in the layout. 
-			// enum
-			// {
-			//		ChannelIndexInLayout = Index,
-			// };
-		};
+			GANDER_ASSERT( Derived::contains( c ), "Channel does not exist in this Layout." );
+			switch( c )
+			{
+				case( 1 ) : Derived::template channel< ChannelDefault( 1 ), true >( container ) = value; break;
+				case( 2 ) : Derived::template channel< ChannelDefault( 2 ), true >( container ) = value; break;
+				case( 3 ) : Derived::template channel< ChannelDefault( 3 ), true >( container ) = value; break;
+				case( 4 ) : Derived::template channel< ChannelDefault( 4 ), true >( container ) = value; break;
+				case( 5 ) : Derived::template channel< ChannelDefault( 5 ), true >( container ) = value; break;
+				case( 6 ) : Derived::template channel< ChannelDefault( 6 ), true >( container ) = value; break;
+				case( 7 ) : Derived::template channel< ChannelDefault( 7 ), true >( container ) = value; break;
+				case( 8 ) : Derived::template channel< ChannelDefault( 8 ), true >( container ) = value; break;
+				case( 9 ) : Derived::template channel< ChannelDefault( 9 ), true >( container ) = value; break;
+				case( 10 ) : Derived::template channel< ChannelDefault( 10 ), true >( container ) = value; break;
+				default : GANDER_ASSERT( 0, "Channel does not exist in this Layout." ); break;
+			}
+		}
+	
+		// Note: We set the ContainerType argument to None as it is resolved by the type of the argument that is passed
+		// into it. Doing this allows the return type to be optionally specified without having to set the ContainerType
+		template< class Type = DefaultChannelType, class ContainerType = Detail::None >
+		inline static Type getChannel( const ContainerType * const container, Channel c )
+		{
+			GANDER_ASSERT( Derived::contains( c ), "Channel does not exist in this Layout." );
+			switch( c )
+			{
+				case( 1 ) : return Derived::template channel< ChannelDefault( 1 ), true >( container ); break;
+				case( 2 ) : return Derived::template channel< ChannelDefault( 2 ), true >( container ); break;
+				case( 3 ) : return Derived::template channel< ChannelDefault( 3 ), true >( container ); break;
+				case( 4 ) : return Derived::template channel< ChannelDefault( 4 ), true >( container ); break;
+				case( 5 ) : return Derived::template channel< ChannelDefault( 5 ), true >( container ); break;
+				case( 6 ) : return Derived::template channel< ChannelDefault( 6 ), true >( container ); break;
+				case( 7 ) : return Derived::template channel< ChannelDefault( 7 ), true >( container ); break;
+				case( 8 ) : return Derived::template channel< ChannelDefault( 8 ), true >( container ); break;
+				case( 9 ) : return Derived::template channel< ChannelDefault( 9 ), true >( container ); break;
+				case( 10 ) : return Derived::template channel< ChannelDefault( 10 ), true >( container ); break;
+				default : GANDER_ASSERT( 0, "Channel does not exist in this Layout." ); break;
+			}
+		}
 };
 
 namespace Detail
@@ -144,7 +192,7 @@ template< class Derived, class T0, class T1, class T2, class T3, class T4, class
 struct TestCompoundLayoutRecurse;
 
 template < class Derived >
-struct TestCompoundLayoutRecurseBase
+struct TestCompoundLayoutRecurseBase : public TestLayoutBase< Derived >
 {
 	public :
 
@@ -270,17 +318,6 @@ struct TestCompoundLayoutRecurse< Derived, None, None, None, None, None, None, N
 			NumberOfChannels = 0,
 		};
 
-		struct ChannelContainerType {};
-		
-		template< ChannelDefault, bool DisableStaticAsserts, class ReferenceType >
-		static inline ReferenceType channel( void *container )
-		{
-			GANDER_IMAGE_STATIC_ASSERT( ( Derived::ChannelMask != 0 ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-			
-			static char l = 0; // We never get here but we still have to return something to keep the compiler happy.
-			return ( ReferenceType & ) l;
-		}
-		
 		static inline void increment( void *ptrContainer, int ){}
 };
 
@@ -291,6 +328,8 @@ struct TestCompoundLayoutRecurse : public TestCompoundLayoutRecurse< Derived, T1
 	protected :
 
 		typedef TestCompoundLayoutRecurse< Derived, T1, T2, T3, T4, T5, T6, T7, None> BaseType;
+		typedef typename Gander::Image::Detail::TestCompoundLayoutContainer< Derived, Gander::Image::Detail::TestChannelContainer >  ChannelContainerType;
+		typedef typename Gander::Image::Detail::TestCompoundLayoutContainer< Derived, Gander::Image::Detail::TestChannelPointerContainer >  ChannelPointerContainerType;
 
 		enum
 		{
@@ -299,32 +338,13 @@ struct TestCompoundLayoutRecurse : public TestCompoundLayoutRecurse< Derived, T1
 			NumberOfChannels = BaseType::NumberOfChannels + T0::NumberOfChannels,
 		};
 
-		struct ChannelContainerType : public BaseType::ChannelContainerType
+		static inline void increment( ChannelPointerContainerType *ptrContainer, int i = 1 )
 		{
-			typename T0::ChannelContainerType m_data;
-		};
+			BaseType::template LayoutTraits< Iteration - 1 >::LayoutType::increment(
+				&( ptrContainer->template child< Iteration - 1 >() ), i
+			);
 		
-		template<
-			ChannelDefault C,
-			bool DisableStaticAsserts = false,
-			class ReferenceType = typename BaseType::template ChannelTraits< C, DisableStaticAsserts >::ReferenceType
-		>
-		static inline ReferenceType channel( void *container )
-		{
-			if( MaskContainsChannel< T0::ChannelMask, C >::Value )
-			{
-				return ( ReferenceType & ) T0::template channel< C, true >( reinterpret_cast<typename T0::ChannelContainerType*>( container ) );
-			}
-			else
-			{
-				return BaseType::template channel< C, DisableStaticAsserts, ReferenceType >( ( reinterpret_cast<typename T0::ChannelContainerType*>( container ) + 1 ) );
-			}
-		}
-		
-		static inline void increment( void *ptrContainer, int i = 1 )
-		{
-			T0::increment( reinterpret_cast<typename T0::ChannelPointerContainerType *>( ptrContainer ), i );
-			BaseType::increment( reinterpret_cast<typename T0::ChannelPointerContainerType *>( ptrContainer ) + 1, i );
+			BaseType::increment( ptrContainer, i );
 		}
 		
 		// Assert that the template arguments have been supplied with the Pixels representing channels ordered
@@ -346,11 +366,22 @@ struct TestCompoundLayout : public Detail::TestCompoundLayoutRecurse< TestCompou
 	private :
 
 		typedef Detail::TestCompoundLayoutRecurse< TestCompoundLayout< T0, T1, T2, T3, T4, T5, T6, T7 >, T0, T1, T2, T3, T4, T5, T6, T7 > BaseType;
+		typedef TestCompoundLayout<T0, T1, T2, T3, T4, T5, T6, T7> Type;
 	
 		// We create a typedef for each of the template parameters so that we can use the
 		// TypeSwitch class to selectively choose one of the template arguments using an index.
 		typedef T0 Type0;	typedef T1 Type1;	typedef T2 Type2;	typedef T3 Type3;
 		typedef T4 Type4;	typedef T5 Type5;	typedef T6 Type6;	typedef T7 Type7;
+		
+		template< class T, EnumType TemplateIndex > friend class Detail::TypeSwitch;
+		template< class Derived > friend class Detail::TestCompoundLayoutRecurseBase;
+		template< class Derived, class S0, class S1, class S2, class S3, class S4, class S5, class S6, class S7 > friend class Detail::TestCompoundLayoutRecurse;
+		template< class S0, class S1, class S2, class S3, class S4, class S5, class S6, class S7 > friend class TestCompoundLayout;
+		template< ChannelDefault > friend class BaseType::ChannelToLayoutIndex;
+		template< EnumType, EnumType > friend class BaseType::ChannelIndexHelper;
+		template< EnumType, bool > friend class LayoutTraits;
+
+	public :
 		
 		enum
 		{
@@ -358,19 +389,9 @@ struct TestCompoundLayout : public Detail::TestCompoundLayoutRecurse< TestCompou
 			ChannelMask = BaseType::ChannelMask,
 			NumberOfChannels = Gander::EnumHelper<ChannelMask>::NumberOfSetBits,
 		};
-
-		template< class T, EnumType TemplateIndex > friend class Detail::TypeSwitch;
-		template< class Derived > friend class Detail::TestCompoundLayoutRecurseBase;
-		template< class Derived, class S0, class S1, class S2, class S3, class S4, class S5, class S6, class S7 > friend class Detail::TestCompoundLayoutRecurse;
-		template< class S0, class S1, class S2, class S3, class S4, class S5, class S6, class S7 > friend class TestCompoundLayout;
-		template< ChannelDefault C > friend class BaseType::ChannelToLayoutIndex;
-		template< EnumType ChannelIndex, EnumType M > friend class BaseType::ChannelIndexHelper;
-		template< EnumType LayoutIndexValue, bool DisableStaticAsserts = false > friend class LayoutTraits;
-
-	public :
-
+		
 		typedef typename BaseType::ChannelContainerType ChannelContainerType;
-		typedef void *ChannelPointerContainerType[NumberOfLayouts];	
+		typedef typename BaseType::ChannelPointerContainerType ChannelPointerContainerType;
 
 		//! @name Channel methods.
 		//@{
@@ -386,7 +407,11 @@ struct TestCompoundLayout : public Detail::TestCompoundLayoutRecurse< TestCompou
 		>
 		static inline ReferenceType channel( ChannelContainerType *container )
 		{
-			return BaseType::template channel< C, DisableStaticAsserts, ReferenceType >( reinterpret_cast<void *>( container ) );
+			return (
+				BaseType::template ChannelTraits< C, DisableStaticAsserts >::LayoutType::template channel< C, DisableStaticAsserts >(
+					&( container->template child< BaseType::template ChannelToLayoutIndex<C>::Value >() )
+				)
+			);
 		}
 
 		template<
@@ -396,9 +421,9 @@ struct TestCompoundLayout : public Detail::TestCompoundLayoutRecurse< TestCompou
 		>
 		static inline ConstReferenceType channel( const ChannelContainerType * const container )
 		{
-			return BaseType::template channel< C, DisableStaticAsserts >( reinterpret_cast<void *>( const_cast<ChannelContainerType*>( container ) ) );
+			return channel< C, DisableStaticAsserts >( const_cast<ChannelContainerType*>( container ) );
 		}
-	
+
 		template<
 			ChannelDefault C,
 			bool DisableStaticAsserts = false,
@@ -407,10 +432,10 @@ struct TestCompoundLayout : public Detail::TestCompoundLayoutRecurse< TestCompou
 		static inline ReferenceType channel( ChannelPointerContainerType *ptrContainer )
 		{
 			GANDER_IMAGE_STATIC_ASSERT( ( MaskContainsChannel< ChannelMask, C >::Value || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-
-			return BaseType::template ChannelTraits<C>::LayoutType::template channel< C, DisableStaticAsserts >(
-				reinterpret_cast< typename BaseType::template ChannelTraits<C>::LayoutType::ChannelPointerContainerType * >(
-					&( (*ptrContainer)[ BaseType::template ChannelToLayoutIndex<C>::Value ] )
+			
+			return (
+				BaseType::template ChannelTraits< C >::LayoutType::template channel< C, DisableStaticAsserts >(
+					&( ptrContainer->template child< BaseType::template ChannelToLayoutIndex<C>::Value >() )
 				)
 			);
 		}
@@ -422,7 +447,6 @@ struct TestCompoundLayout : public Detail::TestCompoundLayoutRecurse< TestCompou
 		>
 		static inline ConstReferenceType channel( const ChannelPointerContainerType * const ptrContainer )
 		{
-			GANDER_IMAGE_STATIC_ASSERT( ( MaskContainsChannel< ChannelMask, C >::Value || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
 			return channel< C, DisableStaticAsserts >( const_cast<ChannelPointerContainerType*>( ptrContainer ) );
 		}
 		
@@ -445,12 +469,13 @@ struct TestChannelLayout : public TestLayoutBase< TestChannelLayout< T, S > >
 		};
 
 		typedef TestChannelLayout< T, S > Type;
+		typedef TestLayoutBase< TestChannelLayout< T, S > > BaseType;
 		typedef typename Gander::template TypeTraits< T >::Type ChannelType; 
 		typedef typename Gander::template TypeTraits< T >::PointerType PointerType;
 		typedef typename Gander::template TypeTraits< T >::ReferenceType ReferenceType;
 		typedef typename Gander::template TypeTraits< T >::ConstReferenceType ConstReferenceType;
-		typedef typename Gander::template TypeTraits< T >::StorageType ChannelContainerType;
-		typedef ChannelContainerType* ChannelPointerContainerType;
+		typedef Gander::template Tuple< ChannelType, NumberOfChannels, false > ChannelContainerType;
+		typedef Gander::template Tuple< PointerType, BaseType::NumberOfLayouts, false > ChannelPointerContainerType;
 		
 		template< ChannelDefault C = Chan_None, bool DisableStaticAsserts = false >
 		struct ChannelTraits
@@ -464,44 +489,37 @@ struct TestChannelLayout : public TestLayoutBase< TestChannelLayout< T, S > >
 			typedef typename Type::ChannelPointerContainerType ChannelPointerContainerType;
 		};
 
-		//! @name Channel methods.
-		//@{
-		static inline unsigned int numberOfChannels() { return Gander::template EnumHelper<ChannelMask>::NumberOfSetBits; }
-		static inline ChannelSet channels() { return ChannelSet( Gander::Image::ChannelMask( ChannelMask ) ); }
-		static inline bool contains( Channel channel ) { return ChannelSet( Gander::Image::ChannelMask( ChannelMask ) ).contains( channel ); }
-		//@}
-
 		template< ChannelDefault C, bool DisableStaticAsserts = false >
 		static inline ReferenceType channel( ChannelContainerType *container )
 		{
 			GANDER_IMAGE_STATIC_ASSERT( ( MaskContainsChannel< ChannelMask, C >::Value || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-			return *container;
+			return (*container)[0];
 		}
 
 		template< ChannelDefault C, bool DisableStaticAsserts = false >
 		static inline ConstReferenceType channel( const ChannelContainerType * const container )
 		{
 			GANDER_IMAGE_STATIC_ASSERT( ( MaskContainsChannel< ChannelMask, C >::Value || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-			return *container;
+			return (*container)[0];
 		}
 		
 		template< ChannelDefault C, bool DisableStaticAsserts = false >
 		static inline ReferenceType channel( ChannelPointerContainerType *ptrContainer )
 		{
 			GANDER_IMAGE_STATIC_ASSERT( ( MaskContainsChannel< ChannelMask, C >::Value || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-			return (*ptrContainer)[0];
+			return *(*ptrContainer)[0];
 		}
 		
 		template< ChannelDefault C, bool DisableStaticAsserts = false >
 		static inline ConstReferenceType channel( const ChannelPointerContainerType * const ptrContainer )
 		{
 			GANDER_IMAGE_STATIC_ASSERT( ( MaskContainsChannel< ChannelMask, C >::Value || DisableStaticAsserts ), CHANNEL_DOES_NOT_EXIST_IN_THE_LAYOUT );
-			return (*ptrContainer)[0];
+			return *(*ptrContainer)[0];
 		}
 
 		static inline void increment( ChannelPointerContainerType * ptrContainer, int i = 1 )
 		{
-			*ptrContainer += i;
+			(*ptrContainer)[0] += i;
 		}
 				
 };

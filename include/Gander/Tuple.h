@@ -69,14 +69,9 @@ struct Tuple< T, NumberOfElements, false >
 		typedef const StorageType * const_iterator;
 		typedef StorageType * iterator;
 		
-		/// The constructor only checks that the runtime size of the array matches that of the compile time.
-		Tuple( unsigned int numberOfElements = NumberOfElements )
-		{
-			GANDER_ASSERT(
-				numberOfElements == NumberOfElements,
-				"A static tuple cannot be resized at runtime. Please use a dynamic tuple."
-			);
-		}
+		inline Tuple() {}
+		
+		inline Tuple( unsigned int numberOfElements ) {}
 	
 		inline ReferenceType operator[] ( unsigned int i ) { return m_data[i]; };
 		inline ConstReferenceType operator[] ( unsigned int i ) const { return m_data[i]; };

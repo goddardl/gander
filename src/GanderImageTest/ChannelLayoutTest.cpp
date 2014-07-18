@@ -96,120 +96,178 @@ struct ChannelLayoutTest
 		BOOST_CHECK_EQUAL( l3.requiredChannels(), ChannelSet( Mask_Red ) );
 	}
 
+	void testTestChannelLayoutAccessors()
+	{
+		typedef TestChannelLayout< float, Chan_Red > Layout1;
+		typedef TestChannelLayout< short, Chan_Alpha > Layout2;
+		Layout1::ChannelContainerType redContainer;
+		Layout2::ChannelContainerType alphaContainer;
+	
+		// Test the layouts have the correct channels.	
+		BOOST_CHECK_EQUAL( Layout1::numberOfChannels(), 1 );
+		BOOST_CHECK_EQUAL( Layout1::channels(), ChannelSet( Mask_Red ) );
+		BOOST_CHECK_EQUAL( Layout1::contains( Chan_Red ), true );
+		BOOST_CHECK_EQUAL( Layout2::numberOfChannels(), 1 );
+		BOOST_CHECK_EQUAL( Layout2::channels(), ChannelSet( Mask_Alpha ) );
+		BOOST_CHECK_EQUAL( Layout2::contains( Chan_Alpha ), true );
+
+		// Test the static and runtime channel accessors.
+		Layout1::channel< Chan_Red >( &redContainer ) = 1.25;
+		Layout2::channel< Chan_Alpha >( &alphaContainer ) = 1.25;
+		
+		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( &redContainer ), 1.25 );
+		BOOST_CHECK_EQUAL( Layout1::getChannel( &redContainer, Chan_Red ), 1.25 );
+		BOOST_CHECK_EQUAL( Layout1::getChannel< int >( &redContainer, Chan_Red ), 1 );
+
+		Layout1::setChannel( &redContainer, Chan_Red, 2.5 );
+		BOOST_CHECK_EQUAL( redContainer[0], 2.5 );
+
+		BOOST_CHECK_EQUAL( Layout2::channel< Chan_Alpha >( &alphaContainer ), 1 ); // The result is cropped because the channel is an int.
+		BOOST_CHECK_EQUAL( Layout2::getChannel( &alphaContainer, Chan_Alpha ), 1 );
+		
+		// Test the static and runtime const channel accessors.
+		const Layout1::ChannelContainerType *constRedContainer = &redContainer;
+		const Layout2::ChannelContainerType *constAlphaContainer = &alphaContainer;
+		
+		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( constRedContainer ), 2.5 );
+		BOOST_CHECK_EQUAL( Layout2::channel< Chan_Alpha >( constAlphaContainer ), 1. );
+		BOOST_CHECK_EQUAL( Layout1::getChannel( constRedContainer, Chan_Red ), 2.5 );
+		BOOST_CHECK_EQUAL( Layout2::getChannel( constAlphaContainer, Chan_Alpha ), 1. );
+
+		// Test the static and runtime channel pointer accessors.
+		Layout1::ChannelPointerContainerType redPtrContainer;
+		Layout2::ChannelPointerContainerType alphaPtrContainer;
+		
+		float red[3] = { 1.5, 9.25, 8.5 };
+		short alpha[3] = { 2, 1, 3 };
+		redPtrContainer[0] = red;	
+		alphaPtrContainer[0] = alpha;
+		
+		Layout1::channel< Chan_Red >( &redPtrContainer ) = 1.5;
+		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( &redPtrContainer ), 1.5 );
+		BOOST_CHECK_EQUAL( red[0], 1.5 );
+		Layout1::setChannel( &redPtrContainer, Chan_Red, 1.25 );
+		BOOST_CHECK_EQUAL( Layout1::getChannel( &redPtrContainer, Chan_Red ), 1.25 );
+		BOOST_CHECK_EQUAL( Layout2::channel< Chan_Alpha >( &alphaPtrContainer ), 2 );
+		BOOST_CHECK_EQUAL( alpha[0], 2 );
+
+		// Test the const channel pointer accessors.
+		const Layout1::ChannelPointerContainerType *constRedPtrContainer = &redPtrContainer;
+		const Layout2::ChannelPointerContainerType *constAlphaPtrContainer = &alphaPtrContainer;
+		Layout1::setChannel( &redPtrContainer, Chan_Red, 1.25 );
+		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( constRedPtrContainer ), 1.25 );
+		BOOST_CHECK_EQUAL( Layout2::channel< Chan_Alpha >( constAlphaPtrContainer ), 2 );
+	
+		// Test that we can increment the channel pointers.	
+		Layout1::increment( &redPtrContainer );
+		Layout2::increment( &alphaPtrContainer );
+		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( &redPtrContainer ), 9.25 );
+		BOOST_CHECK_EQUAL( Layout2::channel< Chan_Alpha >( &alphaPtrContainer ), 1 );
+		
+		Layout1::increment( &redPtrContainer, 1 );
+		Layout2::increment( &alphaPtrContainer, 1 );
+		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( &redPtrContainer ), 8.5 );
+		BOOST_CHECK_EQUAL( Layout2::channel< Chan_Alpha >( &alphaPtrContainer ), 3 );
+		
+		Layout2::channel< Chan_Alpha >( &alphaPtrContainer ) = 10;
+		BOOST_CHECK_EQUAL( Layout2::channel< Chan_Alpha >( &alphaPtrContainer ), 10 );
+		BOOST_CHECK_EQUAL( alpha[2], 10 );
+		
+		Layout1::increment( &redPtrContainer, -2 );
+		Layout2::increment( &alphaPtrContainer, -2 );
+		
+		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( &redPtrContainer ), 1.25 );
+		BOOST_CHECK_EQUAL( Layout2::channel< Chan_Alpha >( &alphaPtrContainer ), 2 );
+	}
+
 	void testTest()
 	{
 		typedef TestChannelLayout< float, Chan_Red > Layout1;
 		typedef TestChannelLayout< short, Chan_Alpha > Layout2;
 		typedef TestCompoundLayout< Layout1, Layout2 > Layout;
-//		typename Layout::ChannelContainerType c;
-
 		
-		BOOST_CHECK_EQUAL( short(Layout::ChannelToLayoutIndex<Chan_Red>::Value), 0 );
-		BOOST_CHECK_EQUAL( short(Layout::ChannelToLayoutIndex<Chan_Alpha>::Value), 1 );
-		BOOST_CHECK( ( std::is_same< Layout::ChannelTraits< Chan_Alpha >::LayoutType, Layout2 >::value ) );
-		BOOST_CHECK( ( std::is_same< Layout::LayoutTraits< 0 >::LayoutType, Layout1 >::value ) );
-		BOOST_CHECK( ( std::is_same< Layout::LayoutTraits< 1 >::LayoutType, Layout2 >::value ) );
-
+		// Test the layouts have the correct channels.	
+		BOOST_CHECK_EQUAL( Layout1::numberOfChannels(), 1 );
+		BOOST_CHECK_EQUAL( Layout1::channels(), ChannelSet( Mask_Red ) );
+		BOOST_CHECK_EQUAL( Layout1::contains( Chan_Red ), true );
+		BOOST_CHECK_EQUAL( Layout2::numberOfChannels(), 1 );
+		BOOST_CHECK_EQUAL( Layout2::channels(), ChannelSet( Mask_Alpha ) );
+		BOOST_CHECK_EQUAL( Layout2::contains( Chan_Alpha ), true );
+		BOOST_CHECK_EQUAL( Layout::numberOfChannels(), 2 );
+		BOOST_CHECK_EQUAL( Layout::channels(), ChannelSet( Mask_Red | Mask_Alpha ) );
+		BOOST_CHECK_EQUAL( Layout::contains( Chan_Red ), true );
+		BOOST_CHECK_EQUAL( Layout::contains( Chan_Alpha ), true );
+		
 		// If channels of different sizes are used, they should be aligned correctly in memory. This means that the final size of the ChannelContainerType
 		// may be larger than the sum of it's parts. For example, combining a short with a float - 6 bytes - will be aligned to 8 bytes. 
 		BOOST_CHECK( sizeof( typename Layout::ChannelContainerType ) >= sizeof( Layout1::ChannelContainerType ) + sizeof( Layout2::ChannelContainerType ) ); 
-		Layout::ChannelContainerType container;
-		Layout::channel< Chan_Red >( &container ) = 1.25;
-		Layout::channel< Chan_Alpha >( &container ) = 1.25;
-		
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Alpha>( &container ), 1 ); // The channel is cast to an short because that is the type that the alpha layout uses.
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Red>( &container ), 1.25 ); // There is no change to the value of the red channel because it's layout uses a float.
 	
-		Layout1::ChannelContainerType container2;
-		Layout1::channel< Chan_Red >( &container2 ) = 1.25;
+		// Test the static and runtime channel accessors using the compound channel container.
+		Layout::ChannelContainerType raContainer;
+		raContainer.child<0>()[0] = 1.;
+		raContainer.child<1>()[0] = 2.5;
 
-		const Layout::ChannelContainerType *constContainer = &container;
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Red>( constContainer ), 1.25 ); 
-		
-		const Layout1::ChannelContainerType *constContainer2 = &container2;
-		BOOST_CHECK_EQUAL( Layout1::channel<Chan_Red>( constContainer2 ), 1.25 ); 
-		
-		Layout1::ChannelPointerContainerType ptrContainer;
-		ptrContainer = new float[3];
-		ptrContainer[0] = 3;
-		ptrContainer[1] = 2;
-		ptrContainer[2] = 1;
-		BOOST_CHECK_EQUAL( ptrContainer[0], 3 ); 
-		BOOST_CHECK_EQUAL( ptrContainer[1], 2 ); 
-		BOOST_CHECK_EQUAL( ptrContainer[2], 1 ); 
-		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( &ptrContainer ), 3 ); 
-	
-		Layout1::increment( &ptrContainer, 1 );
-		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( &ptrContainer ), 2 ); 
-		
-		Layout1::increment( &ptrContainer, 1 );
-		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( &ptrContainer ), 1 ); 
-		
-		Layout1::increment( &ptrContainer, -2 );
-		BOOST_CHECK_EQUAL( Layout1::channel< Chan_Red >( &ptrContainer ), 3 ); 
-		
-		// Create a compound layout poshorter container.
-		typename Layout::ChannelPointerContainerType ptrContainer2;
+		BOOST_CHECK_EQUAL( raContainer.child<0>()[0], 1. );
+		BOOST_CHECK_EQUAL( raContainer.child<1>()[0], 2 ); // The result is rounded as it is an int.
 
-		// Test the accessor using an index.
-		ptrContainer2[0] = new float [3];
-		ptrContainer2[1] = new short [3];
-		
-		Layout::channel<Chan_Red>( &ptrContainer2 ) = 5.25;
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Red>( &ptrContainer2 ), 5.25 );
-		
-		Layout::channel<Chan_Alpha>( &ptrContainer2 ) = 5.25;
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Alpha>( &ptrContainer2 ), 5 );
-		
-		const Layout::ChannelPointerContainerType &constPtrContainer2( ptrContainer2 );
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Alpha>( &constPtrContainer2 ), 5 );
-		
-		((float*)ptrContainer2[0])[0] = 1.5; 
-		((float*)ptrContainer2[0])[1] = 2.5; 
-		((float*)ptrContainer2[0])[2] = 3.5; 
-		((short*)ptrContainer2[1])[0] = 1.5; 
-		((short*)ptrContainer2[1])[1] = 2.5; 
-		((short*)ptrContainer2[1])[2] = 3.5; 
-		
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Red>( &ptrContainer2 ), 1.5 );
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Alpha>( &ptrContainer2 ), 1 );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Red >( &raContainer ), 1. );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Alpha >( &raContainer ), 2 );
 
-		Layout::increment( &ptrContainer2, 1 );
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Red>( &ptrContainer2 ), 2.5 );
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Alpha>( &ptrContainer2 ), 2 );
+		Layout::setChannel( &raContainer, Chan_Red, 4.5 );
+		BOOST_CHECK_EQUAL( Layout::getChannel( &raContainer, Chan_Red ), 4.5 );
+		Layout::setChannel<short>( &raContainer, Chan_Alpha, 6.5 );
+		BOOST_CHECK_EQUAL( Layout::getChannel( &raContainer, Chan_Alpha ), 6 );
+		BOOST_CHECK_THROW( Layout::getChannel( &raContainer, Chan_Blue ), std::runtime_error );
 		
-		Layout::increment( &ptrContainer2, 1 );
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Red>( &ptrContainer2 ), 3.5 );
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Alpha>( &ptrContainer2 ), 3 );
+		Layout::setChannel( &raContainer, Chan_Alpha, 3.75 );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Alpha >( &raContainer ), 3 );
+		Layout::setChannel( &raContainer, Chan_Alpha, 4.5 );
+		BOOST_CHECK_EQUAL( Layout::getChannel( &raContainer, Chan_Alpha ), 4 );
+		Layout::channel<Chan_Red>( &raContainer ) = 3.125;
+		BOOST_CHECK_EQUAL( raContainer.child<0>()[0], 3.125 );
 		
-		Layout::increment( &ptrContainer2, -2 );
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Red>( &ptrContainer2 ), 1.5 );
-		BOOST_CHECK_EQUAL( Layout::channel<Chan_Alpha>( &ptrContainer2 ), 1 );
+		Layout::channel< Chan_Alpha >( &raContainer ) = 6;
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Alpha >( &raContainer ), 6 );
 		
+		// Test the const channel accessor using the compound channel container.
+		const Layout::ChannelContainerType *constRaContainer = &raContainer;
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Red >( constRaContainer ), 3.125 );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Alpha >( constRaContainer ), 6 );
+		BOOST_CHECK_EQUAL( Layout::getChannel( constRaContainer, Chan_Alpha ), 6 );
+		
+		// Test the static and runtime channel accessors using the compound channel pointer container.
+		Layout::ChannelPointerContainerType raPtrContainer;
+		float red[3] = { 1.5, 3., 5. };
+		raPtrContainer.child<0>()[0] = red;
+		
+		short alpha[3] = { 3, 9, 1 };
+		raPtrContainer.child<1>()[0] = alpha;
+		
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Red >( &raPtrContainer ), 1.5 );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Alpha >( &raPtrContainer ), 3 );
+		
+		Layout::channel< Chan_Red >( &raPtrContainer ) = 4.25;
+		Layout::channel< Chan_Alpha >( &raPtrContainer ) = 4.25;
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Red >( &raPtrContainer ), 4.25 );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Alpha >( &raPtrContainer ), 4 );
+		
+		// Test the static and runtime channel accessors using a const compound channel pointer container.
+		const Layout::ChannelPointerContainerType *constRaPtrContainer = &raPtrContainer;
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Red >( constRaPtrContainer ), 4.25 );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Alpha >( constRaPtrContainer ), 4 );
 
-		/*
-		*ptrContainer2.get<0>() = 1.25;
-		*ptrContainer2.get<1>() = 1.25;
-		BOOST_CHECK_EQUAL( *ptrContainer2.get<0>(), 1.25 ); 
-		BOOST_CHECK_EQUAL( *ptrContainer2.get<1>(), 1 );
+		// Test that we can increment channel pointers.
+		Layout::increment( &raPtrContainer );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Red >( constRaPtrContainer ), 3. );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Alpha >( constRaPtrContainer ), 9 );
 		
-		// Test the const accessor using an index.	
-		const Layout::ChannelPointerContainerType &constPtrContainer2( ptrContainer2 );
-		BOOST_CHECK_EQUAL( *constPtrContainer2.get<0>(), 1.25 ); 
-		BOOST_CHECK_EQUAL( *constPtrContainer2.get<1>(), 1 );
+		Layout::increment( &raPtrContainer );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Red >( constRaPtrContainer ), 5. );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Alpha >( constRaPtrContainer ), 1 );
 		
-		// Test the accessor using a channel.	
-		*ptrContainer2.poshorterForChannel<Chan_Red>() = 3.25;
-		*ptrContainer2.poshorterForChannel<Chan_Alpha>() = 3.25;
-		BOOST_CHECK_EQUAL( *ptrContainer2.poshorterForChannel<Chan_Red>(), 3.25 ); 
-		BOOST_CHECK_EQUAL( *ptrContainer2.poshorterForChannel<Chan_Alpha>(), 3 ); 
-		
-		// Test the const accessor using a channel.	
-		BOOST_CHECK_EQUAL( *constPtrContainer2.poshorterForChannel<Chan_Red>(), 3.25 ); 
-		BOOST_CHECK_EQUAL( *constPtrContainer2.poshorterForChannel<Chan_Alpha>(), 3 ); 
-		
-		// Test the channel method using a ChannelPointerContainer.
-		Layout::channel<Chan_Red>( &ptrContainer2 );*/
+		Layout::increment( &raPtrContainer, -2 );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Red >( constRaPtrContainer ), 4.25 );
+		BOOST_CHECK_EQUAL( Layout::channel< Chan_Alpha >( constRaPtrContainer ), 4 );
 	}
 
 	void testChannelTraits()
@@ -283,6 +341,7 @@ struct ChannelLayoutTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<ChannelLayoutTest> instance( new ChannelLayoutTest() );
 		add( BOOST_CLASS_TEST_CASE( &ChannelLayoutTest::testTest, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &ChannelLayoutTest::testTestChannelLayoutAccessors, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ChannelLayoutTest::testChannelTraits, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ChannelLayoutTest::testCommonLayoutAttributes, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &ChannelLayoutTest::testCommonLayoutInterface, instance ) );
