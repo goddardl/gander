@@ -217,7 +217,7 @@ inline bool MurmurHash::operator < ( const MurmurHash &other ) const
 	return m_h1 < other.m_h1 || ( m_h1 == other.m_h1 && m_h2 < other.m_h2 );
 }
 
-MurmurHash::operator std::string () const
+inline MurmurHash::operator std::string () const
 {
 	return toString();
 }

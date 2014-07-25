@@ -1,5 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -13,7 +14,7 @@
 //       notice, this list of conditions and the following disclaimer in the
 //       documentation and/or other materials provided with the distribution.
 //
-//     * Neither the name of Luke Goddard nor the names of any
+//     * Neither the name of Image Engine Design nor the names of any
 //       other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
@@ -31,61 +32,59 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream>
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include <cassert>
+#include <string>
 
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/AngleConversionTest.h"
-#include "GanderTest/DecomposeRQ3x3Test.h"
-#include "GanderTest/CommonTest.h"
-#include "GanderTest/EnumHelperTest.h"
-#include "GanderTest/BitTwiddlerTest.h"
-#include "GanderTest/TupleTest.h"
-#include "GanderTest/BoxTest.h"
-#include "GanderTest/InterfacesTest.h"
-#include "GanderTest/MurmurHashTest.h"
-#include "GanderTest/RefCountedThreadingTest.h"
-#include "GanderTest/CacheTest.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+#include "Gander/Exception.h"
 
 using namespace Gander;
-using namespace Gander::Test;
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+Exception::~Exception() throw()
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
+}
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-		addDecomposeRQ3x3Test(test);
-		addAngleConversionTest(test);
-		addCommonTest(test);
-		addEnumHelperTest(test);
-		addBitTwiddlerTest(test);
-		addTupleTest(test);
-		addInterfacesTest(test);
-		addBoxTest(test);
-		addMurmurHashTest(test);
-		addCacheTest(test);
-		addRefCountedThreadingTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+Exception::Exception(const char *what)
+{
+	assert( what );
+	m_what = new RefCountedString(what);
+}
 
-	return test;
+Exception::Exception(const std::string &what)
+{
+	m_what = new RefCountedString(what);
+}
+
+const char* Exception::what() const throw()
+{
+	return m_what->c_str();
+}
+
+const char* Exception::type() const throw()
+{
+	return "Exception";
+}
+
+Exception &Exception::append( const std::string &s )
+{
+	m_what = new RefCountedString( *m_what + s);
+	return *this;
+}
+
+Exception &Exception::append( const char *s )
+{
+	assert( s );
+	return append( std::string(s) );
+}
+
+Exception &Exception::prepend( const std::string &s )
+{
+	m_what = new RefCountedString( s + *m_what );
+	return *this;
+}
+
+Exception &Exception::prepend( const char *s )
+{
+	assert( s );
+	return prepend( std::string( s ) );
 }

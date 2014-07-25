@@ -95,7 +95,7 @@ class MurmurHash
 		inline bool operator < ( const MurmurHash &other ) const;
 		
 		std::string toString() const;
-		operator std::string () const;
+		inline operator std::string () const;
 
 		std::ostream &operator << ( std::ostream &o );
 

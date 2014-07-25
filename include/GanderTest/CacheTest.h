@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Luke Goddard. All rights reserved.
+//  Copyright (c) 2014, Luke Goddard. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,61 +31,77 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream>
+#ifndef __GANDERTEST_CACHETEST_H__
+#define __GANDERTEST_CACHETEST_H__
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
+#include "boost/test/unit_test.hpp"
 
-#include "GanderTest/LevenbergMarquardtTest.h"
-#include "GanderTest/HomographyTest.h"
-#include "GanderTest/AngleConversionTest.h"
-#include "GanderTest/DecomposeRQ3x3Test.h"
-#include "GanderTest/CommonTest.h"
-#include "GanderTest/EnumHelperTest.h"
-#include "GanderTest/BitTwiddlerTest.h"
-#include "GanderTest/TupleTest.h"
-#include "GanderTest/BoxTest.h"
-#include "GanderTest/InterfacesTest.h"
-#include "GanderTest/MurmurHashTest.h"
-#include "GanderTest/RefCountedThreadingTest.h"
-#include "GanderTest/CacheTest.h"
+#include "Gander/Cache.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace Gander;
-using namespace Gander::Test;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace Gander
 {
-	test_suite* test = BOOST_TEST_SUITE( "Gander unit test" );
 
-	try
-	{
-		addLevenbergMarquardtTest(test);
-		addHomographyTest(test);
-		addDecomposeRQ3x3Test(test);
-		addAngleConversionTest(test);
-		addCommonTest(test);
-		addEnumHelperTest(test);
-		addBitTwiddlerTest(test);
-		addTupleTest(test);
-		addInterfacesTest(test);
-		addBoxTest(test);
-		addMurmurHashTest(test);
-		addCacheTest(test);
-		addRefCountedThreadingTest(test);
-	}
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+namespace Test
+{
 
-	return test;
-}
+namespace Detail
+{
+
+enum
+{
+	TestMemoryInterfaceTypeId1 = 0x10000001,
+	TestMemoryInterfaceTypeId2 = 0x10000002,
+	TestMemoryInterfaceTypeId3 = 0x10000003,
+};
+
+struct TestMemoryInterface1 : public MemoryInterface
+{
+	public :
+	
+		TestMemoryInterface1( int instanceId ) :
+			MemoryInterface( instanceId )
+		{
+		}
+
+	private :
+
+		static MemoryInterfaceRegistration<TestMemoryInterface1> m_registration;
+};
+
+struct TestMemoryInterface2 : public MemoryInterface
+{
+	public :
+	
+		TestMemoryInterface2( int instanceId ) :
+			MemoryInterface( instanceId )
+		{
+		}
+
+	private :
+
+		static MemoryInterfaceRegistration<TestMemoryInterface2> m_registration;
+};
+
+struct TestMemoryInterface3 : public MemoryInterface
+{
+	public :
+	
+		TestMemoryInterface3( int instanceId ) :
+			MemoryInterface( instanceId )
+		{
+		}
+
+	private :
+
+		static MemoryInterfaceRegistration<TestMemoryInterface3> m_registration;
+};
+
+}; // namespace Detail
+
+void addCacheTest( boost::unit_test::test_suite *test );
+
+}; // namespace Test
+
+}; // namespace Gander
+
+#endif // __GANDERTEST_CACHETEST_H__
