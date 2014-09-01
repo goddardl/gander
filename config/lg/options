@@ -32,13 +32,16 @@
 #
 ##########################################################################
 import os
+import Habitat
+import os.path
+
+INSTALL_DIR = Habitat.expandVars( "/software/apps/gander/${GANDER_MAJOR_VERSION}.${GANDER_MINOR_VERSION}.${GANDER_PATCH_VERSION}/${PLATFORM}/${COMPILER}/${COMPILER_VERSION}/" )
 
 CPPFLAGS="-Wno-deprecated -fPIC"
 
 BUILD_DEPENDENCIES = False
 BUILD_DIR = os.path.expanduser( "~/dev/lg/build/Gander" )
 BUILD_CACHEDIR = os.path.expanduser( "~/dev/lg/buildCache" )
-INSTALL_DIR = os.path.expanduser( "~/dev/lg/install/Gander-${GANDER_MAJOR_VERSION}.${GANDER_MINOR_VERSION}.${GANDER_PATCH_VERSION}-${PLATFORM}" )
 
 CXXFLAGS = ['-std=gnu++0x', "-fPIC", "-pipe", "-Wall", "-Werror", "-O2", "-DNDEBUG" ] # "-DBOOST_DISABLE_ASSERTS"
 if BUILD_DEPENDENCIES == True :

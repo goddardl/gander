@@ -101,12 +101,6 @@ options.Add(
 )
 
 options.Add(
-	"PACKAGE_FILE",
-	"The file in which the final Gander file will be created by the package target.",
-	"${INSTALL_DIR}.tar.gz",
-)
-
-options.Add(
 	"TEST_LIBPATH",
 	"Additional colon separated paths to be prepended to the library path"
 	"used when running tests.",
@@ -611,17 +605,3 @@ env.NoCache( install )
 
 env.Alias( "install", install )
 
-#########################################################################################################
-# Packaging
-#########################################################################################################
-
-def packager( target, source, env ) :
-
-	installDir = env.subst( "$INSTALL_DIR" )
-	b = os.path.basename( installDir )
-	d = os.path.dirname( installDir )
-	runCommand( env.subst( "tar -czf $PACKAGE_FILE -C %s %s" % ( d, b ) ) )
-	
-package = env.Command( "$PACKAGE_FILE", install, packager )
-env.NoCache( package )
-env.Alias( "package", package )
